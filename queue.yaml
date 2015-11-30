@@ -1,0 +1,5 @@
+queue:
+- name: sendmail
+  rate: 1/s
+  retry_parameters:
+    task_age_limit: 3d
