@@ -1,0 +1,148 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="payment-card">
+  <style>
+    :host paper-card {
+      min-width: 300px;
+      border-top: 2px solid #8BC34A;
+    }
+
+    :host paper-card.Cancelled {
+      opacity: .5;
+      filter: alpha(opacity=50);
+    }
+
+    :host paper-card.Cancelled:hover {
+      opacity: 1;
+      filter: alpha(opacity=100);
+    }
+
+    paper-input[readonly], paper-textarea[readonly] {
+      /* line color when the input is unfocused */
+      --paper-input-container-underline: {
+        display:none;
+      }
+      --paper-input-container-underline-focus: {
+        display:none;
+      }
+      --paper-input-container-underline-disabled: {
+        display:none;
+      }
+    }
+
+    .card-actions, .card-actions a {
+      color: rgba(0,0,0,.15);
+    }
+
+    .card-actions:hover, .card-actions:hover a {
+      color: rgba(0,0,0,.6);
+    }
+  </style>
+  <template>
+    <paper-card class$="{{payment.status}}">
+      <div>
+        <div class="card-content">
+          <paper-input id="payment_id" name="payment_id" label="Payment ID" value="{{key}}" readonly></paper-input>
+          <paper-input id="invoice_id" name="invoice_id" label="Invoice ID" value="{{payment.invoice}}" readonly></paper-input>
+          <paper-input id="client_val" name="client" label="Client" value="{{client}}" readonly hidden$="{{hideClient}}"></paper-input>
+          <paper-input id="agent_val" name="agent" label="Agent" value="{{agent}}" readonly hidden$="{{hideAgent}}"></paper-input>
+          <paper-input name="amount" label="Amount" value="{{payment.amount}}" readonly></paper-input>
+        </div>
+        <div class="card-actions horizontal layout center flex">
+          <paper-icon-button class="actions" title="Activity" alt="Logs" icon="toc" on-tap="viewLogs" hidden="{{editing}}"></paper-icon-button>
+          <span class="flex"></span>
+        </div>
+      </div>
+    </paper-card>
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        is: 'payment-card',
+        properties: {
+          client: String,
+          agent: String,
+          payment: {
+            type: Object,
+            observer: '_ValChanged'
+          },
+          key: String,
+          editable: {
+            type: Boolean,
+            value: true
+          },
+          editing: {
+            type: Boolean,
+            value: false
+          },
+          isNew: {
+            type: Boolean,
+            value: false
+          },
+          hideClient: {
+            type: Boolean,
+            value: false
+          },
+          hideAgent: {
+            type: Boolean,
+            value: false
+          }
+        },
+
+        ready: function() {
+          this.db = fbase.db.child('payments');
+        },
+
+        _ValChanged: function() {
+          var _this = this;
+
+          if(this.payment && !this.client) {
+            this.clientDB = fbase.db.child('clients');
+            this.clientDB.child(this.payment.client).once('value', function(client) {
+              _this.client = client.val().name;
+            });
+          }
+
+          if(this.payment && !this.agent) {
+            this.agentDB = fbase.db.child('agents');
+
+            this.agentDB.child(this.payment.agent).once('value', function(agent) {
+              _this.agent = agent.val().name;
+            });
+          }
+        },
+
+        viewLogs: function() {
+          var logs = [];
+          if(this.payment.logs) {
+            var _this = this;
+            Object.keys(this.payment.logs).sort().forEach(function(key) {
+              var val = _this.payment.logs[key];
+              val.ts = key;
+              logs.push(val);
+            });
+          }
+          var el = document.createElement('payment-logs');
+          el.logs = logs;
+          app.subTitle = this.key;
+          app.subTitleDesc = 'Payment';
+          app._displayInPanel(el);
+        }
+      });
+    })();
+  </script>
+</dom-module>

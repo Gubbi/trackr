@@ -1,0 +1,33 @@
+{
+  "node": true,
+  "browser": true,
+  "esnext": true,
+  "bitwise": true,
+  "camelcase": false,
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "indent": 2,
+  "latedef": true,
+  "noarg": true,
+  "quotmark": "single",
+  "undef": true,
+  "unused": false,
+  "globals": {
+    "wrap": true,
+    "unwrap": true,
+    "Polymer": true,
+    "Platform": true,
+    "page": true,
+    "app": true,
+    "fbase": true,
+    "Firebase": false,
+    "Cookies": false,
+    "moment": false,
+    "isLoggedIn": false,
+    "checkLoginStatus": false,
+    "setLoginCookies": false,
+    "_login": false,
+    "basePath": true
+  }
+}

@@ -1,0 +1,249 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="invoice-card">
+  <style>
+    paper-card {
+      min-width: 300px;
+      border-top: 2px solid #009688;
+    }
+
+    paper-input[readonly], paper-textarea[readonly]  {
+      /* line color when the input is unfocused */
+      --paper-input-container-underline: {
+        display:none;
+      }
+      --paper-input-container-underline-focus: {
+        display:none;
+      }
+      --paper-input-container-underline-disabled: {
+        display:none;
+      }
+    }
+
+    .card-actions, .card-actions a {
+      color: rgba(0,0,0,.15);
+    }
+
+    .card-actions:hover, .card-actions:hover a {
+      color: rgba(0,0,0,.6);
+    }
+  </style>
+  <template>
+    <paper-card>
+      <div>
+        <div class="card-content">
+          <paper-input name="client" label="Client" value="{{client}}" required readonly hidden$="{{hideClient}}"></paper-input>
+          <paper-input id="invoice_id" name="invoice_id" label="Invoice ID" value="{{key}}" required readonly$={{!editInvoiceID(editing)}}></paper-input>
+          <paper-input name="amount" label="Amount" value="{{invoice.amount}}" required readonly$={{!editing}}></paper-input>
+          <paper-textarea name="details" label="Invoice Details" rows="3" max-rows="3" value="{{invoice.detail}}" readonly$={{!editing}}></paper-textarea>
+        </div>
+        <div class="card-actions horizontal layout center flex">
+          <paper-icon-button class="actions" title="Activity" alt="Logs" icon="toc" on-tap="viewLogs" hidden="{{editing}}"></paper-icon-button>
+          <span class="flex"></span>
+          <paper-icon-button class="actions" title="Edit" alt="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>
+          <paper-icon-button icon="close" title="Cancel" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>
+          <paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!editing}}"></paper-icon-button>
+        </div>
+      </div>
+    </paper-card>
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        is: 'invoice-card',
+        properties: {
+          client: String,
+          invoice: {
+            type: Object,
+            observer: '_ValChanged'
+          },
+          key: String,
+          editable: {
+            type: Boolean,
+            value: true
+          },
+          editing: {
+            type: Boolean,
+            value: false
+          },
+          isNew: {
+            type: Boolean,
+            value: false
+          },
+          hideClient: {
+            type: Boolean,
+            value: false
+          }
+        },
+
+        editInvoiceID: function(editing) {
+          return this.isNew && editing;
+        },
+
+        ready: function() {
+          this.db = fbase.db.child('bills');
+        },
+
+        _ValChanged: function() {
+          var _this = this;
+
+          if(this.invoice && !this.client) {
+            console.log(this.invoice);
+            this.clientDB = fbase.db.child('clients');
+            this.clientDB.child(this.invoice.client).once('value', function(client) {
+              _this.client = client.val().name;
+            });
+          }
+
+          this.update = null;
+        },
+
+        startEdit: function() {
+          var _this = this;
+
+          if(app.online) {
+            this.db.child(this.key).once('value', function (snap) {
+              // Get latest data before editing.
+              _this.invoice = snap.val();
+              _this.editing = true;
+              _this.updateStyles();
+            });
+          }
+        },
+
+        save: function() {
+          if(!this.key) {
+            return;
+          }
+
+          this.update = null;
+          this.invoice.updates = null;
+          var _this = this;
+
+          this.db.child(this.key).transaction(function (current_value) {
+            if (current_value) {
+              if(_this.isNew) {
+                _this.$.invoice_id.errorMessage = 'Invoice with this ID already exists.';
+                _this.$.invoice_id.updateStyles();
+                return;
+              }
+              else {
+                //This is an Update.
+                if(_this.invoice.amount !== current_value.amount) {
+                  _this.update_desc = 'Amount changed from ₹' + current_value.amount + ' to ₹' + _this.invoice.amount;
+                  _this.update = {
+                    amount: _this.invoice.amount,
+                    old_amount: current_value.amount
+                  };
+                }
+              }
+            }
+            else {
+              // This is new Invoice.
+              _this.invoice.status = 'Active';
+
+              _this.update_desc = 'Invoice created';
+              _this.update = {
+                amount: _this.invoice.amount
+              };
+            }
+
+            if(_this.update) {
+              var ts = moment().valueOf();
+              if(!_this.invoice.logs) {
+                _this.invoice.logs = {};
+              }
+
+              _this.invoice.logs[ts] = {
+                type: 'inline',
+                desc: _this.update_desc
+              };
+
+              if (!_this.invoice.updates) {
+                _this.invoice.updates = (current_value && current_value.updates)? current_value.updates : {};
+              }
+
+              _this.invoice.updates[ts] = _this.update;
+
+              fbase.queue('invoice_updated', {
+                invoice: _this.key
+              });
+            }
+
+            return _this.invoice;
+          }, function(error, committed) {
+            _this.dataSaved.call(_this, error, committed);
+          }, false);
+        },
+
+        dataSaved: function(error, committed) {
+          if (!committed) {
+            this.fire('updated');
+            return;
+          }
+
+          this.editing = false;
+          this.updateStyles();
+
+          if (this.isNew) {
+            this.isNew = false;
+          }
+
+          if (this.update) {
+            var today = moment().format('YYYY-MM-DD');
+            this.update.client_name = this.client;
+
+            fbase.log.child(today).push({
+              type: 'invoice',
+              ts: Firebase.ServerValue.TIMESTAMP,
+              path: 'bills/' + this.key,
+              key: this.key,
+              data: this.update
+            });
+          }
+
+          this.fire('updated');
+        },
+        cancel: function() {
+          this.editing = false;
+          this.updateStyles();
+          this.fire('cancelled');
+        },
+        viewLogs: function() {
+          var logs = [];
+          if(this.invoice.logs) {
+            var _this = this;
+            Object.keys(this.invoice.logs).sort().forEach(function(key) {
+              var val = _this.invoice.logs[key];
+              val.ts = key;
+              if (!val.desc) {
+                val.desc = val.subtype === 'cancelled'? 'Payment of ₹' + val.amount + ' Cancelled' :
+                    '₹' + val.amount + ' Paid';
+              }
+              logs.push(val);
+            });
+          }
+          var el = document.createElement('invoice-logs');
+          el.logs = logs;
+          app.subTitle = this.key;
+          app.subTitleDesc = 'Invoice';
+          app._displayInPanel(el);
+        }
+      });
+    })();
+  </script>
+</dom-module>

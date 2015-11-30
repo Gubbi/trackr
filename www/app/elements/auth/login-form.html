@@ -1,0 +1,194 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+
+<dom-module id="login-form">
+    <style>
+        :host paper-card {
+            min-width: 400px;
+            border-top: 2px solid #2196F3;
+            margin: 30px auto;
+            padding: 0 12px;
+        }
+        .card-actions {
+            padding-left: 2px;
+        }
+        .sub-action {
+            font-size: 0.8em;
+        }
+    </style>
+    <template>
+        <div class="card-actions horizontal layout center flex">
+            <span class="flex"></span>
+            <iron-pages attr-for-selected="sub-route" selected="{{show}}">
+                <paper-card sub-route="login">
+                    <div>
+                        <div class="card-content">
+                            <iron-a11y-keys target="[[_passwordField]]" keys="enter" on-keys-pressed="login"></iron-a11y-keys>
+                            <paper-input label="Email" value="{{email}}" required auto-validate autocomplete></paper-input>
+                            <paper-input id="passwordField" type="password" label="Password" value="{{password}}"
+                                         auto-validate required></paper-input>
+                            <br/>
+                        </div>
+                        <div class="card-actions horizontal layout center flex">
+                            <paper-button class="actions" alt="Login" title="Login" on-tap="login">
+                                Login
+                            </paper-button>
+                            <span class="flex"></span>
+                            <a href="#" on-tap="forgot" class="sub-action">forgot password</a>
+                        </div>
+                    </div>
+                </paper-card>
+
+                <paper-card sub-route="reset">
+                    <div>
+                        <div class="card-content">
+                            <iron-a11y-keys target="[[_repasswordField]]" keys="enter" on-keys-pressed="reset"></iron-a11y-keys>
+                            <paper-input type="password" label="New Password" value="{{newPassword}}" required auto-validate autofocus></paper-input>
+                            <paper-input id="repasswordField" type="password" label="Re-enter Password" value="{{rePassword}}" required></paper-input>
+                            <br/>
+                        </div>
+                        <div class="card-actions horizontal layout center">
+                            <paper-button class="actions" alt="Reset" title="Reset Password" on-tap="reset">
+                                Reset Password
+                            </paper-button>
+                        </div>
+                    </div>
+                </paper-card>
+
+                <paper-card sub-route="forgot">
+                    <div>
+                        <div class="card-content">
+                            <iron-a11y-keys target="[[_emailField]]" keys="enter" on-keys-pressed="send_forgot"></iron-a11y-keys>
+                            <paper-input name="email" id="emailField" label="Email" value="{{email}}" required auto-validate autofocus></paper-input>
+                            <br/>
+                        </div>
+                        <div class="card-actions horizontal layout center">
+                            <paper-button class="actions" alt="Forgot" title="Forgot Password" on-tap="send_forgot">
+                                Forgot Password
+                            </paper-button>
+                            <span class="flex"></span>
+                            <a href="#" on-tap="show_login" class="sub-action">login</a>
+                        </div>
+                    </div>
+                </paper-card>
+            </iron-pages>
+            <span class="flex"></span>
+        </div>
+    </template>
+
+    <script>
+        (function() {
+            Polymer({
+                is: 'login-form',
+                properties: {
+                    show: {
+                        type: String,
+                        value: 'login'
+                    }
+                },
+                ready: function() {
+                    this._passwordField = this.$.passwordField;
+                    this._repasswordField = this.$.repasswordField;
+                    this._emailField = this.$.emailField;
+
+                    onAuthReady(function(authData) {
+                        if(authData) {
+                            _login();
+                        }
+                    });
+                },
+                login: function() {
+                    console.log('Login');
+                    var _this = this;
+                    if(!this.email || this.email === '' || !this.password || this.password === '') {
+                        //TODO: display error.
+                        console.log('Email or Password missing.');
+                        return;
+                    }
+
+                    superagent.post('/auth/login').send({
+                        email: this.email,
+                        password: this.password
+                    }).end(function(err, res) {
+                        if (res.ok) {
+                            if(res.body.isTemporaryPassword) {
+                                _this.authData = res.body;
+                                _this.show = 'reset';
+                            }
+                            else {
+                                login(res.body);
+                            }
+                        } else {
+                            console.log('Oh no! error ' + res.body.message);
+                        }
+                    });
+                },
+                show_login: function() {
+                    this.show = 'login';
+                },
+                forgot: function() {
+                    console.log('Forgot');
+                    this.show = 'forgot';
+                },
+                reset: function() {
+                    console.log('Reset');
+
+                    if(!this.newPassword || this.newPassword === '') {
+                        //TODO: display error.
+                        return;
+                    }
+
+                    if(this.newPassword !== this.rePassword) {
+                        //TODO: display error.
+                        return;
+                    }
+
+                    var _this = this;
+
+                    superagent.post('/auth/change').send({
+                        email: this.email,
+                        password: this.password,
+                        new_password: this.newPassword
+                    }).end(function(err, res) {
+                        if (res.ok) {
+                            login(_this.authData);
+                        } else {
+                            console.log('Oh no! error ' + res.body.message);
+                        }
+                    });
+                },
+                send_forgot: function() {
+                    console.log('Send Forgot');
+                    var _this = this;
+
+                    if(!this.email || this.email === '') {
+                        //TODO: display error.
+                        return;
+                    }
+
+                    superagent.post('/auth/reset').send({
+                        email: this.email
+                    }).end(function(err, res) {
+                        if (res.ok) {
+                            _this.show = 'login';
+                        } else {
+                            console.log('Oh no! error ' + res.body.message);
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
+</dom-module>

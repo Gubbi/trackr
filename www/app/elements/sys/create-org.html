@@ -1,0 +1,86 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="create-org">
+    <style>
+        :host paper-card {
+            min-width: 300px;
+            border-top: 2px solid #2196F3;
+            margin: 30px auto;
+        }
+    </style>
+    <template>
+        <div class="card-actions horizontal layout center flex">
+            <span class="flex"></span>
+            <paper-card>
+                <div>
+                    <div class="card-content">
+                        <paper-input name="business_name" label="Business Name" value="{{org.name}}" required></paper-input>
+                        <paper-input name="brand_name" label="Brand Name" value="{{org.brand_name}}" required></paper-input>
+                        <paper-input name="short_code" label="SMS Short Code" value="{{org.short_code}}" required></paper-input>
+                        <paper-input name="business_id" label="Business ID" value="{{org.id}}" required></paper-input>
+                        <paper-input name="support_number" label="Support helpline" value="{{org.support_number}}" required></paper-input>
+                        <paper-input name="pricing" label="Charge per Payment ID" value="{{org.pricing}}" required></paper-input>
+                        <paper-input name="min_pricing" label="Minimum Monthly Charge" value="{{org.min_pricing}}" required></paper-input>
+                        <paper-input name="name" label="Admin Name" value="{{org.admin_name}}" required></paper-input>
+                        <paper-input name="email" label="Admin Email" value="{{org.admin_email}}" required></paper-input>
+                        <paper-input name="phone" label="Phone" value="{{org.admin_phone}}"></paper-input>
+                    </div>
+                    <div class="card-actions horizontal layout center flex">
+                        <span class="flex"></span>
+                        <paper-icon-button class="actions" alt="Reset" title="Reset" icon="close" on-tap="cancel"></paper-icon-button>
+                        <paper-icon-button class="actions" alt="Create Account" title="Create New Account" icon="done" on-tap="createAccount"></paper-icon-button>
+                    </div>
+                </div>
+            </paper-card>
+            <span class="flex"></span>
+        </div>
+    </template>
+
+    <script>
+        (function() {
+            Polymer({
+                is: 'create-org',
+                properties: {
+                    org: {
+                        type: Object,
+                        value: {}
+                    },
+                    admin: {
+                        type: Object,
+                        value: {}
+                    }
+                },
+                ready: function() {
+                },
+                cancel: function() {
+                    this.org = {};
+                    this.admin = {};
+                    this.fire('cancelled');
+                },
+                createAccount: function() {
+                    var _this = this;
+
+                    superagent.post('/sys/accounts/new').send(this.org).end(function(err, res) {
+                        if (res.ok) {
+                            console.log('Successfully created user account: ' + res.body.message);
+                        } else {
+                            console.log('Oh no! error ' + res.body.message);
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
+</dom-module>

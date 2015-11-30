@@ -1,0 +1,100 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="agent-card.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+
+<dom-module id="agents-list">
+  <style>
+    :host {
+      display: block;
+    }
+    ul {
+      list-style: none;
+    }
+    li {
+      display: inline-block;
+      margin: 8px 16px;
+    }
+    paper-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 48px;
+      background-color: #7B1FA2;
+    }
+  </style>
+  <template>
+    <ul hidden="{{isFiltered}}">
+      <template is="dom-repeat" items="{{items}}">
+        <li><agent-card agent="{{item.data}}" key="{{item.key}}"></agent-card></li>
+      </template>
+    </ul>
+    <ul hidden="{{!isFiltered}}">
+      <template is="dom-repeat" items="{{filtered}}">
+        <li><agent-card agent="{{item.data}}" key="{{item.key}}"></agent-card></li>
+      </template>
+    </ul>
+    <paper-fab icon="add" on-tap="createAgent"></paper-fab>
+  </template>
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'agents-list',
+
+        properties: {
+          items: {
+            type: Array,
+            notify: true,
+          },
+          filtered: {
+            type: Array,
+            notify: true
+          }
+        },
+
+        listeners: {
+          'search': 'search'
+        },
+
+        ready: function() {
+          this.db = fbase.db.child('agents');
+          this.items = [];
+          this.filtered = [];
+          this.isFiltered = false;
+
+          var _this = this;
+          this.db.on('child_added', function(snap) {
+            _this.unshift('items', {data: snap.val(), key: snap.key()});
+          });
+        },
+
+        createAgent: function() {
+          this.fire('create-agent');
+        },
+
+        search: function(query) {
+          var phone = query.detail;
+
+          this.splice('filtered', 0, this.filtered.length);
+          if(phone === '' || !phone) {
+            this.isFiltered = false;
+            return;
+          }
+
+          this.isFiltered = true;
+          var _this = this;
+          this.db.orderByChild('phone').equalTo(phone).on('child_added', function(snap) {
+            _this.unshift('filtered', {data: snap.val(), key: snap.key()});
+          });
+        }
+      });
+    })();
+  </script>
+</dom-module>
