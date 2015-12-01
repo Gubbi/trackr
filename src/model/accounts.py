@@ -1,15 +1,4 @@
 from google.appengine.ext import ndb
-from boondi.utils import get_leaf_values
-
-
-SLOTS = {
-}
-
-
-CATEGORY_STATUS = {
-}
-
-valid_statuses = {value for value in get_leaf_values(CATEGORY_STATUS)}
 
 
 class Slots(ndb.Model):
@@ -17,20 +6,11 @@ class Slots(ndb.Model):
     balance                     = ndb.FloatProperty()
 
 
-class Account(ndb.Expando):
-    amount              = ndb.FloatProperty(default=0)
+class Account(ndb.Model):
     slots               = ndb.StructuredProperty(Slots, repeated=True)
-
-    createdAt           = ndb.DateTimeProperty(auto_now_add=True)
-    modifiedAt          = ndb.DateTimeProperty(auto_now=True)
-
-    @classmethod
-    def builtin(cls, key):
-        return Account.get_or_insert(key)
 
 
 class ChargeDetail(ndb.Model):
-    amount                      = ndb.FloatProperty()
     description                 = ndb.StringProperty()
     rule                        = ndb.StringProperty()
     charged_by                  = ndb.StringProperty()
@@ -42,10 +22,10 @@ class AccountLog(ndb.Model):
     An explicitly given Log ID is required while constructing the entity.
     """
     ts                  = ndb.DateTimeProperty(verbose_name="Timestamp when this transaction occurred.")
-    record_type         = ndb.StringProperty(choices=['Received', 'Fee', 'Tax', 'Reversed', 'Refund'])
+    record_type         = ndb.StringProperty()
 
-    from_slot           = ndb.StringProperty(choices=SLOTS.keys())
-    to_slot             = ndb.StringProperty(choices=SLOTS.keys())
+    from_slot           = ndb.StringProperty()
+    to_slot             = ndb.StringProperty()
 
     amount              = ndb.FloatProperty()
     charges             = ndb.StructuredProperty(ChargeDetail, repeated=True)

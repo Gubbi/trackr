@@ -1,11 +1,8 @@
 from google.appengine.ext import ndb
-from model.accounts import Account
-from model.utils import EmailProperty, Address, BankAccountDetails, form_name, APICredentials, MobilePhoneProperty, \
-    PhoneProperty
+from model.utils import EmailProperty, Address, form_name, APICredentials, MobilePhoneProperty
 
-domains = []
 
-class Domain(ndb.Model):
+class App(ndb.Model):
     users                           = ndb.KeyProperty(kind='User', repeated=True)
     org                             = ndb.KeyProperty(kind='Organization')
     active                          = ndb.BooleanProperty(default=True)
@@ -15,28 +12,22 @@ class Domain(ndb.Model):
 
 
 class Organization(ndb.Model):
-    legal_name                      = ndb.StringProperty(verbose_name='Firm Registered Name')
-    name                            = ndb.StringProperty(verbose_name='Shop Name')
-    short_code                      = ndb.StringProperty(verbose_name='SMS short code')
-    brand_name                      = ndb.StringProperty(verbose_name='Brand Name')
-    website                         = ndb.StringProperty(verbose_name='Brand / Website Name')
+    name                            = ndb.StringProperty(verbose_name='Business Name')
 
     registered_address              = ndb.StructuredProperty(Address, verbose_name='Registered Address')
-    support_number                  = PhoneProperty(verbose_name='Support helpline')
+
     pan_card_number                 = ndb.StringProperty(verbose_name='PAN Card Number')
     pan_dob                         = ndb.DateProperty(verbose_name='Date of Birth/Incorporation')
     service_tax_number              = ndb.StringProperty(verbose_name='Service Tax Number')
     registration_number             = ndb.StringProperty(verbose_name='Firm Registration Number')
-
-    bank_account                    = ndb.StructuredProperty(BankAccountDetails, verbose_name='Company Bank Account Details')
-    account                         = ndb.KeyProperty(kind=Account)
 
     referred_by                     = ndb.KeyProperty(kind='MerchantPartner')
     referral_id                     = ndb.StringProperty()
 
     admin                           = ndb.KeyProperty(kind='User')
 
-    secure_signup_step              = ndb.StringProperty(choices={'New', 'Verified', 'Entering Details', 'Reviewing', 'Approved', 'Deactivated'}, default='New')
+    secure_signup_step              = ndb.StringProperty(choices={'New', 'Verified', 'Entering Details', 'Reviewing',
+                                                                  'Approved', 'Deactivated'}, default='New')
 
     secure_api_id                   = ndb.StringProperty(verbose_name='')
     secure_production               = ndb.LocalStructuredProperty(APICredentials)
@@ -44,8 +35,6 @@ class Organization(ndb.Model):
 
     createdAt                       = ndb.DateTimeProperty(auto_now_add=True)
     modifiedAt                      = ndb.DateTimeProperty(auto_now=True)
-
-    authorization_letter            = ndb.BooleanProperty(default=False)
 
 
 class User(ndb.Model):
@@ -64,7 +53,6 @@ class User(ndb.Model):
     account_verified                = ndb.BooleanProperty(default=False)
     verification_code               = ndb.StringProperty()
 
-    type                            = ndb.StringProperty(choices=domains + ['staff', 'admin'], repeated=True)
     org                             = ndb.KeyProperty(kind=Organization, repeated=True)
 
     createdAt                       = ndb.DateTimeProperty(auto_now_add=True)
@@ -74,6 +62,7 @@ class User(ndb.Model):
 
 get_user_by_email = lambda email: User.query(User.email == email).get()
 get_user_by_phone = lambda phone: User.query(User.phone == phone).get()
+get_org_by_phone = lambda phone: Organization.query(Organization.phone == phone).get()
 get_users_in_org = lambda org: User.query(User.org == org).get()
 get_verified_user_by_email = lambda email: User.query(User.email == email, User.account_verified == True).get()
 get_user_by_verification_code = lambda code: User.query(User.verification_code == code).get()

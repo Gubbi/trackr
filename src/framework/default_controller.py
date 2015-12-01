@@ -1,14 +1,13 @@
 import base64
 import logging
+from google.appengine.api import namespace_manager
 from boondi.formats import mime_json
 from config import config
 from boondi.auth import APIBadRequestException, APIAuthenticationException
 from boondi.controllers import BaseController
 from config.domains import domain_config
-from extend_auth import web_auth, api_auth, oauth_as_auth, oauth_pas_auth, oauth_rs_auth, mime_json_oauth
-from boondi.globals import request, context as c
-from boondi.routes import url_for
-from boondi.ext import redirect
+from default_auth import web_auth, api_auth, oauth_as_auth, oauth_pas_auth, oauth_rs_auth, mime_json_oauth
+from boondi.globals import request
 from lib import helpers
 
 __author__ = 'vinuth'
@@ -36,18 +35,17 @@ class DefaultController(BaseController):
         super(DefaultController, self).__init__(request, response)
 
         # Controller variables that will be set when available
-        self.org = self.agency = self.kyash_point = self.merchant = self.admin = self.merchant_partner = None
+        self.org = self.admin = self.org_app = self.default_namespace = None
         self.realm = self.token_response = self.client = None
         self.api_user = None
-
-        c.errors = c.error_msg = c.error = c.success = c.active_domain = c.active_page = None
-
         self.set_env(config=config, h=helpers)
 
-    @staticmethod
-    def _login_form():
-        c.goto = request.params.get('goto', request.url)
-        redirect(url_for('auth', 'login', goto=c.goto))
+    def dispatch(self):
+        self.default_namespace = namespace_manager.get_namespace()
+        try:
+            super(DefaultController, self).dispatch()
+        finally:
+            namespace_manager.set_namespace(self.default_namespace)
 
     @staticmethod
     def _auth_generic_user(model):

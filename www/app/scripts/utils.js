@@ -62,16 +62,12 @@ function _logout() {
     window.location = '/';
 }
 
-function setLoginCookies(authData) {
-    Cookies.set('org_id', authData.org);
-}
-
 function login(authData) {
     console.log(authData);
 
     if(!authData) return;
 
-    fbase.root.authWithCustomToken(authData.fbase_token, function(error, fbaseAuthData) {
+    fbase.root.authWithCustomToken(authData.fbaseToken, function(error, fbaseAuthData) {
         console.log(fbaseAuthData);
 
         if (error) {
@@ -105,6 +101,7 @@ superagent.get('/auth/').end(function(err, res) {
             var fbaseAuthData = fbase.root.getAuth();
             if(!fbaseAuthData) {
                 login(res.body);
+                return;
             }
 
             console.log(fbaseAuthData);
@@ -114,21 +111,21 @@ superagent.get('/auth/').end(function(err, res) {
             if(existingAuth && existingAuth.user !== res.body.user) {
                 console.log('Data stored different from logged in user.');
                 login(res.body);
+                return;
             }
 
             if(fbaseAuthData.uid !== existingAuth.user) {
                 console.log('Fbase logged in user is different from current user.');
                 login(res.body);
+                return;
             }
 
-            setLoginCookies(res.body);
             fbase.orgId = Cookies.get('org_id');
             fbase.db = fbase.root.child(fbase.orgId);
             fbase.log = fbase.db.child('activities');
 
             fbase.root.onAuth(function(authData) {
                 if (!authData) {
-                    Cookies.expire('org_id');
                     localStorage.setItem('baseAuth', null);
                     console.log('No auth data found during this fbase auth event. Logging out.');
                     _logout();

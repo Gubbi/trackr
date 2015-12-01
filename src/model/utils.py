@@ -2,6 +2,7 @@ import re
 
 from google.appengine.ext import ndb
 from google.appengine.ext.ndb import Key
+from boondi.utils import generate_api_key, generate_api_secret
 
 from mobile_numbers import mobile_phone_re
 from model.choices import states
@@ -85,13 +86,16 @@ class PhoneProperty(UniqueProperty):
         return val
 
 
-class MobilePhoneProperty(UniqueProperty):
-    def _validate(self, value):
-        val = get_mobile(re.sub("[^0-9]", "", value))
-        if len(val) < 10:
-            raise TypeError('Mobile Phone Number should be at least 10 digits long')
+def validate_mobile_number(value):
+    val = get_mobile(re.sub("[^0-9]", "", value))
+    if len(val) < 10:
+        raise TypeError('Mobile Phone Number should be at least 10 digits long')
 
-        return val
+    return val
+
+
+class MobilePhoneProperty(UniqueProperty):
+    _validate = lambda self, value: validate_mobile_number(value)
 
 
 class Address(ndb.Model):
@@ -180,3 +184,15 @@ def iter_model_attr(model, *fields):
             yield field, value
         else:
             yield field, getattr(model, field)
+
+
+def set_api_creds(org):
+    org.secure_api_id = key = generate_api_key()
+
+    org.secure_development = APICredentials(callback_secret=generate_api_secret(key, 'dev_callback'),
+                                            hmac_secret=generate_api_secret(key, 'dev_hmac'))
+    org.secure_production = APICredentials(callback_secret=generate_api_secret(key, 'prod_callback'),
+                                           hmac_secret=generate_api_secret(key, 'prod_hmac'))
+
+    org.secure_development.api_secrets.append(generate_api_secret(key, 'dev_secret0'))
+    org.secure_production.api_secrets.append(generate_api_secret(key, 'prod_secret0'))

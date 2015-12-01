@@ -1,12 +1,13 @@
 import logging
 from google.appengine.api import memcache
+from boondi.globals import request
 from config import config
 from config.config import SESSION_SALT, APP_SECRET, OAUTH_TOKEN_SECRET, OAUTH_CIPHER_SECRET
 from boondi.auth import WebAuth, APIAuth, APIAuthorizationException, OAuthAuthorizationServerAuth, \
     OAuthPAuthorizationServerAuth, OAuthResourceServerAuth
 from boondi.formats import JsonMimeType
 from boondi.oauth import OAuthAuthorizationException
-from model.users import get_user_by_email, User, get_org_by_api_key, domains
+from model.users import get_user_by_email, User, get_org_by_api_key
 
 __author__ = 'vinuth'
 
@@ -22,16 +23,22 @@ class DefaultWebAuth(WebAuth):
     def init_controller(controller, user):
         if user:
             controller.set_env(user=user)
-            controller.set_env(org=user.org[0].get())
 
-            for domain in domains:
-                if domain in user.type:
-                    controller.set_env(**{domain: getattr(controller.org, domain).get()})
+            org = None
+            org_id = request.cookies.get('org_id')
+            for org_key in user.org:
+                if org_key.id() == org_id:
+                    org = org_key.get()
+                    controller.set_env(org=org)
+                    controller.set_env(org_app=controller.app_model.get_by_id(org_id))
 
-            if 'admin' in user.type:
+            acl = controller.acl_model.get_by_id('roles', parent=user.key)
+            controller.set_env(roles=acl)
+
+            if org and org.admin == user.key:
                 controller.set_env(admin=True)
 
-            controller.user_acl = user.type
+            controller.user_acl = acl.kind
         else:
             controller.set_env(user=None)
             controller.user_acl = []
@@ -43,7 +50,7 @@ class DefaultWebAuth(WebAuth):
             return
 
         if not controller.user:
-            controller._login_form()
+            controller.needs_login()
 
         if "any" in controller.acl:
             return
