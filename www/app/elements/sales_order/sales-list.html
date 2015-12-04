@@ -7,9 +7,9 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-<link rel="import" href="invoice-card.html">
+<link rel="import" href="sale-card.html">
 
-<dom-module id="invoices-list">
+<dom-module id="sales-list">
   <style>
     :host {
       display: block;
@@ -25,12 +25,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <ul hidden="{{isFiltered}}">
       <template is="dom-repeat" items="{{items}}">
-        <li><invoice-card invoice="{{item.data}}" key="{{item.key}}"></invoice-card></li>
+        <li><sale-card sale="{{item.data}}" key="{{item.key}}"></sale-card></li>
       </template>
     </ul>
     <ul hidden="{{!isFiltered}}">
       <template is="dom-repeat" items="{{filtered}}">
-        <li><invoice-card invoice="{{item.data}}" key="{{item.key}}"></invoice-card></li>
+        <li><sale-card sale="{{item.data}}" key="{{item.key}}"></sale-card></li>
       </template>
     </ul>
   </template>
@@ -38,7 +38,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     (function () {
       Polymer({
-        is: 'invoices-list',
+        is: 'sales-list',
 
         properties: {
           items: {
@@ -60,36 +60,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _this = this;
 
           onAuthReady(function() {
-            _this.db = fbase.db.child('invoices');
+            _this.db = fbase.db.child('sales');
             _this.items = [];
             _this.filtered = [];
             _this.isFiltered = false;
 
             _this.db.on('child_added', function(snap) {
-              var invoice = {data: snap.val(), key: snap.key()};
-              _this.unshift('items', invoice);
+              var sale = {data: snap.val(), key: snap.key()};
+              _this.unshift('items', sale);
             });
           });
         },
 
         search: function(query) {
-          var invoiceID = query.detail;
+          var saleID = query.detail;
           this.splice('filtered', 0, this.filtered.length);
-          if(invoiceID === '' || !invoiceID) {
+          if(saleID === '' || !saleID) {
             this.isFiltered = false;
             return;
           }
 
           this.isFiltered = true;
           var _this = this;
-          this.db.child(invoiceID).once('value', function(snap) {
-            var invoice =  {data: snap.val(), key: snap.key()};
-            _this.unshift('filtered', invoice);
+
+          this.db.child(saleID).once('value', function(snap) {
+            var sale =  {data: snap.val(), key: snap.key()};
+            _this.unshift('filtered', sale);
           });
         },
 
         inview: function() {
-          app.searchon('Invoice ID');
+          app.searchon('Sale Order Num');
         }
       });
     })();

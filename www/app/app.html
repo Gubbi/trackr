@@ -76,6 +76,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            <span>Activity Stream</span>
          </a>
 
+         <a data-route="sales" href="/app.html/sales">
+           <iron-icon icon="shopping-basket"></iron-icon>
+           <span>Sales Orders</span>
+         </a>
+
          <a data-route="invoices" href="/app.html/invoices">
            <iron-icon icon="receipt"></iron-icon>
            <span>Invoices</span>
@@ -86,14 +91,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            <span>Payments</span>
          </a>
 
-         <a data-route="deposits" href="/app.html/deposits">
-           <iron-icon icon="send"></iron-icon>
-           <span>Deposits</span>
-         </a>
+         <!--<a data-route="deposits" href="/app.html/deposits">-->
+           <!--<iron-icon icon="send"></iron-icon>-->
+           <!--<span>Deposits</span>-->
+         <!--</a>-->
 
-         <a data-route="clients" href="/app.html/clients">
+         <a data-route="customers" href="/app.html/customers">
            <iron-icon icon="store"></iron-icon>
-           <span>Clients</span>
+           <span>Customers</span>
          </a>
 
          <a data-route="agents" href="/app.html/agents">
@@ -101,19 +106,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            <span>Agents</span>
          </a>
 
-         <a data-route="contact" href="/app.html/contact">
-           <iron-icon icon="mail"></iron-icon>
-           <span>Contact</span>
+         <br/>
+         <hr/>
+
+         <a data-route="settings" href="/app.html/settings">
+           <iron-icon icon="settings"></iron-icon>
+           <span>Settings</span>
          </a>
 
          <a data-route="logging-out" href="/app.html/logout">
            <iron-icon icon="power-settings-new"></iron-icon>
            <span>Logout</span>
          </a>
+
+         <a data-route="#" href="#">
+           <presence-indicator></presence-indicator>
+           <span>{{onlineStatus}}</span>
+         </a>
        </paper-menu>
-       <br/>
-       <br/>
-       <presence-indicator></presence-indicator>
      </paper-scroll-header-panel>
 
      <paper-drawer-panel id="mainDrawerPanel" class="main-drawer-panel"
@@ -170,8 +180,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                <activity-list></activity-list>
              </section>
 
-             <section data-route="clients">
-               <clients-list id="clients" on-create-client="_newClient"> </clients-list>
+             <section data-route="sales">
+               <sales-list id="sales"> </sales-list>
+             </section>
+
+             <section data-route="customers">
+               <customers-list id="customers" on-create-customer="_newCustomer"> </customers-list>
              </section>
 
              <section data-route="agents">
@@ -182,10 +196,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                <invoices-list id="invoices"> </invoices-list>
              </section>
 
-             <section data-route="client-info">
-               <client-dash id="client-info" key={{params.key}}> </client-dash>
-             </section>
-
              <section data-route="agent-info">
                <agent-dash id="agent-info" key={{params.key}}> </agent-dash>
              </section>
@@ -194,15 +204,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                <payments-list id="payments"> </payments-list>
              </section>
 
-             <section data-route="deposits">
-               <deposits-list id="deposits"> </deposits-list>
-             </section>
+             <!--<section data-route="deposits">-->
+               <!--<deposits-list id="deposits"> </deposits-list>-->
+             <!--</section>-->
 
-             <section data-route="contact">
-               <paper-material elevation="1">
-                 <h2 class="paper-font-display2">Contact</h2>
-                 <p>This is the contact section</p>
-               </paper-material>
+             <section data-route="settings">
+               <app-settings id="settings"></app-settings>
              </section>
            </iron-pages>
          </div>
@@ -218,7 +225,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </paper-toast>
 
     <platinum-sw-register auto-register
-                          clients-claim
+                          customers-claim
                           skip-waiting
                           on-service-worker-installed="displayInstalledToast">
       <platinum-sw-cache default-cache-strategy="networkFirst"

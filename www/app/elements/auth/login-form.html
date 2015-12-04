@@ -110,11 +110,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     });
                 },
                 login: function() {
-                    console.log('Login');
                     var _this = this;
                     if(!this.email || this.email === '' || !this.password || this.password === '') {
                         //TODO: display error.
-                        console.log('Email or Password missing.');
                         return;
                     }
 
@@ -131,7 +129,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 login(res.body);
                             }
                         } else {
-                            console.log('Oh no! error ' + res.body.message);
                         }
                     });
                 },
@@ -139,12 +136,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     this.show = 'login';
                 },
                 forgot: function() {
-                    console.log('Forgot');
                     this.show = 'forgot';
                 },
                 reset: function() {
-                    console.log('Reset');
-
                     if(!this.newPassword || this.newPassword === '') {
                         //TODO: display error.
                         return;
@@ -165,12 +159,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         if (res.ok) {
                             login(_this.authData);
                         } else {
-                            console.log('Oh no! error ' + res.body.message);
                         }
                     });
                 },
                 send_forgot: function() {
-                    console.log('Send Forgot');
                     var _this = this;
 
                     if(!this.email || this.email === '') {
@@ -184,7 +176,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         if (res.ok) {
                             _this.show = 'login';
                         } else {
-                            console.log('Oh no! error ' + res.body.message);
                         }
                     });
                 }

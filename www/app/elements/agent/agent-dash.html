@@ -94,7 +94,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <paper-scroll-header-panel id="container" fixed header-height='32px'>
       <div class="paper-header layout horizontal center flex">
         <span class="flex"></span>
-        <paper-button id="accountIcon" class="menu-icon selected" title="Account Activity" on-tap="showAccount">{{_getBalance(self)}}</paper-button>
         <paper-icon-button id="paymentsIcon" title="Payments Collected" class="menu-icon" icon="toll" on-tap="showPayments"></paper-icon-button>
         <paper-icon-button id="profileIcon" title="Profile" class="menu-icon" icon="perm-identity" on-tap="showProfile"></paper-icon-button>
       </div>
@@ -116,24 +115,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <li><payment-card payment="{{item.data}}" key="{{item.key}}" hide-agent></payment-card></li>
               </template>
             </ul>
-          </section>
-          <section sub-route="Account">
-            <table>
-              <tr>
-                <th>Time</th>
-                <th>Activity</th>
-                <th class="num">Amount</th>
-                <th class="num">Balance</th>
-              </tr>
-              <template is="dom-repeat" items="{{accountLogs}}">
-                <tr class="record">
-                  <td class="ts">{{_displayDate(item.ts)}}</td>
-                  <td class="clickable" on-tap="showRecord" title="click to view">{{item.desc}}</td>
-                  <td class="num">{{_getNetAmount(item)}}</td>
-                  <td class="num">{{item.balance}}</td>
-                </tr>
-              </template>
-            </table>
           </section>
         </iron-pages>
       </div>
@@ -172,42 +153,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         ready: function() {
-          this.profileDB = fbase.db.child('agents');
-          this.paymentsDB = fbase.db.child('payments');
-          this.accountDB = fbase.db.child('logs/account/agents/');
+          var _this = this;
+          onAuthReady(function() {
+            _this.profileDB = fbase.db.child('agents');
+            _this.paymentsDB = fbase.db.child('payments');
+          });
         },
 
         _keyChanged: function() {
           this.payments = [];
           this.filteredPayments = [];
           this.isPaymentFiltered = false;
-          this.accountLogs = [];
 
           if(!this.key) {
             return;
           }
 
-          var _this = this;
-          if(this.profileSock) {
-            this.profileSock.off();
-            this.paymentSock.off();
-            this.accountSock.off();
-          }
+          this.profileDB.child(this.key).once('value', function(snap) {
+            this.self = snap.val();
+            this.fire('set-title-nav', this.self.name);
+          }, this);
 
-          this.profileSock = this.profileDB.child(this.key);
-          this.profileSock.on('value', function(snap) {
-            _this.self = snap.val();
-            _this.fire('set-title-nav', _this.self.name);
-          });
+          var _this = this;
+          if(this.paymentSock) {
+            this.paymentSock.off();
+          }
 
           this.paymentSock = this.paymentsDB.orderByChild('agent').equalTo(this.key);
           this.paymentSock.on('child_added', function(snap) {
             _this.unshift('payments', {data: snap.val(), key: snap.key()});
-          });
-
-          this.accountSock = this.accountDB.child(this.key).orderByChild('ts');
-          this.accountSock.on('child_added', function(snap) {
-            _this.push('accountLogs', snap.val());
           });
         },
 
@@ -239,11 +213,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.show = 'Payments';
         },
 
-        showAccount: function() {
-          this.show = 'Account';
-        },
-
-        _showChanged: function(newVal, oldVal) {
+        _showChanged: function(newVal) {
           this.classFollows('selected', this.$$('#' + this.show.toLowerCase() + 'Icon'), this.$$('.selected'));
           this.fire('set-title', this.show);
 
@@ -253,55 +223,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           else {
             app.searchon('Phone');
           }
-        },
-
-        _displayDate: function(ts) {
-          return moment(ts).format('DD-MM-YYYY hh:mm:ss a');
-        },
-
-        _getNetAmount: function(item) {
-          if (item.type === 'deposit') {
-            return parseInt(item.amount) + (parseInt(item.old_amount || 0));
-          }
-          return item.amount - (item.old_amount || 0);
-        },
-
-        _getBalance: function(item) {
-          if(!item) {
-            return '';
-          }
-
-          if(!item.balance) {
-            return '₹0';
-          }
-
-          var ret = '₹' + Math.abs(item.balance);
-
-          if (item.balance < 0) {
-            ret = '- ' + ret;
-          }
-
-          return ret;
-        },
-
-        showRecord: function(e) {
-          var item = e.model.item, _this=this;
-
-          app.subTitle = item.type.charAt(0).toUpperCase() + item.type.slice(1).replace('-', ' ');
-
-          fbase.db.child(item.path).once('value', function(snap) {
-            var el = document.createElement(item.type + '-card');
-            el[item.type] = snap.val();
-            el.key = snap.key();
-            if(item.client_name && item.client_name !== ''){
-              el.client = item.client_name;
-            }
-            if(_this.self.name && _this.self.name !== ''){
-              el.agent = _this.self.name;
-            }
-
-            app._displayInPanel(el);
-          });
         }
       });
     })();

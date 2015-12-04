@@ -41,7 +41,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <ul>
             <template is="dom-repeat" items="{{logs}}">
               <li class$="{{item.type}}" on-tap="showRecord">
-                <div>{{item.desc}}</div>
+                <div>{{_desc(item)}}</div>
                 <div class="secondary">
                   <time is="relative-time" datetime$="{{_timestamp(item.ts)}}">{{_displayDate(item.ts)}}</time>
                 </div>
@@ -87,18 +87,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             if(item.agent_name && item.agent_name !== ''){
               el.agent = item.agent_name;
             }
-            if(item.client_name && item.client_name !== ''){
-              el.client = item.client_name;
+            if(item.customer_name && item.customer_name !== ''){
+              el.customer = item.customer_name;
             }
             app._displayInPanel(el);
           });
         },
-
+        _desc: function(item) {
+          if(item.subtype === 'Payment Made') {
+            return '₹' +  item.data.amount + ' Paid';
+          }
+          else if(item.subtype === 'Payment Cancelled') {
+            return '₹' +  item.data.amount + ' Payment Cancelled';
+          }
+          return item.subtype;
+        },
         _displayDate: function(epoch) {
-          return moment(parseInt(epoch)).fromNow();
+          return moment(parseInt(epoch)*1000).fromNow();
         },
         _timestamp: function(epoch) {
-          return moment(parseInt(epoch)).format();
+          return moment(parseInt(epoch)*1000).format();
         }
       });
     })();

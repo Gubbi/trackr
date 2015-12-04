@@ -39,7 +39,7 @@ def base32(num, b=32, numerals="0123456789abcdefghijklmnopqrstuvwxyz"):
 
 
 @ndb.transactional()
-def get_next_prn(key):
+def get_next_prn(key='Global'):
     prng = Prng.get_or_insert(key)
     prng.gen()
     prng.put()
@@ -48,7 +48,7 @@ def get_next_prn(key):
 
 
 @ndb.transactional()
-def get_cancel_prn(key):
+def get_cancel_prn(key='Global'):
     prng = CancelPrng.get_or_insert(key)
     prng.gen()
     prng.put()

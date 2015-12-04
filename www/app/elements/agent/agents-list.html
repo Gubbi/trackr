@@ -64,14 +64,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         ready: function() {
-          this.db = fbase.db.child('agents');
-          this.items = [];
-          this.filtered = [];
-          this.isFiltered = false;
-
           var _this = this;
-          this.db.on('child_added', function(snap) {
-            _this.unshift('items', {data: snap.val(), key: snap.key()});
+          onAuthReady(function(){
+            _this.db = fbase.db.child('agents');
+            _this.items = [];
+            _this.filtered = [];
+            _this.isFiltered = false;
+
+            _this.db.on('child_added', function(snap) {
+              _this.unshift('items', {data: snap.val(), key: snap.key()});
+            });
           });
         },
 
@@ -90,7 +92,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           this.isFiltered = true;
           var _this = this;
-          this.db.orderByChild('phone').equalTo(phone).on('child_added', function(snap) {
+          this.db.child(phone).once('value', function(snap) {
             _this.unshift('filtered', {data: snap.val(), key: snap.key()});
           });
         }

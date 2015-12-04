@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   window.addEventListener('WebComponentsReady', function() {
 
     // We use Page.js for routing. This is a Micro
-    // client-side router inspired by the Express router
+    // customer-side router inspired by the Express router
     // More info: https://visionmedia.github.io/page.js/
     page.base('/app.html');
 
@@ -22,12 +22,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.titlePage = 'Activity Stream';
     });
 
-    page('/clients', function () {
-      app.route = 'clients';
+    page('/customers', function () {
+      app.route = 'customers';
     });
 
-    page('/clients/:key', function (data) {
-      app.route = 'client-info';
+    page('/customers/:key', function (data) {
+      app.route = 'customer-info';
       app.params = data.params;
     });
 
@@ -62,9 +62,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.route = 'deposits';
     });
 
-    page('/contact', function () {
-      app.route = 'contact';
-      app.titlePage = 'Contact Details';
+    page('/sales', function () {
+      app.route = 'sales';
+    });
+
+    page('/settings', function () {
+      app.route = 'settings';
+      app.titlePage = 'App Settings';
     });
 
     page('/logout', function () {

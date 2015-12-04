@@ -94,7 +94,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         ready: function() {
-          this.db = fbase.db.child('deposits');
+          var _this = this;
+          onAuthReady(function() {
+            _this.db = fbase.db.child('deposits');
+          });
         },
 
         _ValChanged: function() {
@@ -182,7 +185,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             return _this.deposit;
           }, function(error, committed) {
-            console.log(error, committed);
             _this.dataSaved.call(_this, error, committed);
           }, false);
         },
@@ -213,7 +215,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
           }
 
-          console.log('Deposit created / updated');
           this.fire('updated');
         },
         cancel: function() {

@@ -13,11 +13,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 
-<dom-module id="invoice-card">
+<dom-module id="sale-card">
   <style>
     paper-card {
       min-width: 300px;
-      border-top: 2px solid #009688;
+      border-top: 2px solid #795548;
     }
 
     paper-input[readonly], paper-textarea[readonly]  {
@@ -45,15 +45,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <paper-card>
       <div>
         <div class="card-content">
-          <paper-input id="invoice_id" name="invoice_id" label="Invoice ID" value="{{key}}" required readonly$={{!editInvoiceID(editing)}}></paper-input>
-          <paper-input name="customer" label="Customer" value="{{customer}}" readonly hidden$="{{hideCustomer}}"></paper-input>
-          <paper-input name="saleId" label="Sale Order Num" value="{{invoice.sale}}" readonly></paper-input>
-          <paper-input name="amount" label="Amount" value="{{invoice.amount}}" readonly></paper-input>
-          <paper-input name="paid" label="Advance" value="{{invoice.paid}}" readonly></paper-input>
+          <paper-input id="sale_id" name="sale_id" label="Sale Order Number" value="{{key}}" required readonly$={{!editSaleID(editing)}}></paper-input>
+          <paper-input name="amount" label="Amount" value="{{sale.amount}}" required readonly$={{!editing}}></paper-input>
+
+          <paper-input name="customer" label="Customer" value="{{customer}}" required readonly hidden$="{{hideCustomer}}"></paper-input>
+          <paper-input name="agent" label="Sales Executive" value="{{agent}}" required readonly hidden$="{{hideAgent}}"></paper-input>
+
+          <paper-input name="advance" label="Advance Paid" value="{{sale.advance}}" required readonly$={{!editing}}></paper-input>
+          <paper-input name="invoice" label="Invoice ID" value="{{sale.invoice}}" required readonly></paper-input>
         </div>
         <div class="card-actions horizontal layout center flex">
           <paper-icon-button class="actions" title="Activity" alt="Logs" icon="toc" on-tap="viewLogs" hidden="{{editing}}"></paper-icon-button>
           <span class="flex"></span>
+          <!--<paper-icon-button class="actions" title="Edit" alt="Edit" icon="create" on-tap="startEdit" hidden="{{!showEdit()}}"></paper-icon-button>-->
+          <!--<paper-icon-button icon="close" title="Cancel" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>-->
+          <!--<paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!editing}}"></paper-icon-button>-->
         </div>
       </div>
     </paper-card>
@@ -62,14 +68,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     (function() {
       Polymer({
-        is: 'invoice-card',
+        is: 'sale-card',
         properties: {
           customer: String,
-          invoice: {
-            type: Object,
+          agent: String,
+          sale: Object,
+          key: {
+            type: String,
             observer: '_ValChanged'
           },
-          key: String,
           editable: {
             type: Boolean,
             value: true
@@ -85,40 +92,73 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           hideCustomer: {
             type: Boolean,
             value: false
+          },
+          hideAgent: {
+            type: Boolean,
+            value: false
           }
         },
 
-        editInvoiceID: function(editing) {
+        showEdit: function() {
+          return this.editable && !this.editing;
+        },
+
+        editSaleID: function(editing) {
           return this.isNew && editing;
         },
 
         ready: function() {
           var _this = this;
+
           onAuthReady(function() {
-            _this.db = fbase.db.child('invoices');
+            _this.db = fbase.db.child('sales');
             _this._ValChanged.call(_this);
           });
+
+          this.logs = [];
         },
 
         _ValChanged: function() {
+          var _this = this;
+
           if(!this.db || !this.key) {
             return;
           }
 
-          var _this = this;
+          if(this.sale) {
+            this.sale_listener = this.db.child(this.key).on('value', function(snap) {
+              this.set('sale', snap.val());
+            }, this);
+          }
 
-          if(this.invoice && !this.customer) {
+          if(this.sale && !this.customer) {
             this.customerDB = fbase.db.child('customers');
-            this.customerDB.child(this.invoice.customer).once('value', function(customer) {
+
+            this.customerDB.child(this.sale.customer).once('value', function(customer) {
               if (customer.val())
                 _this.customer = customer.val().name;
             });
+          }
+
+          if(this.sale && !this.agent) {
+            this.agentDB = fbase.db.child('agents');
+
+            this.agentDB.child(this.sale.agent).once('value', function(agent) {
+              if (agent.val())
+                _this.agent = agent.val().name;
+            });
+          }
+
+          if(this.sale && this.sale.invoice) {
+            this.editable = false;
           }
 
           this.update = null;
         },
 
         detached: function() {
+          this.db.child(this.key).off('value', this.sale_listener);
+
           if(this.logs_listener) {
             this.logs_db.off('value', this.logs_listener);
           }
@@ -128,7 +168,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _this = this;
 
           if(!this.logs_listener) {
-            this.logs_db = fbase.db.child('logs/invoices/').child(this.key);
+            this.logs_db = fbase.db.child('logs/sales/').child(this.key);
 
             this.logs_listener = this.logs_db.on('value', function (snap) {
               this.logs = [];
@@ -141,19 +181,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               });
               if(!this.log_first) {
                 this.log_first = true;
-                var el = document.createElement('invoice-logs');
+                var el = document.createElement('sale-logs');
                 el.logs = this.logs;
                 app.subTitle = this.key;
-                app.subTitleDesc = 'Invoice';
+                app.subTitleDesc = 'Sale Order';
                 app._displayInPanel(el);
               }
             }, this);
           }
           else {
-            var el = document.createElement('invoice-logs');
+            var el = document.createElement('sale-logs');
             el.logs = this.logs;
             app.subTitle = this.key;
-            app.subTitleDesc = 'Invoice';
+            app.subTitleDesc = 'Sale Order';
             app._displayInPanel(el);
           }
         }

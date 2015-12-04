@@ -1,3 +1,4 @@
+import logging
 from google.appengine.api import namespace_manager
 from framework.default_controller import DefaultController
 from model.apps.trackr import Trackr, TrackrRoles
@@ -22,4 +23,7 @@ class SignedInController(TrackrController):
     acl = ["any"]
 
     def _setup(self):
-        namespace_manager.set_namespace('Trackr_'+self.org.key.id())
+        namespace = 'Trackr_'+self.org.key.id()+'_'+str(self.livemode or True)
+        logging.info(['Switching to namespace ', namespace])
+
+        namespace_manager.set_namespace(namespace)

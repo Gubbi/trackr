@@ -22,7 +22,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     :host paper-card.Cancelled {
       opacity: .5;
-      filter: alpha(opacity=50);
+      filter: alpha(opacity=30);
+      text-decoration: line-through !important;
     }
 
     :host paper-card.Cancelled:hover {
@@ -56,10 +57,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div>
         <div class="card-content">
           <paper-input id="payment_id" name="payment_id" label="Payment ID" value="{{key}}" readonly></paper-input>
-          <paper-input id="invoice_id" name="invoice_id" label="Invoice ID" value="{{payment.invoice}}" readonly></paper-input>
-          <paper-input id="client_val" name="client" label="Client" value="{{client}}" readonly hidden$="{{hideClient}}"></paper-input>
-          <paper-input id="agent_val" name="agent" label="Agent" value="{{agent}}" readonly hidden$="{{hideAgent}}"></paper-input>
           <paper-input name="amount" label="Amount" value="{{payment.amount}}" readonly></paper-input>
+          <paper-input id="customer_val" name="customer" label="Customer" value="{{customer}}" readonly hidden$="{{hideCustomer}}"></paper-input>
+          <paper-input id="agent_val" name="agent" label="Agent" value="{{agent}}" readonly hidden$="{{hideAgent}}"></paper-input>
+          <paper-input id="invoice_id" name="invoice_id" label="Invoice ID" value="{{payment.invoice}}" readonly></paper-input>
         </div>
         <div class="card-actions horizontal layout center flex">
           <paper-icon-button class="actions" title="Activity" alt="Logs" icon="toc" on-tap="viewLogs" hidden="{{editing}}"></paper-icon-button>
@@ -74,13 +75,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'payment-card',
         properties: {
-          client: String,
+          customer: String,
           agent: String,
-          payment: {
-            type: Object,
+          payment: Object,
+          key: {
+            type: String,
             observer: '_ValChanged'
           },
-          key: String,
           editable: {
             type: Boolean,
             value: true
@@ -93,7 +94,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             value: false
           },
-          hideClient: {
+          hideCustomer: {
             type: Boolean,
             value: false
           },
@@ -104,43 +105,81 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         ready: function() {
-          this.db = fbase.db.child('payments');
+          var _this = this;
+          onAuthReady(function() {
+            _this.db = fbase.db.child('payments');
+            _this._ValChanged.call(_this);
+          });
         },
 
         _ValChanged: function() {
           var _this = this;
 
-          if(this.payment && !this.client) {
-            this.clientDB = fbase.db.child('clients');
-            this.clientDB.child(this.payment.client).once('value', function(client) {
-              _this.client = client.val().name;
-            });
+          if(!this.db || !this.key) {
+            return;
+          }
+
+          this.payment_listener = this.db.child(this.key).on('value', function(snap) {
+            this.set('payment', snap.val());
+          }, this);
+
+          if(this.payment && !this.customer) {
+            this.customerDB = fbase.db.child('customers');
+
+            this.customerDB.child(this.payment.by).once('value', function(customer) {
+              if(customer.val()) this.customer = customer.val().name;
+            }, this);
           }
 
           if(this.payment && !this.agent) {
             this.agentDB = fbase.db.child('agents');
 
-            this.agentDB.child(this.payment.agent).once('value', function(agent) {
-              _this.agent = agent.val().name;
-            });
+            this.agentDB.child(this.payment.to).once('value', function(agent) {
+              if(agent.val()) this.agent = agent.val().name;
+            }, this);
+          }
+        },
+
+        detached: function() {
+          this.db.child(this.key).off('value', this.payment_listener);
+
+          if(this.logs_listener) {
+            this.logs_db.off('value', this.logs_listener);
           }
         },
 
         viewLogs: function() {
-          var logs = [];
-          if(this.payment.logs) {
-            var _this = this;
-            Object.keys(this.payment.logs).sort().forEach(function(key) {
-              var val = _this.payment.logs[key];
-              val.ts = key;
-              logs.push(val);
-            });
+          var _this = this;
+
+          if(!this.logs_listener) {
+            this.logs_db = fbase.db.child('logs/payments/').child(this.key);
+
+            this.logs_listener = this.logs_db.on('value', function (snap) {
+              this.logs = [];
+              var all_logs = snap.val();
+
+              Object.keys(all_logs).sort().forEach(function (key) {
+                var val = all_logs[key];
+                val.ts = key;
+                _this.logs.push(val);
+              });
+              if(!this.log_first) {
+                this.log_first = true;
+                var el = document.createElement('payment-logs');
+                el.logs = this.logs;
+                app.subTitle = this.key;
+                app.subTitleDesc = 'Payment';
+                app._displayInPanel(el);
+              }
+            }, this);
           }
-          var el = document.createElement('payment-logs');
-          el.logs = logs;
-          app.subTitle = this.key;
-          app.subTitleDesc = 'Payment';
-          app._displayInPanel(el);
+          else {
+            var el = document.createElement('payment-logs');
+            el.logs = this.logs;
+            app.subTitle = this.key;
+            app.subTitleDesc = 'Payment';
+            app._displayInPanel(el);
+          }
         }
       });
     })();

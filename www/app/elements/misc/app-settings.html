@@ -1,0 +1,127 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="app-settings">
+    <style>
+        :host paper-card {
+            min-width: 300px;
+            border-top: 2px solid #2196F3;
+            margin: 30px auto;
+        }
+
+        paper-input[readonly]  {
+          /* line color when the input is unfocused */
+          --paper-input-container-underline: {
+            display:none;
+          }
+          --paper-input-container-underline-focus: {
+            display:none;
+          }
+          --paper-input-container-underline-disabled: {
+            display:none;
+          }
+        }
+    </style>
+    <template>
+        <div class="card-actions horizontal layout center flex">
+            <span class="flex"></span>
+            <paper-card>
+                <div>
+                    <div class="card-content">
+                        <paper-input label="Brand Name" value="{{app.brand_name}}" required></paper-input>
+                        <paper-input label="SMS Short Code" value="{{app.short_code}}" required></paper-input>
+                        <paper-input label="Support Helpline" value="{{app.support_number}}" required></paper-input>
+                        <paper-input label="Notification Email" value="{{app.notification_email}}" required></paper-input>
+                        <paper-input label="Spreadsheet ID" value="{{app.spreadsheet_id}}" required></paper-input>
+                    </div>
+                    <div class="card-actions horizontal layout center flex">
+                        <span class="flex"></span>
+                        <paper-icon-button class="actions" alt="Reset" title="Reset" icon="close" on-tap="cancel"></paper-icon-button>
+                        <paper-icon-button class="actions" alt="Update Settings" title="Update Settings" icon="done" on-tap="updateSettings"></paper-icon-button>
+                    </div>
+                </div>
+            </paper-card>
+            <span class="flex"></span>
+        </div>
+        <div class="card-actions horizontal layout center flex">
+            <span class="flex"></span>
+            <paper-card>
+                <div>
+                    <div class="card-content">
+                        <paper-input label="API ID" value="{{auth.api_id}}" readonly></paper-input>
+                        <paper-input label="API Secret" value="{{auth.api_secret}}" readonly></paper-input>
+                    </div>
+                </div>
+            </paper-card>
+            <span class="flex"></span>
+        </div>
+    </template>
+
+    <script>
+        (function() {
+            Polymer({
+                is: 'app-settings',
+                properties: {
+                    app: {
+                        type: Object,
+                        value: {}
+                    },
+                    bak_app: {
+                        type: Object,
+                        value: {}
+                    },
+                    auth: {
+                        type: Object,
+                        value: {}
+                    }
+                },
+                ready: function() {
+                    var _this = this;
+                    superagent.get('/bkend/trackr/app_settings').end(function(err, res) {
+                        if (res.ok) {
+                            _this.app = res.body.app;
+                            _this.auth = res.body.auth;
+                            _this.clone();
+                        } else {
+
+                        }
+                    });
+                },
+                clone: function() {
+                    var _this = this;
+                    Object.keys(this.app).forEach(function(key){
+                        _this.bak_app[key] = _this.app[key];
+                    });
+                },
+                cancel: function() {
+                    this.app = this.bak_app;
+                    this.bak_app = {};
+                    this.clone();
+//                    this.set('app', this.app);
+                    this.fire('cancelled');
+                },
+                updateSettings: function() {
+                    var _this = this;
+
+                    superagent.post('/bkend/trackr/app_settings').send(this.app).end(function(err, res) {
+                        if (res.ok) {
+                            _this.clone();
+                        } else {
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
+</dom-module>

@@ -82,8 +82,10 @@ class DefaultAPIAuth(APIAuth):
     def init_controller(controller, user):
         if user:
             controller.set_env(api_user=user)
+            controller.set_env(org=user)
+            controller.set_env(org_app=controller.app_model.get_by_id(user.key.id()))
             controller.set_env(livemode=user._livemode)
-            controller.user_acl = user.type
+            controller.user_acl = ["any"]
         else:
             controller.set_env(api_user=None)
             controller.user_acl = []

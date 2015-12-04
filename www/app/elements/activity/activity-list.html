@@ -89,9 +89,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         ready: function() {
-          this.activityDB = fbase.db.child('activities');
-          this.today = moment().format('YYYY-MM-DD');
-          this.dateSelected = this.today;
+          var _this = this;
+          onAuthReady(function() {
+            _this.activityDB = fbase.db.child('activities');
+            _this.today = moment().format('YYYY-MM-DD');
+            _this.dateSelected = _this.today;
+          });
         },
 
         _dateChanged: function() {
@@ -125,7 +128,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.dateSelected = moment(this.dateSelected).add(1, 'day').format('YYYY-MM-DD');
         },
         search: function(query) {
-          console.log(query);
         }
       });
     })();

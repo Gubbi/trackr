@@ -14,8 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="presence-indicator">
   <style>
     :host {
-      display: block;
-      font-size: 14px;
+      display: inline-block;
     }
     :host #is_online {
       color: rgba(100,221,23, 0.8);
@@ -24,23 +23,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       color: rgba(0,0,0,.4);
     }
     :host iron-icon {
-      --iron-icon-width: 16px;
-      --iron-icon-height: 16px;
-      margin-right: 17px;
-      padding: 0 20px;
-    }
-    #statusIndicator {
-      background-color: #FAFAFA;
-      padding: 24px 0;
+      --iron-icon-width: 24px;
+      --iron-icon-height: 24px;
+      margin-right: 33px;
+      padding: 0;
     }
   </style>
 
   <template>
-    <div id="statusIndicator" class="center horizontal layout">
       <iron-icon icon="image:lens" title="Online!" id="is_online" hidden$="{{!online}}"></iron-icon>
       <iron-icon icon="error-outline" title="No Network" id="is_offline" hidden$="{{online}}"></iron-icon>
-      <span>{{status}}</span>
-    </div>
   </template>
 
   <script>
@@ -48,12 +40,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'presence-indicator',
         ready: function() {
-          this.connectedStatus = new Firebase('https://resplendent-heat-7838.firebaseio.com/.info/connected');
           var _this = this;
+          this.connectedStatus = fbase.root.child('.info/connected');
+
 
           this.connectedStatus.on('value', function(snap) {
             app.online = _this.online = snap.val();
-            _this.status = _this.online? 'Online': 'No Connection';
+            app.onlineStatus = _this.status = _this.online? 'Online': 'No Connection';
           });
         }
       });

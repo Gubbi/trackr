@@ -584,7 +584,7 @@ Response.prototype.parseBody = function(str){
  *
  * For example a 2xx response will give you a `.ok` of __true__
  * whereas 5xx will be __false__ and `.error` will be __true__. The
- * `.clientError` and `.serverError` are also available to be more
+ * `.customerError` and `.serverError` are also available to be more
  * specific, and `.statusType` is the class of error ranging from 1..5
  * sometimes useful for mapping respond colors etc.
  *
@@ -615,7 +615,7 @@ Response.prototype.setStatusProperties = function(status){
   // basics
   this.info = 1 == type;
   this.ok = 2 == type;
-  this.clientError = 4 == type;
+  this.customerError = 4 == type;
   this.serverError = 5 == type;
   this.error = (4 == type || 5 == type)
     ? this.toError()

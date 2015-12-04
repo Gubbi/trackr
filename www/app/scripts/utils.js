@@ -58,20 +58,14 @@ function _login() {
 }
 
 function _logout() {
-    console.log('logging out');
     window.location = '/';
 }
 
 function login(authData) {
-    console.log(authData);
-
     if(!authData) return;
 
     fbase.root.authWithCustomToken(authData.fbaseToken, function(error, fbaseAuthData) {
-        console.log(fbaseAuthData);
-
         if (error) {
-            console.log('Login Failed!', error);
         } else {
             localStorage.setItem('baseAuth', JSON.stringify(authData));
             _login();
@@ -89,13 +83,11 @@ onAuth(function(authData) {
         }
     }
     else {
-        console.log('Page logged out from somewhere');
         _logout();
     }
 });
 
 superagent.get('/auth/').end(function(err, res) {
-    console.log(res.body);
     if(res.ok && res.body.status === 'success') {
         superagent.post('/auth/refresh').end(function() {
             var fbaseAuthData = fbase.root.getAuth();
@@ -104,18 +96,14 @@ superagent.get('/auth/').end(function(err, res) {
                 return;
             }
 
-            console.log(fbaseAuthData);
-
             var existingAuth = JSON.parse(localStorage.getItem('baseAuth'));
 
             if(existingAuth && existingAuth.user !== res.body.user) {
-                console.log('Data stored different from logged in user.');
                 login(res.body);
                 return;
             }
 
             if(fbaseAuthData.uid !== existingAuth.user) {
-                console.log('Fbase logged in user is different from current user.');
                 login(res.body);
                 return;
             }
@@ -127,7 +115,6 @@ superagent.get('/auth/').end(function(err, res) {
             fbase.root.onAuth(function(authData) {
                 if (!authData) {
                     localStorage.setItem('baseAuth', null);
-                    console.log('No auth data found during this fbase auth event. Logging out.');
                     _logout();
                 }
             });
@@ -136,7 +123,6 @@ superagent.get('/auth/').end(function(err, res) {
         });
     }
     else {
-        console.log('Auth check: ' + res.body.message);
         if(localStorage.getItem('baseAuth') !== null) {
             localStorage.removeItem('baseAuth');
         }

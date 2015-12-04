@@ -74,9 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                     superagent.post('/sys/accounts/new').send(this.org).end(function(err, res) {
                         if (res.ok) {
-                            console.log('Successfully created user account: ' + res.body.message);
                         } else {
-                            console.log('Oh no! error ' + res.body.message);
                         }
                     });
                 }

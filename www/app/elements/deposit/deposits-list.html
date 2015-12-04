@@ -57,15 +57,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         ready: function() {
-          this.db = fbase.db.child('deposits');
-          this.items = [];
-          this.filtered = [];
-          this.isFiltered = false;
-
           var _this = this;
-          this.db.on('child_added', function(snap) {
-            var deposit = {data: snap.val(), key: snap.key()};
-            _this.unshift('items', deposit);
+
+          onAuthReady(function() {
+            _this.db = fbase.db.child('deposits');
+            _this.items = [];
+            _this.filtered = [];
+            _this.isFiltered = false;
+
+            _this.db.on('child_added', function(snap) {
+              var deposit = {data: snap.val(), key: snap.key()};
+              _this.unshift('items', deposit);
+            });
           });
         },
 

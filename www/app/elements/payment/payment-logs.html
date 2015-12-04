@@ -38,7 +38,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <ul>
             <template is="dom-repeat" items="{{logs}}">
               <li>
-                <div>{{item.desc}}</div>
+                <div>{{item.subtype}}</div>
                 <div class="secondary">
                   <time is="relative-time" datetime$="{{_timestamp(item.ts)}}">{{_displayDate(item.ts)}}</time>
                 </div>
@@ -69,10 +69,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         _displayDate: function(epoch) {
-          return moment(parseInt(epoch)).fromNow();
+          return moment(parseInt(epoch) * 1000).fromNow();
         },
         _timestamp: function(epoch) {
-          return moment(parseInt(epoch)).format();
+          return moment(parseInt(epoch) * 1000).format();
         }
       });
     })();

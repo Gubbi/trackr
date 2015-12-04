@@ -1,7 +1,6 @@
 from google.appengine.ext import ndb
-from model import accounts
 from model.users import App
-from model.utils import PhoneProperty, MobilePhoneProperty
+from model.utils import PhoneProperty, MobilePhoneProperty, ShortCodeProperty
 
 NA = 0
 READ = 1
@@ -11,9 +10,13 @@ perms = [READ, WRITE, NA]
 
 
 class Trackr(App):
-    short_code                      = ndb.StringProperty(verbose_name='SMS short code')
+    short_code                      = ShortCodeProperty(verbose_name='SMS short code', unique=True)
     brand_name                      = ndb.StringProperty(verbose_name='Brand Name')
     support_number                  = PhoneProperty(verbose_name='Support helpline')
+    notification_email              = ndb.StringProperty(verbose_name='Notifications Email')
+
+    spreadsheet_id                  = ndb.StringProperty()
+    spreadsheet_sheets              = ndb.StringProperty(repeated=True)
 
     pricing                         = ndb.FloatProperty()
     min_pricing                     = ndb.FloatProperty()
@@ -40,7 +43,7 @@ class Supervisor(ndb.Model):
     email               = ndb.StringProperty()
 
 
-class Sales(ndb.Model):
+class Agent(ndb.Model):
     name                = ndb.StringProperty()
     phone               = MobilePhoneProperty()
 
@@ -49,15 +52,17 @@ class Sales(ndb.Model):
 
 class SalesOrder(ndb.Model):
     on                  = ndb.StringProperty()
-    amount              = ndb.FloatProperty()
-    advance_amount      = ndb.FloatProperty()
+    amount              = ndb.FloatProperty(default=0)
+    advance_amount      = ndb.FloatProperty(default=0)
 
     advance             = ndb.KeyProperty(kind='Payment')
 
     customer            = ndb.KeyProperty(kind=Customer)
-    incharge            = ndb.KeyProperty(kind=Sales)
+    incharge            = ndb.KeyProperty(kind=Agent)
 
     invoice             = ndb.KeyProperty(kind='Invoice')
+
+    status              = ndb.StringProperty(choices=['Recorded', 'Cancelled'], default='Recorded')
 
     createdAt           = ndb.DateTimeProperty(auto_now_add=True)
     modifiedAt          = ndb.DateTimeProperty(auto_now=True)
@@ -68,10 +73,17 @@ class Invoice(ndb.Model):
     order               = ndb.KeyProperty(kind=SalesOrder)
     customer            = ndb.KeyProperty(kind=Customer)
 
-    amount              = ndb.FloatProperty()
-    paid                = ndb.FloatProperty()
-    credit              = ndb.FloatProperty()
-    balance             = ndb.ComputedProperty(lambda self: self.amount - self.paid + self.credit)
+    amount              = ndb.FloatProperty(default=0)
+
+    paid                = ndb.FloatProperty(default=0)
+    payments            = ndb.KeyProperty(kind='Payment', repeated=True)
+
+    credit              = ndb.FloatProperty(default=0)
+    credits             = ndb.KeyProperty(kind='Credit', repeated=True)
+
+    balance             = ndb.ComputedProperty(lambda self: (self.amount or 0) - (self.paid or 0) + (self.credit or 0))
+
+    status              = ndb.StringProperty(choices=['Recorded', 'Cancelled'], default='Recorded')
 
     createdAt           = ndb.DateTimeProperty(auto_now_add=True)
     modifiedAt          = ndb.DateTimeProperty(auto_now=True)
@@ -79,7 +91,7 @@ class Invoice(ndb.Model):
 
 class Payment(ndb.Model):
     by                  = ndb.KeyProperty(kind=Customer)
-    to                  = ndb.KeyProperty(kind=Sales)
+    to                  = ndb.KeyProperty(kind=Agent)
 
     amount              = ndb.FloatProperty()
 
@@ -96,7 +108,7 @@ class Payment(ndb.Model):
 
 
 class Deposit(ndb.Model):
-    by                  = ndb.KeyProperty(kind=Sales)
+    by                  = ndb.KeyProperty(kind=Agent)
 
     amount              = ndb.FloatProperty()
     comment             = ndb.StringProperty()
@@ -121,18 +133,6 @@ class Credit(ndb.Model):
     modifiedAt          = ndb.DateTimeProperty(auto_now=True)
 
 
-class InvoiceLog(ndb.Model):
-    amount              = ndb.FloatProperty()
-    kind                = ndb.StringProperty(choices=['Payment', 'Advance', 'Credit', 'Payment Cancelled',
-                                                      'Credit Cancelled'])
-
-    old_amount          = ndb.FloatProperty()
-    payment             = ndb.KeyProperty(kind=Payment)
-    credit              = ndb.KeyProperty(kind=Credit)
-
-
-class AccountLog(accounts.AccountLog):
-    payment             = ndb.KeyProperty(kind=Payment)
-    credit              = ndb.KeyProperty(kind=Credit)
-    deposit             = ndb.KeyProperty(kind=Deposit)
-    invoice             = ndb.KeyProperty(kind=Invoice)
+class Cache(ndb.Model):
+    value               = ndb.StringProperty()
+    createdAt           = ndb.DateTimeProperty(auto_now_add=True)

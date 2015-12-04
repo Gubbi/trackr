@@ -10,7 +10,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 var pageBasePath = '/app.html';
 onAuthReady(function(authData) {
     if(!authData) {
-      console.log('No auth data found after initial auth check completed. Logging out.');
       _logout();
     }
 });
@@ -67,7 +66,7 @@ onAuthReady(function(authData) {
   // Close drawer after menu item is selected if drawerPanel is narrow
   app.onMenuSelect = function() {
     var drawerPanel = document.querySelector('#paperDrawerPanel');
-    if (drawerPanel.narrow) {
+    if (drawerPanel && drawerPanel.narrow) {
       drawerPanel.closeDrawer();
     }
   };
@@ -100,11 +99,11 @@ onAuthReady(function(authData) {
     });
   };
 
-  app._newClient = function() {
-    app.subTitle = 'New Client';
-    var el = document.createElement('client-card');
+  app._newCustomer = function() {
+    app.subTitle = 'New Customer';
+    var el = document.createElement('customer-card');
 
-    el.client = {};
+    el.customer = {};
     el.key = null;
     el.editing = true;
 
@@ -126,9 +125,9 @@ onAuthReady(function(authData) {
     app.subTitle = 'New Invoice';
     var el = document.createElement('invoice-card');
 
-    el.invoice = {client: e.detail.clientKey};
+    el.invoice = {customer: e.detail.customerKey};
     el.key = null;
-    el.client = e.detail.client;
+    el.customer = e.detail.customer;
     el.isNew = true;
     el.editing = true;
 

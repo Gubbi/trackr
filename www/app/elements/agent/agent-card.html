@@ -45,13 +45,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div>
         <div class="card-content">
           <paper-input name="name" label="Name" value="{{agent.name}}" required readonly$={{!editing}}></paper-input>
-          <paper-input name="place" label="Place" value="{{agent.place}}" required readonly$={{!editing}}></paper-input>
-          <paper-input name="phone" label="Mobile No" value="{{agent.phone}}" required readonly$={{!editing}}></paper-input>
+          <paper-input name="supervisor" label="Supervisor Name" value="{{supervisor.name}}" readonly$={{!editing}}></paper-input>
+          <paper-input name="supervisor_email" label="Supervisor Email" value="{{supervisor.email}}" readonly$={{!editing}}></paper-input>
+          <paper-input name="supervisor_phone" label="Supervisor Mobile" value="{{agent.supervisor}}" readonly$={{!editing}}></paper-input>
+          <paper-input name="phone" id="agent_phone" label="Mobile No" value="{{agent.phone}}" required readonly$={{!keyEditable}}></paper-input>
         </div>
         <div class="card-actions horizontal layout center flex">
           <a href$="{{getUrl(key)}}" hidden="{{hideLaunch}}" title="Expand"><paper-icon-button class="actions" alt="View More" icon="launch" hidden="{{editing}}"></paper-icon-button></a>
           <span class="flex"></span>
-          <paper-icon-button class="actions" alt="New Deposit" title="New Deposit Entry" icon="send" on-tap="createDeposit" hidden="{{editing}}"></paper-icon-button>
+          <!--<paper-icon-button class="actions" alt="New Deposit" title="New Deposit Entry" icon="send" on-tap="createDeposit" hidden="{{editing}}"></paper-icon-button>-->
           <paper-icon-button class="actions" alt="Edit" title="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>
           <paper-icon-button icon="close" title="Cancel" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>
           <paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!editing}}"></paper-icon-button>
@@ -66,7 +68,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         is: 'agent-card',
         properties: {
           agent: Object,
-          key: String,
+          supervisor: {
+            type: Object,
+            value: {}
+          },
+          key: {
+            type: String,
+            observer: '_ValChanged'
+          },
           editable: {
             type: Boolean,
             value: true
@@ -80,49 +89,79 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: false
           }
         },
+
         getUrl: function(key) {
           return pageBasePath + '/agents/' + key;
         },
+
         ready: function() {
-          this.db = fbase.db.child('agents');
+          var _this = this;
+          onAuthReady(function() {
+            _this.db = fbase.db.child('agents');
+            _this._ValChanged.call(_this);
+          });
+
+          this.keyEditable = false;
         },
+
+        _ValChanged: function() {
+          if(!this.db || !this.agent) {
+            return;
+          }
+
+          this.agent_listener = this.db.child(this.key).on('value', function(snap) {
+            this.set('agent', snap.val());
+          }, this);
+
+          if(this.agent && this.agent.supervisor) {
+            this.supervisorDB = fbase.db.child('supervisors');
+            this.supervisorDB.child(this.agent.supervisor).once('value', function(supervisor) {
+              if (supervisor.val())
+                this.supervisor = supervisor.val();
+            }, this);
+          }
+        },
+
+        detached: function() {
+          this.db.child(this.key).off('value', this.agent_listener);
+        },
+
         startEdit: function() {
           this.editing = true;
+          if (!this.key) { this.keyEditable = true; }
           this.updateStyles();
         },
+
         save: function() {
+          var _this = this;
+
           if (!this.agent.phone) {
             return;
           }
 
           if(!this.key) {
-            this.key = this.db.push(this.agent).key();
+            this.key = this.agent.phone;
+          }
 
-            var today = moment().format('YYYY-MM-DD');
-            fbase.log.child(today).push({
-              type: 'agent',
-              ts: Firebase.ServerValue.TIMESTAMP,
-              path: 'agents/' + this.key,
-              key: this.key,
-              data: {
-                name: this.agent.name
-              }
-            });
-          }
-          else {
-            this.db.child(this.key).update(this.agent);
-          }
-          this.editing = false;
-          this.updateStyles();
-          this.fire('updated');
+          superagent.post('/bkend/trackr/update_agent')
+                  .send({'agent': this.agent, 'supervisor': this.supervisor})
+                  .end(function(err, res) {
+                    if (res.ok) {
+                      _this.editing = false;
+                      _this.keyEditable = false;
+                      _this.updateStyles();
+                      _this.fire('updated');
+                    } else {
+
+                    }
+                  });
         },
+
         cancel: function() {
           this.editing = false;
+          this.keyEditable = false;
           this.updateStyles();
           this.fire('cancelled');
-        },
-        createDeposit: function() {
-          this.fire('create-deposit', {agentKey: this.key, agent: this.agent.name});
         }
       });
     })();
