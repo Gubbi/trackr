@@ -4,7 +4,7 @@ from sendgrid import sendgrid
 
 __author__ = 'vinuth'
 
-APP_NAME = 'AuthServer'
+APP_NAME = 'Trackr'
 
 # Settings for local host. KEYS, SECRETS, etc.,
 APP_SECRET = "bec0lkjewjr942375elekshdhfnbilentvabf782345o9ufdkskkyashvab2d9ab3a02"
@@ -26,6 +26,21 @@ FIREBASE_SECRET = 'PXagmBMfPfNlJ8IufPrIeHApt7qewFdAbsCLVV9b'
 
 # Sendgrid
 SENDGRID = sendgrid.SendGridClient('kya.sh', 'Kyash4mBilent')
+
+
+#App Script
+SCRIPT_ID = 'MqYmS4xLHrfMUKXscSsk-wWIbUQ_rcZIF'
+TRACKR_CREDENTIALS = {
+    "client_id": "849963260641-ho772s6i0k84sia0qc9omofbkp7k8b6a.apps.googleusercontent.com",
+    "client_secret": "3yPheIGRs_Ve27seCiAlo5YS",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://accounts.google.com/o/oauth2/token",
+}
+TRACKR_SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+MODULE_SECRETS = {
+    'sldj3q8@#$DSA1dca': False,
+    'adojsl!@$EDASDDIQ04324': True
+}
 
 try:
     from config_prod import *

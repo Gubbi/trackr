@@ -1,5 +1,5 @@
 from boondi.ext import render
-from boondi.forms import Required
+from boondi.data import Required
 from boondi.globals import data
 from boondi.utils import generate_random_password, send_email
 from framework.extend import PublicController
@@ -12,12 +12,12 @@ __author__ = 'vinuth'
 
 
 class AccountsController(PublicController):
-    def new(self):
-        self.validate({
-            'pricing': Required(float),
-            'min_pricing': Required(float)
-        }, required_fields=['name', 'id', 'short_code', 'brand_name', 'support_number',
-                            'admin_name', 'admin_email', 'admin_phone'], error_message='Form has errors')
+    @staticmethod
+    def new():
+        data.validate(pricing=Required(float), min_pricing=Required(float),
+                      required_fields=['name', 'id', 'short_code', 'brand_name', 'support_number',
+                                       'admin_name', 'admin_email', 'admin_phone'],
+                      error_message='Form has errors')
 
         org = Organization.get_by_id(data.id)
         if not org:
@@ -42,7 +42,7 @@ class AccountsController(PublicController):
         if not Trackr.get_by_id(org.key.id()):
             Trackr(id=org.key.id(), org=org.key, users=[user.key],
                    short_code=data.short_code, brand_name=data.brand_name, support_number=data.support_number,
-                   pricing=data.pricing, min_pricing=data.min_pricing).put()
+                   secure_pricing=data.pricing, secure_min_pricing=data.min_pricing).put()
 
         TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Staff'])
 

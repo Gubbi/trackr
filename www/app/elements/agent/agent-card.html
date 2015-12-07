@@ -143,7 +143,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.key = this.agent.phone;
           }
 
-          superagent.post('/bkend/trackr/update_agent')
+          superagent.post('/bkend/update_agent')
                   .send({'agent': this.agent, 'supervisor': this.supervisor})
                   .end(function(err, res) {
                     if (res.ok) {

@@ -1,9 +1,9 @@
-from boondi.controllers import methods, error
+from boondi.controllers import methods
 from config.config import FIREBASE_SECRET
 from framework.extend import PublicController
 from framework.default_auth import web_auth
 from boondi.globals import response, data
-from boondi.ext import render
+from boondi.ext import render, error
 from boondi.utils import send_email, generate_random_password
 from model.users import get_user_by_email, get_verified_user_by_email
 from firebase_token_generator import create_token
@@ -12,7 +12,7 @@ from firebase_token_generator import create_token
 class AuthController(PublicController):
     @methods('POST')
     def login(self):
-        self.validate(required_fields=['email', 'password'], error_message='Invalid User / Password')
+        data.validate(required_fields=['email', 'password'], error_message='Invalid User / Password')
 
         user = get_verified_user_by_email(data.email.lower())
         password = web_auth.signed_password(data.password)
@@ -70,7 +70,7 @@ class AuthController(PublicController):
 
     @methods('POST')
     def reset(self):
-        self.validate(required_fields=['email'], error_message='')
+        data.validate(required_fields=['email'], error_message='')
 
         user = get_user_by_email(data.email)
 
@@ -89,7 +89,7 @@ class AuthController(PublicController):
 
     @methods('POST')
     def change(self):
-        self.validate(required_fields=['email', 'password', 'new_password'])
+        data.validate(required_fields=['email', 'password', 'new_password'])
 
         user = get_user_by_email(data.email)
         password = web_auth.signed_password(data.password)

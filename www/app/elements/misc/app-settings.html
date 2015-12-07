@@ -11,6 +11,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 
 <dom-module id="app-settings">
     <style>
@@ -34,7 +35,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
     </style>
     <template>
-        <div class="card-actions horizontal layout center flex">
+        <div class="horizontal layout center flex">
             <span class="flex"></span>
             <paper-card>
                 <div>
@@ -43,7 +44,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <paper-input label="SMS Short Code" value="{{app.short_code}}" required></paper-input>
                         <paper-input label="Support Helpline" value="{{app.support_number}}" required></paper-input>
                         <paper-input label="Notification Email" value="{{app.notification_email}}" required></paper-input>
-                        <paper-input label="Spreadsheet ID" value="{{app.spreadsheet_id}}" required></paper-input>
+                        <br/>
+                        <br/>
+                        <div class="horizontal layout center flex" hidden="{{is_script_enabled}}">
+                            <span>Enable Spreadsheet Updates</span> <span class="flex"></span>
+                            <paper-toggle-button checked="[[is_script_enabled]]" toggles on-change="enableScript"></paper-toggle-button>
+                        </div>
+                        <paper-input label="Spreadsheet ID" value="{{app.spreadsheet_id}}" required hidden="{{!is_script_enabled}}"></paper-input>
+                        <br/>
                     </div>
                     <div class="card-actions horizontal layout center flex">
                         <span class="flex"></span>
@@ -54,7 +62,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </paper-card>
             <span class="flex"></span>
         </div>
-        <div class="card-actions horizontal layout center flex">
+        <div class="horizontal layout center flex">
             <span class="flex"></span>
             <paper-card>
                 <div>
@@ -81,6 +89,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         type: Object,
                         value: {}
                     },
+                    is_script_enabled: Boolean,
                     auth: {
                         type: Object,
                         value: {}
@@ -88,10 +97,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 },
                 ready: function() {
                     var _this = this;
-                    superagent.get('/bkend/trackr/app_settings').end(function(err, res) {
+                    superagent.get('/bkend/settings').end(function(err, res) {
                         if (res.ok) {
                             _this.app = res.body.app;
                             _this.auth = res.body.auth;
+                            _this.is_script_enabled = res.body.is_script_enabled;
+
                             _this.clone();
                         } else {
 
@@ -114,9 +125,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 updateSettings: function() {
                     var _this = this;
 
-                    superagent.post('/bkend/trackr/app_settings').send(this.app).end(function(err, res) {
+                    superagent.post('/bkend/settings').send(this.app).end(function(err, res) {
                         if (res.ok) {
                             _this.clone();
+                        } else {
+                        }
+                    });
+                },
+                enableScript: function() {
+                    superagent.get('/bkend/google/auth_url').end(function(err, res) {
+                        if (res.ok) {
+                            window.location = res.body.auth_url;
                         } else {
                         }
                     });

@@ -515,8 +515,8 @@ def create_payment(invoice, amount, sales, update):
     }
 
     if invoice_id:
-        update['Sheet']['Payments'][payment_id] = [payment_id, invoice_id, customer.name, customer.phone,
-                                                   sales.name, sales.phone, payment.amount, 'Paid']
+        update['Sheet']['Payments'][payment_id] = [payment_id, payment.amount, invoice_id, sales.phone, sales.name,
+                                                   customer.phone, customer.name, 'Paid', '']
 
         set_payment_on_invoice(invoice, payment, update)
 
@@ -596,8 +596,8 @@ def cancel_payment(payment, sales, update):
     }
 
     if invoice_id:
-        update['Sheet']['Payments'][payment_id] = [payment_id, invoice_id, customer.name, customer.phone,
-                                                   sales.name, sales.phone, payment.amount, 'Cancelled']
+        update['Sheet']['Payments'][payment_id] = [payment_id, payment.amount, invoice_id, sales.phone, sales.name,
+                                                   customer.phone, customer.name, 'Cancelled', payment.cancellation_id]
 
         remove_payment_on_invoice(invoice, payment, update)
 

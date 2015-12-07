@@ -2,9 +2,9 @@ import logging
 from google.appengine.api import memcache
 from boondi.globals import request
 from config import config
-from config.config import SESSION_SALT, APP_SECRET, OAUTH_TOKEN_SECRET, OAUTH_CIPHER_SECRET
+from config.config import SESSION_SALT, APP_SECRET, OAUTH_TOKEN_SECRET, OAUTH_CIPHER_SECRET, MODULE_SECRETS
 from boondi.auth import WebAuth, APIAuth, APIAuthorizationException, OAuthAuthorizationServerAuth, \
-    OAuthPAuthorizationServerAuth, OAuthResourceServerAuth
+    OAuthPAuthorizationServerAuth, OAuthResourceServerAuth, ModuleAuth
 from boondi.formats import JsonMimeType
 from boondi.oauth import OAuthAuthorizationException
 from model.users import get_user_by_email, User, get_org_by_api_key
@@ -67,6 +67,43 @@ class DefaultWebAuth(WebAuth):
     @staticmethod
     def _get_app_secret():
         return APP_SECRET
+
+
+class DefaultModuleAuth(ModuleAuth):
+    @staticmethod
+    def _get_user(user_data):
+        raise NotImplementedError()
+
+    @staticmethod
+    def init_controller(controller, user):
+        if user:
+            controller.set_env(api_user=user)
+            controller.set_env(org=user)
+            controller.set_env(org_app=controller.app_model.get_by_id(user.key.id()))
+            controller.set_env(livemode=user._livemode)
+            controller.user_acl = ["any"]
+        else:
+            controller.set_env(api_user=None)
+            controller.user_acl = []
+
+    @staticmethod
+    def authorize(controller):
+        if "public" in controller.acl:
+            return None
+
+        if not controller.api_user:
+            raise APIAuthorizationException('API Access Denied. API User Not Authenticated.')
+
+        logging.info('Logged In: ' + str(controller.api_user.name))
+
+        if set(controller.user_acl).intersection(controller.acl):
+            return None
+        else:
+            raise APIAuthorizationException('API Access Denied.')
+
+    @staticmethod
+    def _get_secret():
+        return MODULE_SECRETS
 
 
 class DefaultAPIAuth(APIAuth):

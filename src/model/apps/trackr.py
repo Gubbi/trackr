@@ -1,5 +1,5 @@
 from google.appengine.ext import ndb
-from model.users import App
+from model.users import App, Organization
 from model.utils import PhoneProperty, MobilePhoneProperty, ShortCodeProperty
 
 NA = 0
@@ -15,11 +15,13 @@ class Trackr(App):
     support_number                  = PhoneProperty(verbose_name='Support helpline')
     notification_email              = ndb.StringProperty(verbose_name='Notifications Email')
 
+    is_script_enabled               = ndb.BooleanProperty(default=False)
+    secure_script_access_token      = ndb.TextProperty()
+    script_sheets                   = ndb.StringProperty(repeated=True)
     spreadsheet_id                  = ndb.StringProperty()
-    spreadsheet_sheets              = ndb.StringProperty(repeated=True)
 
-    pricing                         = ndb.FloatProperty()
-    min_pricing                     = ndb.FloatProperty()
+    secure_pricing                         = ndb.FloatProperty()
+    secure_min_pricing                     = ndb.FloatProperty()
 
 
 class TrackrRoles(ndb.Model):
@@ -136,3 +138,11 @@ class Credit(ndb.Model):
 class Cache(ndb.Model):
     value               = ndb.StringProperty()
     createdAt           = ndb.DateTimeProperty(auto_now_add=True)
+
+
+def get_org_by_short_code(short_code):
+    trackr = Trackr.query(Trackr.short_code == short_code).get(keys_only=True)
+    if trackr:
+        return Organization.get_by_id(trackr.id())
+
+    return None
