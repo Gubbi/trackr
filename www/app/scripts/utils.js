@@ -28,20 +28,28 @@ var ScriptRunner = (function() {
         },
 
         onAuthReady: function(func) {
-            if(is_auth_checked) func(authData);
-            else auth_checked_queue.push(func);
+            if(is_auth_checked) {
+                func(authData);
+            }
+            else {
+                auth_checked_queue.push(func);
+            }
         },
 
         markAuthReady: function(authDataP) {
             authData = authDataP;
             is_auth_checked = true;
-            for(var i = 0; i < auth_checked_queue.length; i++) auth_checked_queue[i](authData);
+            for(var i = 0; i < auth_checked_queue.length; i++) {
+                auth_checked_queue[i](authData);
+            }
         },
 
         callAuth: function(authData) {
-            for(var i = 0; i < queue.length; i++) queue[i](authData);
+            for(var i = 0; i < queue.length; i++) {
+                queue[i](authData);
+            }
         }
-    }
+    };
 })();
 var onAuth = ScriptRunner.onAuth;
 var onAuthReady = ScriptRunner.onAuthReady;
@@ -49,6 +57,9 @@ var onAuthReady = ScriptRunner.onAuthReady;
 window.addEventListener('storage', function(e) {
     if (e.key === 'baseAuth') {
         ScriptRunner.callAuth(JSON.parse(e.newValue));
+    }
+    else if (e.key === 'isDemo') {
+        location.reload();
     }
 });
 
@@ -62,7 +73,9 @@ function _logout() {
 }
 
 function login(authData) {
-    if(!authData) return;
+    if(!authData) {
+        return;
+    }
 
     fbase.root.authWithCustomToken(authData.fbaseToken, function(error, fbaseAuthData) {
         if (error) {
@@ -108,7 +121,21 @@ superagent.get('/auth/').end(function(err, res) {
                 return;
             }
 
+            var cookieDemo = Cookies.get('is_demo') === 'True';
+            var isDemo = (localStorage.getItem('isDemo') === 'true');
+
+            console.log('Demo? ', isDemo);
+
+            if(cookieDemo !== isDemo) {
+                localStorage.setItem('isDemo', cookieDemo);
+                location.reload();
+            }
+
             fbase.orgId = Cookies.get('org_id');
+            if(isDemo) {
+                fbase.orgId += '_demo';
+            }
+
             fbase.db = fbase.root.child(fbase.orgId);
             fbase.log = fbase.db.child('activities');
 

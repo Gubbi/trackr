@@ -127,7 +127,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.customerDB = fbase.db.child('customers');
 
             this.customerDB.child(this.payment.by).once('value', function(customer) {
-              if(customer.val()) this.customer = customer.val().name;
+              if(customer.val()) {
+                this.customer = customer.val().name;
+              }
             }, this);
           }
 
@@ -135,7 +137,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.agentDB = fbase.db.child('agents');
 
             this.agentDB.child(this.payment.to).once('value', function(agent) {
-              if(agent.val()) this.agent = agent.val().name;
+              if(agent.val()) {
+                this.agent = agent.val().name;
+              }
             }, this);
           }
         },

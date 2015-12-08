@@ -135,18 +135,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.customerDB = fbase.db.child('customers');
 
             this.customerDB.child(this.sale.customer).once('value', function(customer) {
-              if (customer.val())
-                _this.customer = customer.val().name;
-            });
+              if (customer.val()) {
+                this.customer = customer.val().name;
+              }
+            }, this);
           }
 
           if(this.sale && !this.agent) {
             this.agentDB = fbase.db.child('agents');
 
             this.agentDB.child(this.sale.agent).once('value', function(agent) {
-              if (agent.val())
-                _this.agent = agent.val().name;
-            });
+              if (agent.val()){
+                this.agent = agent.val().name;
+              }
+            }, this);
           }
 
           if(this.sale && this.sale.invoice) {

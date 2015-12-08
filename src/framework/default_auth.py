@@ -35,6 +35,8 @@ class DefaultWebAuth(WebAuth):
             acl = controller.acl_model.get_by_id('roles', parent=user.key)
             controller.set_env(roles=acl)
 
+            controller.set_env(livemode=request.cookies.get("is_demo", 'False') != 'True')
+
             if org and org.admin == user.key:
                 controller.set_env(admin=True)
 
@@ -51,6 +53,8 @@ class DefaultWebAuth(WebAuth):
 
         if not controller.user:
             controller.needs_login()
+
+        logging.info('Logged In: ' + str(controller.user.email))
 
         if "any" in controller.acl:
             return
@@ -145,7 +149,7 @@ class DefaultAPIAuth(APIAuth):
     @staticmethod
     def _get_secret(user):
         prod_keys = [(key, True) for key in user.secure_production.api_secrets] if user.secure_production else []
-        dev_keys = [(key, False) for key in user.secure_development.api_secrets]
+        dev_keys = [(key, False) for key in user.secure_development.api_secrets] if user.secure_development else []
         return dict(prod_keys + dev_keys)
 
 

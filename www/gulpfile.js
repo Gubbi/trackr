@@ -85,6 +85,7 @@ gulp.task('copy', function () {
   var app = gulp.src([
     'app/*',
     '!app/test',
+    '!app/bower_components',
     '!app/precache.json'
   ], {
     dot: true
@@ -96,6 +97,9 @@ gulp.task('copy', function () {
 
   var elements = gulp.src(['app/elements/**/*.html'])
     .pipe(gulp.dest('dist/elements'));
+
+  var scripts = gulp.src(['app/scripts/**/*.js'])
+    .pipe(gulp.dest('dist/scripts'));
 
   var swBootstrap = gulp.src(['bower_components/platinum-sw/bootstrap/*.js'])
     .pipe(gulp.dest('dist/elements/bootstrap'));
@@ -115,7 +119,7 @@ gulp.task('copy', function () {
     .pipe($.rename('sys.vulcanized.html'))
     .pipe(gulp.dest('dist/elements/sys'));
 
-  return merge(app, bower, elements, vulcanized, auth_vulcanized, sys_vulcanized, swBootstrap, swToolbox)
+  return merge(app, bower, elements, scripts, vulcanized, auth_vulcanized, sys_vulcanized, swBootstrap, swToolbox)
     .pipe($.size({title: 'copy'}));
 });
 
@@ -130,7 +134,7 @@ gulp.task('fonts', function () {
 gulp.task('html', function () {
   var assets = $.useref.assets({searchPath: ['.tmp', 'app', 'dist']});
 
-  return gulp.src(['app/**/*.html', '!app/{elements,test}/**/*.html'])
+  return gulp.src(['app/**/*.html', '!app/{elements,test,bower_components}/**/*.html'])
     // Replace path for vulcanized assets
     .pipe($.if('*.html', $.replace('elements/elements.html', 'elements/elements.vulcanized.html')))
     .pipe($.if('*.html', $.replace('elements/auth/auth.html', 'elements/auth/auth.vulcanized.html')))
@@ -214,7 +218,7 @@ gulp.task('serve', ['styles', 'elements', 'images'], function () {
     }
   });
 
-  gulp.watch(['app/**/*.html'], reload);
+  gulp.watch(['app/**/*.html', '!app/bower_components/**/*.html'], reload);
   gulp.watch(['app/styles/**/*.css'], ['styles', reload]);
   gulp.watch(['app/elements/**/*.css'], ['elements', reload]);
   gulp.watch(['app/{scripts,elements}/**/*.js'], ['jshint']);

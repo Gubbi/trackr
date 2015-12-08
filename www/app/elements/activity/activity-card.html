@@ -119,7 +119,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         },
         onReady: function() {
-          if(!this.activity) return;
+          if(!this.activity) {
+            return;
+          }
 
           this.db = fbase.db.child(this.activity.path);
           this.title = 'click to view';
@@ -167,14 +169,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           else if(this.activity.type === 'sale') {
             this.heading = this.activity.data.customer_name;
-            if(this.activity.data.type == 'Created') {
+            if(this.activity.data.type === 'Created') {
               this.card_type = 'new sales order!';
               this.log = '₹' + this.activity.data.amount + ' [Advance: ₹' + this.activity.data.advance + ']';
             }
-            if(this.activity.data.type == 'Modified') {
+            if(this.activity.data.type === 'Modified') {
               this.log = 'Sales order modified';
             }
-            if(this.activity.data.type == 'Cancelled') {
+            if(this.activity.data.type === 'Cancelled') {
               this.log = 'Sales order cancelled';
             }
           }

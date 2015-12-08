@@ -1,4 +1,4 @@
-from boondi.ext import render
+from boondi.ext import render, error
 from boondi.data import Required
 from boondi.globals import data
 from boondi.utils import generate_random_password, send_email
@@ -48,5 +48,32 @@ class AccountsController(PublicController):
 
         mail_body = render('/emails/welcome.mako', new_password=new_password, user=user)
         send_email(data.admin_email, mail_body, 'Welcome to Trackr')
+
+        return 'Account Created'
+
+    @staticmethod
+    def add_user():
+        data.validate(required_fields=['id', 'user_name', 'user_email', 'user_phone'],
+                      error_message='Form has errors')
+
+        org = Organization.get_by_id(data.id)
+        if not org:
+            return error('Organization not found')
+
+        user = get_user_by_email(data.user_email)
+        if not user:
+            user = User(raw_name=data.user_name, email=data.user_email, phone=data.user_phone, account_verified=True)
+            user.org = [org.key]
+        else:
+            user.org = list(set(user.org + [org.key]))
+
+        new_password = generate_random_password()
+        user.password = web_auth.signed_password(new_password)
+        user.put()
+
+        TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Staff'])
+
+        mail_body = render('/emails/welcome.mako', new_password=new_password, user=user)
+        send_email(data.user_email, mail_body, 'Welcome to Trackr')
 
         return 'Account Created'

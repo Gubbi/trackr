@@ -1,3 +1,4 @@
+
 <!--
 @license
 Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
@@ -21,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
     </style>
     <template>
-        <div class="card-actions horizontal layout center flex">
+        <div class="horizontal layout center flex">
             <span class="flex"></span>
             <paper-card>
                 <div>
@@ -46,6 +47,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </paper-card>
             <span class="flex"></span>
         </div>
+        <div class="horizontal layout center flex">
+            <span class="flex"></span>
+            <paper-card>
+                <div>
+                    <div class="card-content">
+                        <paper-input name="business_id" label="Business ID" value="{{new_user.id}}" required></paper-input>
+                        <paper-input name="name" label="User Name" value="{{new_user.user_name}}" required></paper-input>
+                        <paper-input name="email" label="User Email" value="{{new_user.user_email}}" required></paper-input>
+                        <paper-input name="phone" label="User Phone" value="{{new_user.user_phone}}"></paper-input>
+                    </div>
+                    <div class="card-actions horizontal layout center flex">
+                        <span class="flex"></span>
+                        <paper-icon-button class="actions" alt="Reset" title="Reset" icon="close"></paper-icon-button>
+                        <paper-icon-button class="actions" alt="Add User" title="Add New User" icon="done" on-tap="addUser"></paper-icon-button>
+                    </div>
+                </div>
+            </paper-card>
+            <span class="flex"></span>
+        </div>
     </template>
 
     <script>
@@ -54,6 +74,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 is: 'create-org',
                 properties: {
                     org: {
+                        type: Object,
+                        value: {}
+                    },
+                    new_user: {
                         type: Object,
                         value: {}
                     },
@@ -73,6 +97,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     var _this = this;
 
                     superagent.post('/sys/accounts/new').send(this.org).end(function(err, res) {
+                        if (res.ok) {
+                        } else {
+                        }
+                    });
+                },
+                addUser: function() {
+                    var _this = this;
+
+                    superagent.post('/sys/accounts/add_user').send(this.new_user).end(function(err, res) {
                         if (res.ok) {
                         } else {
                         }

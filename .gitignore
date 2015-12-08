@@ -2,6 +2,7 @@ credentials
 **/dist
 **/bower_components
 **/node_modules
+**/prod.py
 bin/
 include/
 man/

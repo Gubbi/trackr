@@ -15,13 +15,15 @@ class Trackr(App):
     support_number                  = PhoneProperty(verbose_name='Support helpline')
     notification_email              = ndb.StringProperty(verbose_name='Notifications Email')
 
+    script_sheets                   = ndb.StringProperty(repeated=True)
+
     is_script_enabled               = ndb.BooleanProperty(default=False)
     secure_script_access_token      = ndb.TextProperty()
-    script_sheets                   = ndb.StringProperty(repeated=True)
     spreadsheet_id                  = ndb.StringProperty()
+    demo_spreadsheet_id             = ndb.StringProperty()
 
-    secure_pricing                         = ndb.FloatProperty()
-    secure_min_pricing                     = ndb.FloatProperty()
+    secure_pricing                  = ndb.FloatProperty()
+    secure_min_pricing              = ndb.FloatProperty()
 
 
 class TrackrRoles(ndb.Model):

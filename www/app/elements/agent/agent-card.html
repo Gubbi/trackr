@@ -116,8 +116,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if(this.agent && this.agent.supervisor) {
             this.supervisorDB = fbase.db.child('supervisors');
             this.supervisorDB.child(this.agent.supervisor).once('value', function(supervisor) {
-              if (supervisor.val())
+              if (supervisor.val()) {
                 this.supervisor = supervisor.val();
+              }
             }, this);
           }
         },

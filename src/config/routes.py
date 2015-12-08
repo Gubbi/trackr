@@ -17,7 +17,12 @@ routes = [
     ]),
 
     Controller("sys.accounts",  '/sys/accounts', [
-        Action('new',               '/new')
+        Action('new',               '/new'),
+        Action('add_user',          '/add_user')
+    ]),
+
+    Controller("sys.prod",      '/sys/prod', [
+        Action('show_config',       '/config')
     ]),
 
     Controller('auth',          '/auth', [
@@ -26,6 +31,7 @@ routes = [
         Action('get_auth',          '/'),
         Action('reset',             '/reset'),
         Action('change',            '/change'),
+        Action('toggle_demo',        '/toggle_demo'),
     ]),
 
     Controller('home',          '/auth', [

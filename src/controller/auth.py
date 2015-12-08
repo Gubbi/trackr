@@ -2,7 +2,7 @@ from boondi.controllers import methods
 from config.config import FIREBASE_SECRET
 from framework.extend import PublicController
 from framework.default_auth import web_auth
-from boondi.globals import response, data
+from boondi.globals import response, data, request
 from boondi.ext import render, error
 from boondi.utils import send_email, generate_random_password
 from model.users import get_user_by_email, get_verified_user_by_email
@@ -30,6 +30,7 @@ class AuthController(PublicController):
 
         web_auth.set_cookie_for_user(user.email, response)
         response.set_cookie("org_id", org_id, max_age=7200)
+        response.set_cookie("is_demo", 'False')
 
         auth_payload = {'uid': user.email, 'org': org_id}
         token = create_token(FIREBASE_SECRET, auth_payload)
@@ -104,3 +105,14 @@ class AuthController(PublicController):
         user.is_temporary_password = False
         user.put()
         return 'Password has been changed'
+
+    @staticmethod
+    @methods('POST')
+    def toggle_demo():
+        toggled_demo_value = request.cookies.get("is_demo", 'False') != 'True'
+
+        response.set_cookie("is_demo", str(toggled_demo_value))
+        return {
+            'isDemo': toggled_demo_value
+        }
+48

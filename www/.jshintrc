@@ -24,10 +24,12 @@
     "Firebase": false,
     "Cookies": false,
     "moment": false,
-    "isLoggedIn": false,
-    "checkLoginStatus": false,
-    "setLoginCookies": false,
     "_login": false,
+    "login": false,
+    "_logout": false,
+    "superagent": false,
+    "onAuthReady": true,
+    "pageBasePath": true,
     "basePath": true
   }
 }

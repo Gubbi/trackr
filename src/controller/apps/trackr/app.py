@@ -35,7 +35,7 @@ class AppController(SignedInController):
         payment = create_payment(data.invoice_num, data.amount, data.sales_phone, updates)
 
         Cache(id=data.sales_phone + data.invoice_num + str(data.amount)).put()
-        push_updates(self.org, self.org_app, updates)
+        push_updates(self.org, self.org_app, self.livemode, updates)
 
         try:
             supervisor = None
@@ -70,7 +70,7 @@ class AppController(SignedInController):
 
         payment = cancel_payment(data.payment_id, data.sales_phone, updates)
 
-        push_updates(self.org, self.org_app, updates)
+        push_updates(self.org, self.org_app, self.livemode, updates)
 
         try:
             supervisor = None
@@ -112,7 +112,7 @@ class AppController(SignedInController):
         if data.invoice_num and data.invoice_date:
             create_invoice(data.invoice_num, data.invoice_date, order, update)
 
-        push_updates(self.org, self.org_app, update)
+        push_updates(self.org, self.org_app, self.livemode, update)
         return "Entries Made"
 
     @methods('POST')
@@ -123,26 +123,38 @@ class AppController(SignedInController):
         update = updates_holder()
         create_invoice(data.invoice_num, data.invoice_date, data.order_num, update)
 
-        push_updates(self.org, self.org_app, update)
+        push_updates(self.org, self.org_app, self.livemode, update)
         return "Entries Made"
 
     def settings(self):
         data.define(required_fields=['brand_name', 'short_code', 'support_number'],
-                    optional_fields=['notification_email', 'spreadsheet_id', 'script_sheets'])
+                    optional_fields=['notification_email', 'script_sheets'])
 
-        logging.info(data.payload)
         if data.payload:
             data.validate()
-            data.put(self.org_app)
 
+            if self.livemode:
+                self.org_app.spreadsheet_id = data.spreadsheet_id
+            else:
+                self.org_app.demo_spreadsheet_id = data.spreadsheet_id
+
+            data.put(self.org_app)
             return "Successfully updated settings"
+
+        app_settings = self.org_app.to_dict(include=data.defined_fields)
+        if self.livemode:
+            api_secret = self.org.secure_production
+            app_settings['spreadsheet_id'] = self.org_app.spreadsheet_id
+        else:
+            api_secret = self.org.secure_development
+            app_settings['spreadsheet_id'] = self.org_app.demo_spreadsheet_id
 
         return {
             'auth': {
                 'api_id': self.org.secure_api_id,
-                'api_secret': self.org.secure_production.api_secrets[0]
+                'api_secret': api_secret.api_secrets[0]
             },
-            'app': self.org_app.to_dict(include=data.defined_fields),
+            'app': app_settings,
             'is_script_enabled': self.org_app.is_script_enabled
         }
 
@@ -165,6 +177,5 @@ class AppController(SignedInController):
             else:
                 return error('All supervisor details are required')
 
-        push_updates(self.org, self.org_app, update)
+        push_updates(self.org, self.org_app, self.livemode, update)
         return "Entries Made"
-

@@ -110,9 +110,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if(this.invoice && !this.customer) {
             this.customerDB = fbase.db.child('customers');
             this.customerDB.child(this.invoice.customer).once('value', function(customer) {
-              if (customer.val())
-                _this.customer = customer.val().name;
-            });
+              if (customer.val()) {
+                this.customer = customer.val().name;
+              }
+            }, this);
           }
 
           this.update = null;

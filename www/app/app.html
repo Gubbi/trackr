@@ -119,6 +119,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            <span>Logout</span>
          </a>
 
+         <a href="[[currentPath]]" on-tap="demoToggle">
+           <iron-icon icon="visibility"></iron-icon>
+           <span hidden="{{!demo}}">Turn Off Demo</span><span hidden="{{demo}}">Turn On Demo</span>
+         </a>
+
          <a data-route="#" href="#">
            <presence-indicator></presence-indicator>
            <span>{{onlineStatus}}</span>
