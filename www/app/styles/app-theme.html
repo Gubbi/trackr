@@ -105,37 +105,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     transform-origin: left center;
   }
 
-  paper-toolbar.agents, paper-toolbar.agent-info {
+  paper-toolbar[route~=agents], paper-toolbar[route~=agent-info] {
     background-color: #7B1FA2;
     color: white;
   }
 
-  paper-toolbar.customers, paper-toolbar.customer-info {
+  paper-toolbar[route~=customers], paper-toolbar[route~=customer-info] {
     background-color: #1976D2;
     color: white;
   }
 
-  paper-toolbar.home {
+  paper-toolbar[route~=home] {
     background-color: #0288D1;
     color: white;
   }
 
-  paper-toolbar.invoices {
+  paper-toolbar[route~=invoices] {
     background-color: #00796B;
     color: white;
   }
 
-  paper-toolbar.deposits {
+  paper-toolbar[route~=deposits] {
     background-color: #FFA000;
     color: white;
   }
 
-  paper-toolbar.payments {
+  paper-toolbar[route~=payments] {
     background-color: #689F38;
     color: white;
   }
 
-  paper-toolbar.sales {
+  paper-toolbar[route~=sales] {
     background-color: #5D4037;
     color: white;
   }
@@ -147,15 +147,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   #mainToolbar:not(.tall) .middle {
     font-size: 18px;
-    padding-bottom: 0;
+    /*padding-bottom: 0;*/
   }
 
-  #mainToolbar .bottom {
-    margin-left: 48px;
-    /* Required for main area's paper-scroll-header-panel custom condensing transformation */
-    -webkit-transform-origin: left center;
-    transform-origin: left center;
-  }
+  /*#mainToolbar .bottom {*/
+    /*margin-left: 48px;*/
+    /*/!* Required for main area's paper-scroll-header-panel custom condensing transformation *!/*/
+    /*-webkit-transform-origin: left center;*/
+    /*transform-origin: left center;*/
+  /*}*/
 
   #moreActivity {
     padding-top: 32px;

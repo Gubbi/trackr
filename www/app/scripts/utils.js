@@ -124,8 +124,6 @@ superagent.get('/auth/').end(function(err, res) {
             var cookieDemo = Cookies.get('is_demo') === 'True';
             var isDemo = (localStorage.getItem('isDemo') === 'true');
 
-            console.log('Demo? ', isDemo);
-
             if(cookieDemo !== isDemo) {
                 localStorage.setItem('isDemo', cookieDemo);
                 location.reload();

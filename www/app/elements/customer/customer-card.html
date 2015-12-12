@@ -11,11 +11,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
 <dom-module id="customer-card">
   <style>
     paper-card {
-      min-width: 300px;
+      width: 300px;
+      max-width: 90vw;
       border-top: 2px solid #2196F3;
     }
 
@@ -39,6 +42,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     .card-actions:hover, .card-actions:hover a {
       color: rgba(0,0,0,.6);
     }
+
+    paper-toast {
+        width: 100%;
+        min-width: 0;
+        border-radius: 0;
+        margin: 0;
+        text-align: center;
+        font-size: 1.05em;
+    }
+    paper-toast.error {
+        background-color: #D50000;
+        color: rgba(255, 255, 255, 0.87);
+    }
+    paper-toast.success {
+        background-color: #33691E;
+        color: rgba(255, 255, 255, 0.87);
+    }
   </style>
   <template>
     <paper-card>
@@ -52,12 +72,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <!--<a href$="{{getUrl(key)}}" hidden="{{hideLaunch}}" title="Expand"><paper-icon-button class="actions" alt="View More" icon="launch" hidden="{{editing}}"></paper-icon-button></a>-->
           <span class="flex"></span>
           <!--<paper-icon-button class="actions" alt="New Invoice" title="New Invoice" icon="assignment-turned-in" on-tap="createInvoice" hidden="{{editing}}"></paper-icon-button>-->
-          <!--<paper-icon-button class="actions" alt="Edit" title="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>-->
-          <!--<paper-icon-button icon="close" title="Cancel" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>-->
-          <!--<paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!editing}}"></paper-icon-button>-->
+          <paper-icon-button class="actions" alt="Edit" title="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>
+          <paper-icon-button icon="close" title="Cancel" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>
+          <paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!canSave()}}"></paper-icon-button>
+          <paper-spinner alt="Saving Changes" active="[[isSaving]]"></paper-spinner>
         </div>
       </div>
     </paper-card>
+
+    <paper-toast class="error" id="errorMsg" text="{{errorMessage}}" duration="0"></paper-toast>
+    <paper-toast class="success" id="successMsg" text="[[successMessage]]"></paper-toast>
   </template>
 
   <script>
@@ -83,9 +107,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             value: false
           }
         },
+
+        canSave: function() {
+          return this.editing && !this.isSaving;
+        },
+
         getUrl: function(key) {
           return pageBasePath + '/customers/' + key;
         },
+
         ready: function() {
           var _this = this;
 
@@ -94,7 +124,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _this._ValChanged.call(_this);
           });
 
-          this.keyEditable = false;
+          this.keyEditable = this.isSaving = false;
         },
 
         _ValChanged: function() {
@@ -108,7 +138,60 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         detached: function() {
+          _this.$.errorMsg.close();
           this.db.child(this.key).off('value', this.customer_listener);
+        },
+
+        startEdit: function() {
+          this.editing = true;
+          if (!this.key) { this.keyEditable = true; }
+          this.updateStyles();
+        },
+
+        save: function() {
+          var _this = this;
+
+          if (!this.customer.phone) {
+            this.show_error('Phone number is required.');
+            return;
+          }
+
+          if(!this.key) {
+            this.key = this.customer.phone;
+          }
+
+          this.isSaving = true;
+          superagent.post('/bkend/update_customer')
+                  .send(this.customer)
+                  .end(function(err, res) {
+                    _this.isSaving = false;
+
+                    if (res.ok) {
+                      _this.show_success(res.body.message);
+                      _this.editing = false;
+                      _this.keyEditable = false;
+                      _this.updateStyles();
+                      _this.fire('updated');
+                    } else {
+                      _this.show_error(res.body.message);
+                    }
+                  });
+        },
+
+        cancel: function() {
+          this.$.errorMsg.close();
+          this.editing = false;
+          this.keyEditable = false;
+          this.updateStyles();
+          this.fire('cancelled');
+        },
+        show_success: function(message) {
+            this.successMessage = message;
+            this.$.successMsg.show();
+        },
+        show_error: function(message) {
+            this.errorMessage = message;
+            this.$.errorMsg.open();
         }
       });
     })();

@@ -14,7 +14,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="activity-card">
   <style>
     :host paper-card {
-      min-width: 300px;
+      width: 300px;
+      max-width: 90vw;
     }
 
     paper-card.customer {
@@ -141,7 +142,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               this.log = 'amount changed from ₹' +  this.activity.data.old_amount + ' to ₹' +  this.activity.data.amount;
             }
             else {
-              this.log = '₹' +  this.activity.data.amount + ' [Paid: ₹' + this.activity.data.paid + ']';
+              this.log = '₹' +  this.activity.data.amount + ' [Paid: ₹' + (this.activity.data.paid || 0) + ']';
             }
           }
           else if(this.activity.type === 'payment') {

@@ -1,3 +1,4 @@
+import logging
 import urllib
 import json
 import httplib2
@@ -45,7 +46,9 @@ class Firebase(object):
 
     def _request(self, method, **kwargs):
         if 'body' in kwargs:
-            kwargs['body'] = json.dumps(kwargs['body'])
+            body = json.dumps(kwargs['body'])
+            logging.info(body)
+            kwargs['body'] = body
 
         params = {}
         if 'params' in kwargs:
@@ -63,6 +66,7 @@ class Firebase(object):
             url = self.root_url
 
         response, content = http.request(url, method, **kwargs)
+        logging.info([response.status, content])
 
         if response.status == 200:
             return json.loads(content)

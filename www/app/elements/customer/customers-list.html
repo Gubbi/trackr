@@ -15,13 +15,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     :host {
       display: block;
     }
+
     ul {
       list-style: none;
+      padding-left: 0;
+      text-align: center;
     }
+
     li {
       display: inline-block;
       margin: 8px 16px;
+      text-align: left;
     }
+
+    li.filler {
+      width: 300px;
+      max-width: 90vw;
+    }
+
     paper-fab {
       position: fixed;
       bottom: 24px;
@@ -34,11 +45,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <template is="dom-repeat" items="{{items}}">
         <li><customer-card customer="{{item.data}}" key="{{item.key}}"></customer-card></li>
       </template>
+
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
     </ul>
     <ul hidden="{{!isFiltered}}">
       <template is="dom-repeat" items="{{filtered}}">
         <li><customer-card customer="{{item.data}}" key="{{item.key}}"></customer-card></li>
       </template>
+
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
     </ul>
     <!--<paper-fab icon="add" on-tap="createCustomer"></paper-fab>-->
   </template>
@@ -72,8 +103,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _this.filtered = [];
             _this.isFiltered = false;
 
-            _this.db.on('child_added', function(snap) {
-              _this.unshift('items', {data: snap.val(), key: snap.key()});
+            _this.db.orderByPriority().limitToFirst(50).on('child_added', function(snap) {
+              _this.push('items', {data: snap.val(), key: snap.key()});
             });
           });
         },

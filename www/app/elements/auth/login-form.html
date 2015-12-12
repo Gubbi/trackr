@@ -11,6 +11,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
 
 <dom-module id="login-form">
@@ -27,6 +29,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .sub-action {
             font-size: 0.8em;
         }
+        paper-toast {
+            width: 100%;
+            min-width: 0;
+            border-radius: 0;
+            margin: 0;
+            text-align: center;
+            font-size: 1.05em;
+        }
+        paper-toast.error {
+            background-color: #D50000;
+            color: rgba(255, 255, 255, 0.87);
+        }
+        paper-toast.success {
+            background-color: #33691E;
+            color: rgba(255, 255, 255, 0.87);
+        }
+
     </style>
     <template>
         <div class="card-actions horizontal layout center flex">
@@ -45,6 +64,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <paper-button class="actions" alt="Login" title="Login" on-tap="login">
                                 Login
                             </paper-button>
+                            <paper-spinner alt="Logging In..." active="[[isLoggingIn]]"></paper-spinner>
                             <span class="flex"></span>
                             <a href="#" on-tap="forgot" class="sub-action">forgot password</a>
                         </div>
@@ -63,6 +83,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                             <paper-button class="actions" alt="Reset" title="Reset Password" on-tap="reset">
                                 Reset Password
                             </paper-button>
+                            <paper-spinner alt="Resetting Password" active="[[isResetting]]"></paper-spinner>
                         </div>
                     </div>
                 </paper-card>
@@ -86,6 +107,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </iron-pages>
             <span class="flex"></span>
         </div>
+
+        <paper-toast class="error" id="errorMsg" text="{{errorMessage}}" duration="0"></paper-toast>
+        <paper-toast class="success" id="successMsg" text="[[successMessage]]"></paper-toast>
     </template>
 
     <script>
@@ -102,6 +126,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     this._passwordField = this.$.passwordField;
                     this._repasswordField = this.$.repasswordField;
                     this._emailField = this.$.emailField;
+                    this.errorMessage = this.successMessage = '';
 
                     onAuthReady(function(authData) {
                         if(authData) {
@@ -112,15 +137,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 login: function() {
                     var _this = this;
                     if(!this.email || this.email === '' || !this.password || this.password === '') {
-                        //TODO: display error.
+                        this.show_error('Enter both Email and Password to login');
                         return;
                     }
+                    this.isLoggingIn = true;
 
                     superagent.post('/auth/login').send({
                         email: this.email,
                         password: this.password
                     }).end(function(err, res) {
+                        _this.isLoggingIn = false;
+
                         if (res.ok) {
+                            _this.show_success('Logged In!');
+
                             if(res.body.isTemporaryPassword) {
                                 _this.authData = res.body;
                                 _this.show = 'reset';
@@ -129,6 +159,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 login(res.body);
                             }
                         } else {
+                            _this.show_error(res.body.message);
                         }
                     });
                 },
@@ -140,25 +171,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 },
                 reset: function() {
                     if(!this.newPassword || this.newPassword === '') {
-                        //TODO: display error.
+                        this.show_error('Enter New Password');
                         return;
                     }
 
                     if(this.newPassword !== this.rePassword) {
-                        //TODO: display error.
+                        this.show_error('Passwords dont match.');
                         return;
                     }
 
                     var _this = this;
+                    this.isResetting = true;
 
                     superagent.post('/auth/change').send({
                         email: this.email,
                         password: this.password,
                         new_password: this.newPassword
                     }).end(function(err, res) {
+                        _this.isResetting = false;
+
                         if (res.ok) {
+                            _this.show_success('Done');
                             login(_this.authData);
                         } else {
+                            _this.show_error(res.body.message);
                         }
                     });
                 },
@@ -178,6 +214,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         } else {
                         }
                     });
+                },
+                show_success: function(message) {
+                    this.successMessage = message;
+                    this.$.successMsg.show();
+                },
+                show_error: function(message) {
+                    this.errorMessage = message;
+                    this.$.errorMsg.open();
                 }
             });
         })();

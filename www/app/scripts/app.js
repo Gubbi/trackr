@@ -24,7 +24,6 @@ onAuthReady(function(authData) {
   app.showingSearch = false;
 
   app.demo = (localStorage.getItem('isDemo') === 'true');
-  console.log(app.demo, localStorage.getItem('isDemo'), Cookies.get('is_demo'));
 
   app.demoToggle = function() {
     superagent.post('/auth/toggle_demo').end(function(err, res) {

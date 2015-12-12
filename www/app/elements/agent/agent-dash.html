@@ -21,11 +21,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     ul {
       list-style: none;
+      padding-left: 0;
+      text-align: center;
     }
 
     li {
       display: inline-block;
       margin: 8px 16px;
+      text-align: left;
+    }
+
+    li.filler {
+      width: 300px;
+      max-width: 90vw;
     }
 
     paper-fab {
@@ -109,11 +117,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <template is="dom-repeat" items="{{payments}}">
                 <li><payment-card payment="{{item.data}}" key="{{item.key}}" hide-agent></payment-card></li>
               </template>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
             </ul>
             <ul hidden="{{!isPaymentFiltered}}">
               <template is="dom-repeat" items="{{filteredPayments}}">
                 <li><payment-card payment="{{item.data}}" key="{{item.key}}" hide-agent></payment-card></li>
               </template>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
+              <li class="filler"></li>
             </ul>
           </section>
         </iron-pages>
@@ -174,15 +200,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.fire('set-title-nav', this.self.name);
           }, this);
 
-          var _this = this;
           if(this.paymentSock) {
-            this.paymentSock.off();
+            this.paymentsDB.off('child_added', this.paymentSock);
           }
 
-          this.paymentSock = this.paymentsDB.orderByChild('agent').equalTo(this.key);
-          this.paymentSock.on('child_added', function(snap) {
-            _this.unshift('payments', {data: snap.val(), key: snap.key()});
-          });
+          this.paymentSock = this.paymentsDB.orderByChild('agent').equalTo(this.key).limitToFirst(50)
+                  .on('child_added', function(snap) {
+                    this.push('payments', {data: snap.val(), key: snap.key()});
+                  }, this);
         },
 
         search: function(query) {
@@ -199,7 +224,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.paymentsDB.child(paymentID).once('value', function(snap) {
               var payment = snap.val();
               if(payment.agent === _this.key) {
-                  _this.unshift('filteredPayments', {data: payment, key: snap.key()});
+                  _this.push('filteredPayments', {data: payment, key: snap.key()});
               }
             });
           }

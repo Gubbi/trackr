@@ -9,20 +9,20 @@ var INVOICE_NUM = 1, INVOICE_DATE = 2, ORDER_NUM = 3, ORDER_DATE = 4, PAYTYPE = 
 var CUST_NAME = 11, CUST_PHONE = 12, BUSINESS = 13, AMOUNT = 59, ADVANCE = 61, NOTE = 98;
 
 var column_map = {
-    INVOICE_NUM: 'invoice_num',
-    INVOICE_DATE: 'invoice_date',
-    ORDER_NUM: 'order_num',
-    ORDER_DATE: 'order_date',
-    SALES_NAME: 'sales_name',
-    SALES_PHONE: 'sales_phone',
-    CUST_NAME: 'customer_name',
-    CUST_PHONE: 'customer_phone',
-    BUSINESS: 'business',
-    AMOUNT: 'amount',
-    ADVANCE: 'advance'
+    1: 'invoice_num',
+    2: 'invoice_date',
+    3: 'order_num',
+    4: 'order_date',
+    9: 'sales_name',
+    10: 'sales_phone',
+    11: 'customer_name',
+    12: 'customer_phone',
+    13: 'business',
+    59: 'amount',
+    61: 'advance'
 };
 
-var TRACKR_URL = 'http://trackr.bilent.in';
+var TRACKR_URL = 'https://bilent-apps.appspot.com';
 
 
 function trackrUpdate(e) {
@@ -43,7 +43,7 @@ function trackrUpdate(e) {
     var note = noteCell.getNote();
     Logger.log(note);
 
-    if(strip(noteCell.getValue().toLowerCase()) !== 'track') return;
+    if (strip(noteCell.getValue().toLowerCase()) !== 'track') return;
 
     var val = getRow(sheet.getRange(row, 1, 1, NOTE).getValues()[0]);
     Logger.log(val);
@@ -81,24 +81,28 @@ function getRow(raw) {
     var row = {};
     var cols = Object.keys(column_map);
 
-    for (var i = 0; i < cols.length; i++)
+    for (var i = 0; i < cols.length; i++) {
         row[column_map[cols[i]]] = "" + strip(raw[cols[i] - 1]);
+    }
 
     return row;
 }
 
 function sendRequest(path, val, noteCell) {
+    var encoded = Utilities.base64Encode(API_ID + ':' + API_SECRET);
+
     var response = UrlFetchApp.fetch(TRACKR_URL + path, {
         "method": "post",
         "payload": JSON.stringify(val),
         "contentType": "application/json",
         "headers": {
-            'Authorization': 'Basic ' + btoa(API_ID + ':' + API_SECRET)
-        }
+            'Authorization': 'Basic ' + encoded
+        },
+        "muteHttpExceptions": true
     });
 
     noteCell.clearNote();
-    if(response.getResponseCode() === 200) {
+    if (response.getResponseCode() === 200) {
         if (val['invoice_num'] && val['invoice_date']) {
             noteCell.setNote('Trackr: Invoice Stored');
         }

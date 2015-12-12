@@ -16,7 +16,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <dom-module id="invoice-card">
   <style>
     paper-card {
-      min-width: 300px;
+      width: 300px;
+      max-width: 90vw;
       border-top: 2px solid #009688;
     }
 
@@ -140,6 +141,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 val.ts = key;
                 _this.logs.push(val);
               });
+
               if(!this.log_first) {
                 this.log_first = true;
                 var el = document.createElement('invoice-logs');

@@ -11,11 +11,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
 <dom-module id="agent-card">
   <style>
     paper-card {
-      min-width: 300px;
+      width: 300px;
+      max-width: 90vw;
       border-top: 2px solid #9C27B0;
     }
 
@@ -39,6 +42,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     .card-actions:hover, .card-actions:hover a {
       color: rgba(0,0,0,.6);
     }
+
+    paper-toast {
+        width: 100%;
+        min-width: 0;
+        border-radius: 0;
+        margin: 0;
+        text-align: center;
+        font-size: 1.05em;
+    }
+    paper-toast.error {
+        background-color: #D50000;
+        color: rgba(255, 255, 255, 0.87);
+    }
+    paper-toast.success {
+        background-color: #33691E;
+        color: rgba(255, 255, 255, 0.87);
+    }
   </style>
   <template>
     <paper-card>
@@ -56,10 +76,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <!--<paper-icon-button class="actions" alt="New Deposit" title="New Deposit Entry" icon="send" on-tap="createDeposit" hidden="{{editing}}"></paper-icon-button>-->
           <paper-icon-button class="actions" alt="Edit" title="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>
           <paper-icon-button icon="close" title="Cancel" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>
-          <paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!editing}}"></paper-icon-button>
+          <paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!canSave()}}"></paper-icon-button>
+          <paper-spinner alt="Saving Changes" active="[[isSaving]]"></paper-spinner>
         </div>
       </div>
     </paper-card>
+
+    <paper-toast class="error" id="errorMsg" text="{{errorMessage}}" duration="0"></paper-toast>
+    <paper-toast class="success" id="successMsg" text="[[successMessage]]"></paper-toast>
   </template>
 
   <script>
@@ -90,6 +114,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         },
 
+        canSave: function() {
+          return this.editing && !this.isSaving;
+        },
+
         getUrl: function(key) {
           return pageBasePath + '/agents/' + key;
         },
@@ -101,7 +129,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _this._ValChanged.call(_this);
           });
 
-          this.keyEditable = false;
+          this.keyEditable = this.isSaving = false;
         },
 
         _ValChanged: function() {
@@ -111,8 +139,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           this.agent_listener = this.db.child(this.key).on('value', function(snap) {
             this.set('agent', snap.val());
+            this.refreshSupervisor();
           }, this);
 
+          this.refreshSupervisor();
+        },
+
+        refreshSupervisor: function() {
           if(this.agent && this.agent.supervisor) {
             this.supervisorDB = fbase.db.child('supervisors');
             this.supervisorDB.child(this.agent.supervisor).once('value', function(supervisor) {
@@ -124,6 +157,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         detached: function() {
+          _this.$.errorMsg.close();
           this.db.child(this.key).off('value', this.agent_listener);
         },
 
@@ -137,6 +171,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _this = this;
 
           if (!this.agent.phone) {
+            this.show_error('Agent Phone number is required.');
             return;
           }
 
@@ -144,25 +179,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.key = this.agent.phone;
           }
 
+          this.isSaving = true;
           superagent.post('/bkend/update_agent')
                   .send({'agent': this.agent, 'supervisor': this.supervisor})
                   .end(function(err, res) {
+                    _this.isSaving = false;
+
                     if (res.ok) {
+                      _this.show_success(res.body.message);
                       _this.editing = false;
                       _this.keyEditable = false;
                       _this.updateStyles();
                       _this.fire('updated');
                     } else {
-
+                      _this.show_error(res.body.message);
                     }
                   });
         },
 
         cancel: function() {
+          this.$.errorMsg.close();
           this.editing = false;
           this.keyEditable = false;
           this.updateStyles();
           this.fire('cancelled');
+        },
+        show_success: function(message) {
+            this.successMessage = message;
+            this.$.successMsg.show();
+        },
+        show_error: function(message) {
+            this.errorMessage = message;
+            this.$.errorMsg.open();
         }
       });
     })();

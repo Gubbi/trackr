@@ -138,7 +138,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
        <paper-scroll-header-panel class="list-panel" drawer fixed>
          <!-- List Toolbar -->
-         <paper-toolbar class$="{{_mediumTall(route)}}">
+         <paper-toolbar class="medium-tall" route$="{{route}}">
            <div class="center horizontal layout flex">
              <paper-icon-button icon="arrow-back" list-toggle></paper-icon-button>
              <span class="flex"></span>
@@ -157,12 +157,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        <paper-scroll-header-panel class="content-panel" main fixed>
 
          <!-- Main Toolbar -->
-         <paper-toolbar id="mainToolbar" class$="{{route}}">
-           <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
-           <span class="flex"></span>
-
+         <paper-toolbar id="mainToolbar" route$="{{route}}">
+           <div class="center horizontal layout flex">
+             <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
+             <span class="flex"></span>
+             <search-bar id="search" on-search="_search"></search-bar>
+           </div>
            <!-- Toolbar icons -->
-           <search-bar id="search" on-search="_search"></search-bar>
            <!-- <paper-icon-button icon="refresh"></paper-icon-button> -->
 
            <!-- Application name -->

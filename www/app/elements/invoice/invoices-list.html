@@ -14,12 +14,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     :host {
       display: block;
     }
+
     ul {
       list-style: none;
+      padding-left: 0;
+      text-align: center;
     }
+
     li {
       display: inline-block;
       margin: 8px 16px;
+      text-align: left;
+    }
+
+    li.filler {
+      width: 300px;
+      max-width: 90vw;
     }
   </style>
   <template>
@@ -27,11 +37,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <template is="dom-repeat" items="{{items}}">
         <li><invoice-card invoice="{{item.data}}" key="{{item.key}}"></invoice-card></li>
       </template>
+
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
     </ul>
     <ul hidden="{{!isFiltered}}">
       <template is="dom-repeat" items="{{filtered}}">
         <li><invoice-card invoice="{{item.data}}" key="{{item.key}}"></invoice-card></li>
       </template>
+
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
+      <li class="filler"></li>
     </ul>
   </template>
 
@@ -65,9 +95,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _this.filtered = [];
             _this.isFiltered = false;
 
-            _this.db.on('child_added', function(snap) {
+            _this.db.orderByPriority().limitToFirst(50).on('child_added', function(snap) {
               var invoice = {data: snap.val(), key: snap.key()};
-              _this.unshift('items', invoice);
+              _this.push('items', invoice);
             });
           });
         },
@@ -84,7 +114,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _this = this;
           this.db.child(invoiceID).once('value', function(snap) {
             var invoice =  {data: snap.val(), key: snap.key()};
-            _this.unshift('filtered', invoice);
+            _this.push('filtered', invoice);
           });
         },
 

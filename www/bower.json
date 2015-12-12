@@ -4,13 +4,13 @@
   "dependencies": {
     "cookies-js": "~1.2.2",
     "firebase": "~2.3.0",
-    "iron-elements": "PolymerElements/iron-elements#1.0.0",
+    "iron-elements": "PolymerElements/iron-elements#1.0.6",
     "neon-elements": "PolymerElements/neon-elements#1.0.0",
     "page": "visionmedia/page.js#~1.6.3",
     "paper-card": "PolymerElements/paper-card#~1.0.4",
-    "paper-date-picker": "bendavis78/paper-date-picker#~1.0.3",
-    "paper-elements": "PolymerElements/paper-elements#1.0.1",
-    "platinum-elements": "PolymerElements/platinum-elements#1.0.1",
+    "paper-toast": "PolymerElements/paper-toast#~1.1.1",
+    "paper-elements": "PolymerElements/paper-elements#1.0.6",
+    "platinum-elements": "PolymerElements/platinum-elements#1.2.0",
     "time-elements": "~0.4.0"
   },
   "devDependencies": {

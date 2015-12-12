@@ -20,11 +20,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     ul {
       list-style: none;
+      padding-left: 0;
+      text-align: center;
     }
 
     li {
       display: inline-block;
       margin: 8px 16px;
+      text-align: left;
+    }
+
+    li.filler {
+      width: 300px;
+      max-width: 90vw;
     }
 
     .paper-header {
@@ -67,6 +75,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <template is="dom-repeat" items="{{activities}}">
             <li><activity-card activity="{{item.data}}"></activity-card></li>
           </template>
+          <li class="filler"></li>
+          <li class="filler"></li>
+          <li class="filler"></li>
+          <li class="filler"></li>
+          <li class="filler"></li>
+          <li class="filler"></li>
+          <li class="filler"></li>
+          <li class="filler"></li>
+          <li class="filler"></li>
         </ul>
       </div>
     </paper-scroll-header-panel>
@@ -113,7 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           this.active_query = this.activityDB.child(this.dateSelected);
-          this.active_query.on('child_added', function(snap) {
+          this.active_query.orderByPriority().limitToFirst(50).on('child_added', function(snap) {
             _this.push('activities', {data: snap.val(), key: snap.key()});
           });
         },

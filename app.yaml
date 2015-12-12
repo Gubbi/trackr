@@ -73,6 +73,7 @@ skip_files:
 - ^(.*/)?www/node_modules/.*
 - ^(.*/)?www/\..*
 - ^(.*/)?www/.*\.md
-- ^(.*/)?www/dist/bower_components/(?!webcomponentsjs/webcomponents-lite\.min).*
+- ^(.*/)?www/dist/bower_components/((?!webcomponentsjs\/webcomponents\-lite\.min).)*\..*
+- ^(.*/)?www/dist/bower_components/.*(LICENSE|COPYING|Makefile|marked)
 - ^(.*/)?www/[^/]*\.js
 - ^(.*/)?www/.*\.json

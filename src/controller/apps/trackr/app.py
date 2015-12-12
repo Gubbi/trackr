@@ -58,7 +58,8 @@ class AppController(SignedInController):
             'customer_phone': payment.by.id(),
             'agent_name': payment._agent.name,
             'payment_id': payment.key.id(),
-            'org_brand': self.org_app.brand_name
+            'org_brand': self.org_app.brand_name,
+            'support_number': self.org_app.support_number
         }
 
     @methods('POST')
@@ -92,7 +93,8 @@ class AppController(SignedInController):
             'amount': payment.amount,
             'cancel_id': payment.cancellation_id,
             'invoice_id': payment.invoice.id(),
-            'customer_phone': payment.by.id()
+            'customer_phone': payment.by.id(),
+            'support_number': self.org_app.support_number
         }
 
     @methods('POST')
@@ -109,6 +111,9 @@ class AppController(SignedInController):
         order = create_or_update_sales_order(data.order_num, data.order_date, data.amount, data.advance,
                                              customer, incharge, update)
 
+        push_updates(self.org, self.org_app, self.livemode, update)
+
+        update = updates_holder()
         if data.invoice_num and data.invoice_date:
             create_invoice(data.invoice_num, data.invoice_date, order, update)
 
@@ -131,7 +136,7 @@ class AppController(SignedInController):
                     optional_fields=['notification_email', 'script_sheets'])
 
         if data.payload:
-            data.validate()
+            data.validate(error_message="Required Data Missing")
 
             if self.livemode:
                 self.org_app.spreadsheet_id = data.spreadsheet_id
@@ -139,7 +144,7 @@ class AppController(SignedInController):
                 self.org_app.demo_spreadsheet_id = data.spreadsheet_id
 
             data.put(self.org_app)
-            return "Successfully updated settings"
+            return "Updated settings"
 
         app_settings = self.org_app.to_dict(include=data.defined_fields)
         if self.livemode:
@@ -161,7 +166,7 @@ class AppController(SignedInController):
     @methods('POST')
     def update_agent(self):
         agent = PayloadData(self.payload['agent'])
-        supervisor = PayloadData(self.payload['supervisor'])
+        supervisor = PayloadData(self.payload['supervisor']) if self.payload['supervisor'] else None
 
         update = updates_holder()
 
@@ -172,10 +177,24 @@ class AppController(SignedInController):
 
         if supervisor:
             if supervisor.name and agent.supervisor and supervisor.email:
-                supervisor_db = get_or_create_supervisor(supervisor.name, agent.supervisor, supervisor.email, update)
-                set_supervisor(agent_db, supervisor_db, update)
+                get_or_create_supervisor(supervisor.name, agent.supervisor, supervisor.email, update)
             else:
                 return error('All supervisor details are required')
 
+        if agent.supervisor:
+            set_supervisor(agent_db, agent.supervisor, update)
+
         push_updates(self.org, self.org_app, self.livemode, update)
-        return "Entries Made"
+        return "Details Updated"
+
+    @methods('POST')
+    def update_customer(self):
+        update = updates_holder()
+
+        if not (data.name and data.phone):
+            return error('Name and Phone number are required')
+
+        agent_db = get_or_create_customer(data.name, data.contact, data.phone, update)
+
+        push_updates(self.org, self.org_app, self.livemode, update)
+        return "Details Updated"
