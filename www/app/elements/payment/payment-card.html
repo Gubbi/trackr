@@ -109,40 +109,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _this = this;
           onAuthReady(function() {
             _this.db = fbase.db.child('payments');
+            _this.customerDB = fbase.db.child('customers');
+            _this.agentDB = fbase.db.child('agents');
             _this._ValChanged.call(_this);
           });
         },
 
         _ValChanged: function() {
-          var _this = this;
-
           if(!this.db || !this.key) {
             return;
           }
 
           this.payment_listener = this.db.child(this.key).on('value', function(snap) {
             this.set('payment', snap.val());
+            this.refreshReferences();
+          }, this);
+        },
+
+        refreshReferences: function() {
+          this.customerDB.child(this.payment.by).once('value', function(customer) {
+            if(customer.val()) {
+              this.customer = customer.val().name;
+            }
           }, this);
 
-          if(this.payment && !this.customer) {
-            this.customerDB = fbase.db.child('customers');
-
-            this.customerDB.child(this.payment.by).once('value', function(customer) {
-              if(customer.val()) {
-                this.customer = customer.val().name;
-              }
-            }, this);
-          }
-
-          if(this.payment && !this.agent) {
-            this.agentDB = fbase.db.child('agents');
-
-            this.agentDB.child(this.payment.to).once('value', function(agent) {
-              if(agent.val()) {
-                this.agent = agent.val().name;
-              }
-            }, this);
-          }
+          this.agentDB.child(this.payment.to).once('value', function(agent) {
+            if(agent.val()) {
+              this.agent = agent.val().name;
+            }
+          }, this);
         },
 
         detached: function() {

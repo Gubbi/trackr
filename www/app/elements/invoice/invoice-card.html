@@ -66,11 +66,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         is: 'invoice-card',
         properties: {
           customer: String,
-          invoice: {
-            type: Object,
+          invoice: Object,
+          key: {
+            type: String,
             observer: '_ValChanged'
           },
-          key: String,
           editable: {
             type: Boolean,
             value: true
@@ -97,6 +97,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _this = this;
           onAuthReady(function() {
             _this.db = fbase.db.child('invoices');
+            _this.customerDB = fbase.db.child('customers');
             _this._ValChanged.call(_this);
           });
         },
@@ -106,18 +107,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return;
           }
 
-          var _this = this;
-
-          if(this.invoice && !this.customer) {
-            this.customerDB = fbase.db.child('customers');
-            this.customerDB.child(this.invoice.customer).once('value', function(customer) {
-              if (customer.val()) {
-                this.customer = customer.val().name;
-              }
-            }, this);
-          }
+          this.db.child(this.key).once('value', function(snap) {
+            this.set('invoice', snap.val());
+            this.refreshReferences();
+          }, this);
 
           this.update = null;
+        },
+
+        refreshReferences: function() {
+          this.customerDB.child(this.invoice.customer).once('value', function(customer) {
+            if (customer.val()) {
+              this.customer = customer.val().name;
+            }
+          }, this);
         },
 
         detached: function() {

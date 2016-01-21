@@ -77,7 +77,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <paper-input label="SMS Short Code" value="{{app.short_code}}" required readonly$={{!editing}}></paper-input>
                         <paper-input label="Support Helpline" value="{{app.support_number}}" required readonly$={{!editing}}></paper-input>
                         <paper-input label="Notification Email" value="{{app.notification_email}}" readonly$={{!editing}}></paper-input>
-                        <paper-input label="Spreadsheet ID" value="{{app.spreadsheet_id}}" required hidden="{{!is_script_enabled}}"></paper-input>
+                        <paper-input label="Spreadsheet ID" value="{{app.spreadsheet_id}}" required readonly$={{!editing}} hidden="{{!is_script_enabled}}"></paper-input>
                     </div>
                     <div class="card-actions horizontal layout center flex">
                         <span class="flex"></span>
@@ -209,6 +209,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 },
 
                 enableScript: function() {
+                    var _this = this;
+
                     superagent.get('/bkend/google/auth_url').end(function(err, res) {
                         if (res.ok) {
                             window.location = res.body.auth_url;

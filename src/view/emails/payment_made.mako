@@ -1,4 +1,4 @@
-<h4>${payment.key.id()} - New Payment Made</h4>
+<h4>${payment.key.id()} - ${'New Payment Made' if payment.invoice else 'Advance Collected'}</h4>
 <br/>
 Amount: ${payment.amount}<br/>
 Made By: ${payment._customer.name}<br/>

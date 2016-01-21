@@ -66,10 +66,15 @@ class SalesOrder(ndb.Model):
 
     invoice             = ndb.KeyProperty(kind='Invoice')
 
-    status              = ndb.StringProperty(choices=['Recorded', 'Cancelled'], default='Recorded')
+    status              = ndb.StringProperty(choices=['Recorded', 'Cancelled', 'Placeholder'], default='Recorded')
 
     createdAt           = ndb.DateTimeProperty(auto_now_add=True)
     modifiedAt          = ndb.DateTimeProperty(auto_now=True)
+
+
+class OrderPlaceholder(SalesOrder):
+    customer_number     = ndb.StringProperty()
+    incharge_number     = ndb.StringProperty()
 
 
 class Invoice(ndb.Model):
@@ -100,6 +105,7 @@ class Payment(ndb.Model):
     amount              = ndb.FloatProperty()
 
     invoice             = ndb.KeyProperty(kind=Invoice)
+    order               = ndb.KeyProperty(kind=SalesOrder)
     is_advance          = ndb.BooleanProperty(default=False)
 
     status              = ndb.StringProperty(choices=['Recorded', 'Cancelled'], default='Recorded')

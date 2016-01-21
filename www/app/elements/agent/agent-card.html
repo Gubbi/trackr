@@ -74,10 +74,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <a href$="{{getUrl(key)}}" hidden="{{hideLaunch}}" title="Expand"><paper-icon-button class="actions" alt="View More" icon="launch" hidden="{{editing}}"></paper-icon-button></a>
           <span class="flex"></span>
           <!--<paper-icon-button class="actions" alt="New Deposit" title="New Deposit Entry" icon="send" on-tap="createDeposit" hidden="{{editing}}"></paper-icon-button>-->
-          <paper-icon-button class="actions" alt="Edit" title="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>
           <paper-icon-button icon="close" title="Cancel" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>
-          <paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!canSave()}}"></paper-icon-button>
+          <paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!canSave(editing)}}"></paper-icon-button>
           <paper-spinner alt="Saving Changes" active="[[isSaving]]"></paper-spinner>
+          <paper-icon-button class="actions" alt="Edit" title="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>
+
         </div>
       </div>
     </paper-card>
@@ -133,7 +134,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         _ValChanged: function() {
-          if(!this.db || !this.agent) {
+          if(!this.db || !this.key) {
             return;
           }
 
@@ -157,7 +158,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         detached: function() {
-          _this.$.errorMsg.close();
+          this.$.errorMsg.close();
           this.db.child(this.key).off('value', this.agent_listener);
         },
 

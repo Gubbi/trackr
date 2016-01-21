@@ -42,7 +42,7 @@ class SignedInController(TrackrController):
     acl = ["any"]
 
     def _setup(self):
-        namespace = 'Trackr_'+self.org.key.id()+'_'+str(self.livemode or True)
+        namespace = 'Trackr_'+self.org.key.id()+'_'+str(self.livemode)
         logging.info(['Switching to namespace ', namespace])
 
         namespace_manager.set_namespace(namespace)

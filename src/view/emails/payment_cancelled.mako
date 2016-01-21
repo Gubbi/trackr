@@ -1,4 +1,4 @@
-<h4>${payment.key.id()} - Payment Cancelled</h4>
+<h4>${payment.key.id()} - ${'Payment Cancelled' if payment.invoice else 'Advance Cancelled'}</h4>
 <br/>
 Amount: ${payment.amount}<br/>
 Customer Name: ${payment._customer.name}<br/>

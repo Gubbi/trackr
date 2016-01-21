@@ -5,7 +5,7 @@
 
 var fbase = {};
 fbase.orgId = '';
-fbase.root = new Firebase('https://trackrapp.firebaseio.com/');
+fbase.root = new Firebase('https://trackrdb.firebaseio.com/');
 
 fbase.queueDB = fbase.root.child('/queue/tasks');
 fbase.queue = function(spec, task) {

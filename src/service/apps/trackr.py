@@ -83,7 +83,8 @@ def get_or_create_agent(name, phone, update):
 
                 tst = ts()
                 update['Sheet']['Sales Executives'][phone] = [phone, name, None]
-                update['FBase']['PATCH'][agents_path(phone)] = {'name': name, 'phone': phone, '.priority': -1 * tst}
+                update['FBase']['PATCH'][agents_path(phone)] = {'name': name, 'phone': phone,
+                                                                'supervisor': agent.supervisor, '.priority': -1 * tst}
 
         else:
             logging.info('Creating new agent')
@@ -181,7 +182,7 @@ def set_supervisor(agent, supervisor, update):
         logging.info('Supervisor already set for agent.')
 
 
-def create_or_update_sales_order(order_num, order_date, amount, advance, customer, incharge, update):
+def create_or_update_sales_order(order_num, order_date, amount, advance, customer, incharge, update, order_type=None):
     logging.info('Create / Update Sales Order')
 
     order = SalesOrder.get_by_id(order_num)
@@ -206,7 +207,7 @@ def create_or_update_sales_order(order_num, order_date, amount, advance, custome
             date_updated = True
 
         if order.advance_amount != advance or order.customer != customer.key or order.incharge != incharge.key:
-            if order.advance:
+            if order.advance and order.advance_amount != advance:
                 order_updated['advance'] = order.advance.id()
                 cancel_payment(order.advance.get(), order.incharge.get(), update)
                 order.advance = None
@@ -219,15 +220,16 @@ def create_or_update_sales_order(order_num, order_date, amount, advance, custome
                 order_updated['agent'] = order.incharge.id()
                 order.incharge = incharge.key
 
-            if advance:
+            if advance and order.advance_amount != advance:
                 advance_payment = create_payment(order, advance, incharge, update)
                 order.advance = advance_payment.key
                 order.advance_amount = advance
 
         if order_updated or date_updated:
             logging.info('Modifying order details.')
-
+            order.status = 'Recorded'
             order.put()
+
             advance_id = order.advance.id() if order.advance else ''
 
             update['Sheet']['Sales Orders'][order_num] = [order_num, order_date, amount, advance, advance_id,
@@ -263,6 +265,9 @@ def create_or_update_sales_order(order_num, order_date, amount, advance, custome
         advance_id = ''
         order = SalesOrder(id=order_num, on=order_date, amount=amount, advance_amount=advance,
                            customer=customer.key, incharge=incharge.key)
+
+        if order_type:
+            order.status = order_type
 
         if advance:
             advance_payment = create_payment(order, advance, incharge, update)
@@ -339,6 +344,34 @@ def cancel_sales_order(order, update):
         'key': order.key.id(),
         'data': {'type': 'Cancelled', 'customer_name': order.customer.get().name, 'amount': order.amount},
         '.priority': -1 * tst,
+    }
+
+
+def delete_placeholder_order(order, update):
+    logging.info('Deleting placeholder sales order')
+
+    if not isinstance(order, SalesOrder):
+        order = SalesOrder.get_by_id(order)
+        if not order:
+            raise ValueError('Sales Order not found')
+
+    if order.status != 'Placeholder':
+        raise ValueError('Can delete only Placeholder orders.')
+
+    if order.invoice:
+        raise ValueError('Sales order cannot be cancelled once invoice is raised.')
+
+    order.key.delete()
+
+    tst = ts()
+    update['Sheet']['Sales Orders'][order.key.id()] = {'Status': 'Deleted'}
+    update['FBase']['PATCH'][sales_path(order.key.id())] = {}
+
+    update['FBase']['PATCH']['logs/' + sales_path(order.key.id()) + '/' + str(tst)] = {
+        'type': 'inline',
+        'ts': {'.sv': 'timestamp'},
+        'subtype': 'Deleted',
+        '.priority': tst,
     }
 
 
@@ -485,7 +518,8 @@ def create_payment(invoice, amount, sales, update):
             raise ValueError('Payment cannot be created from this phone number')
 
     payment = Payment(id=get_next_prn(), by=invoice.customer, to=sales.key, amount=amount,
-                      invoice=invoice.key if invoice_id else None, is_advance=False if invoice_id else True)
+                      invoice=invoice.key if invoice_id else None, order=None if invoice_id else invoice.key,
+                      is_advance=False if invoice_id else True)
     payment.put()
 
     tst = ts()
@@ -514,10 +548,11 @@ def create_payment(invoice, amount, sales, update):
         '.priority': -1 * tst,
     }
 
-    if invoice_id:
-        update['Sheet']['Payments'][payment_id] = [payment_id, payment.amount, invoice_id, sales.phone, sales.name,
-                                                   customer.phone, customer.name, 'Paid', '']
+    update['Sheet']['Payments'][payment_id] = [payment_id, payment.amount, invoice.key.id(), sales.phone,
+                                               sales.name, customer.phone, customer.name,
+                                               'Paid' if invoice_id else 'Advance', '']
 
+    if invoice_id:
         set_payment_on_invoice(invoice, payment, update)
 
     payment._customer = customer
@@ -573,8 +608,12 @@ def cancel_payment(payment, sales, update):
     tst = ts()
     payment_id = payment.key.id()
     customer = payment.by.get()
+
     invoice = payment.invoice.get() if payment.invoice else None
     invoice_id = payment.invoice.id() if invoice else ''
+
+    order = payment.order.get() if payment.order else None
+    order_id = payment.order.id() if order else ''
 
     update['FBase']['PATCH'][payments_path(payment_id) + '/status'] = 'Cancelled'
 
@@ -595,11 +634,15 @@ def cancel_payment(payment, sales, update):
         '.priority': -1 * tst,
     }
 
-    if invoice_id:
-        update['Sheet']['Payments'][payment_id] = [payment_id, payment.amount, invoice_id, sales.phone, sales.name,
-                                                   customer.phone, customer.name, 'Cancelled', payment.cancellation_id]
+    update['Sheet']['Payments'][payment_id] = [payment_id, payment.amount, invoice_id or order_id, sales.phone,
+                                               sales.name, customer.phone, customer.name, 'Cancelled',
+                                               payment.cancellation_id]
 
+    if invoice_id:
         remove_payment_on_invoice(invoice, payment, update)
+
+    elif order and order.status == 'Placeholder':
+        delete_placeholder_order(order, update)
 
     payment._customer = customer
     payment._agent = sales

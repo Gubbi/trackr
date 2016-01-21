@@ -173,7 +173,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if(this.self && this.self.name) {
             this.fire('set-title-nav', this.self.name);
           }
-          this.show = 'Account';
+          this.show = 'Payments';
           this._showChanged();
           app.$.mainDrawerPanel.closeDrawer();
         },
@@ -183,6 +183,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           onAuthReady(function() {
             _this.profileDB = fbase.db.child('agents');
             _this.paymentsDB = fbase.db.child('payments');
+            _this._keyChanged.call(_this);
           });
         },
 
@@ -191,7 +192,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.filteredPayments = [];
           this.isPaymentFiltered = false;
 
-          if(!this.key) {
+          if(!this.profileDB || !this.key) {
             return;
           }
 
@@ -204,8 +205,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.paymentsDB.off('child_added', this.paymentSock);
           }
 
-          this.paymentSock = this.paymentsDB.orderByChild('agent').equalTo(this.key).limitToFirst(50)
-                  .on('child_added', function(snap) {
+          this.paymentSock = this.paymentsDB.orderByChild('to').equalTo(this.key).limitToFirst(50).on(
+                  'child_added', function(snap) {
+                    console.log(snap.val());
                     this.push('payments', {data: snap.val(), key: snap.key()});
                   }, this);
         },
@@ -223,7 +225,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var _this = this;
             this.paymentsDB.child(paymentID).once('value', function(snap) {
               var payment = snap.val();
-              if(payment.agent === _this.key) {
+              if(payment.to === _this.key) {
                   _this.push('filteredPayments', {data: payment, key: snap.key()});
               }
             });

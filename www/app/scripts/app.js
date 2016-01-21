@@ -129,7 +129,7 @@ onAuthReady(function(authData) {
     el.agent = {};
     el.key = null;
     el.editing = true;
-
+    el.keyEditable = true;
     app._displayInPanel(el);
   };
 

@@ -109,7 +109,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
 
         <paper-toast class="error" id="errorMsg" text="{{errorMessage}}" duration="0"></paper-toast>
-        <paper-toast class="success" id="successMsg" text="[[successMessage]]"></paper-toast>
+        <paper-toast class="success horizontal layout center flex" id="successMsg" text="[[successMessage]]">
+            <span class="flex"></span>
+            <paper-spinner alt="Resetting Password" active="[[loadingPage]]"></paper-spinner>
+        </paper-toast>
     </template>
 
     <script>
@@ -127,6 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     this._repasswordField = this.$.repasswordField;
                     this._emailField = this.$.emailField;
                     this.errorMessage = this.successMessage = '';
+                    this.loadingPage = false;
 
                     onAuthReady(function(authData) {
                         if(authData) {
@@ -156,6 +160,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                                 _this.show = 'reset';
                             }
                             else {
+                                _this.loadingPage = true;
                                 login(res.body);
                             }
                         } else {
@@ -192,6 +197,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                         if (res.ok) {
                             _this.show_success('Done');
+                            _this.loadingPage = true;
                             login(_this.authData);
                         } else {
                             _this.show_error(res.body.message);

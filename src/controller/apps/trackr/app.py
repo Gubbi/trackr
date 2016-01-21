@@ -6,7 +6,7 @@ from boondi.data import Required, Optional
 from boondi.globals import data
 from boondi.utils import send_email
 from framework.extend import SignedInController
-from model.apps.trackr import Cache
+from model.apps.trackr import Cache, Agent, Customer, SalesOrder
 from service.apps.push_updates import updates_holder, push_updates
 from service.apps.trackr import create_or_update_sales_order, get_or_create_customer, get_or_create_agent, \
     create_invoice, get_or_create_supervisor, set_supervisor, create_payment, cancel_payment
@@ -19,9 +19,10 @@ class AppController(SignedInController):
     def create_payment(self):
         data.validate(amount=Required(float),
                       required_fields=['sales_phone', 'invoice_num'],
+                      optional_fields=['additional_data'],
                       error_message='Valid Invoice Number and Amount is required')
 
-        cache = Cache.get_by_id(data.sales_phone + data.invoice_num + str(data.amount))
+        cache = Cache.get_by_id(data.sales_phone + data.invoice_num + str(data.amount) + (data.additional_data or ''))
         now = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
 
         if cache:
@@ -32,9 +33,29 @@ class AppController(SignedInController):
 
         updates = updates_holder()
 
-        payment = create_payment(data.invoice_num, data.amount, data.sales_phone, updates)
+        if data.additional_data:
+            customer = Customer.get_by_id(data.additional_data)
+            if not customer:
+                customer = get_or_create_customer('New Business', 'New Customer', data.additional_data, updates)
 
-        Cache(id=data.sales_phone + data.invoice_num + str(data.amount)).put()
+            incharge = Agent.get_by_id(data.sales_phone)
+            if not incharge:
+                return error('Payment cannot be created from this phone number.')
+
+            order = SalesOrder.get_by_id(data.invoice_num)
+            if order:
+                return error('Advance payment can only be entered for new orders.')
+
+            now = datetime.datetime.utcnow() + datetime.timedelta(hours=5.5)
+            order = create_or_update_sales_order(data.invoice_num, now.strftime('%d/%m/%Y %I:%M %p'), 0,
+                                                 data.amount, customer, incharge, updates, 'Placeholder')
+
+            payment = order.advance.get()
+
+        else:
+            payment = create_payment(data.invoice_num, data.amount, data.sales_phone, updates)
+
+        Cache(id=data.sales_phone + data.invoice_num + str(data.amount) + (data.additional_data or '')).put()
         push_updates(self.org, self.org_app, self.livemode, updates)
 
         try:
@@ -92,7 +113,7 @@ class AppController(SignedInController):
             "message": "Payment Cancelled",
             'amount': payment.amount,
             'cancel_id': payment.cancellation_id,
-            'invoice_id': payment.invoice.id(),
+            'invoice_id': payment.invoice.id() if payment.invoice else payment.order.id(),
             'customer_phone': payment.by.id(),
             'support_number': self.org_app.support_number
         }
@@ -166,7 +187,6 @@ class AppController(SignedInController):
     @methods('POST')
     def update_agent(self):
         agent = PayloadData(self.payload['agent'])
-        supervisor = PayloadData(self.payload['supervisor']) if self.payload['supervisor'] else None
 
         update = updates_holder()
 
@@ -175,7 +195,17 @@ class AppController(SignedInController):
 
         agent_db = get_or_create_agent(agent.name, agent.phone, update)
 
-        if supervisor:
+        push_updates(self.org, self.org_app, self.livemode, update)
+
+        update = updates_holder()
+
+        supervisor = PayloadData(self.payload['supervisor']) if self.payload['supervisor'] else None
+        logging.info([supervisor, self.payload['supervisor']])
+
+        if supervisor and not agent.supervisor:
+            return error('Supervisor phone number is required')
+
+        if supervisor and agent.supervisor:
             if supervisor.name and agent.supervisor and supervisor.email:
                 get_or_create_supervisor(supervisor.name, agent.supervisor, supervisor.email, update)
             else:
@@ -194,7 +224,7 @@ class AppController(SignedInController):
         if not (data.name and data.phone):
             return error('Name and Phone number are required')
 
-        agent_db = get_or_create_customer(data.name, data.contact, data.phone, update)
+        get_or_create_customer(data.name, data.contact, data.phone, update)
 
         push_updates(self.org, self.org_app, self.livemode, update)
         return "Details Updated"
