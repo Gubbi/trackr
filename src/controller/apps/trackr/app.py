@@ -122,6 +122,7 @@ class AppController(SignedInController):
     def entry(self):
         data.validate(amount=Required(float), advance=Optional(float),
                       required_fields=['order_num', 'order_date', 'sales_phone', 'customer_phone', 'business'],
+                      optional_fields=['category'],
                       error_message='All required details are not present')
 
         update = updates_holder()
@@ -130,7 +131,7 @@ class AppController(SignedInController):
         incharge = get_or_create_agent(data.sales_name, data.sales_phone, update)
 
         order = create_or_update_sales_order(data.order_num, data.order_date, data.amount, None,
-                                             customer, incharge, update)
+                                             customer, incharge, data.category, update)
 
         push_updates(self.org, self.org_app, self.livemode, update)
 

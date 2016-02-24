@@ -115,4 +115,3 @@ class AuthController(PublicController):
         return {
             'isDemo': toggled_demo_value
         }
-48

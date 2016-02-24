@@ -66,6 +66,7 @@ class SalesOrder(ndb.Model):
 
     invoice             = ndb.KeyProperty(kind='Invoice')
 
+    category            = ndb.StringProperty(default='Cash')
     status              = ndb.StringProperty(choices=['Recorded', 'Cancelled', 'Placeholder'], default='Recorded')
 
     createdAt           = ndb.DateTimeProperty(auto_now_add=True)
@@ -92,6 +93,7 @@ class Invoice(ndb.Model):
 
     balance             = ndb.ComputedProperty(lambda self: (self.amount or 0) - (self.paid or 0) + (self.credit or 0))
 
+    category            = ndb.StringProperty(default='Cash')
     status              = ndb.StringProperty(choices=['Recorded', 'Cancelled'], default='Recorded')
 
     createdAt           = ndb.DateTimeProperty(auto_now_add=True)
@@ -108,6 +110,7 @@ class Payment(ndb.Model):
     order               = ndb.KeyProperty(kind=SalesOrder)
     is_advance          = ndb.BooleanProperty(default=False)
 
+    category            = ndb.StringProperty(default='Cash')
     status              = ndb.StringProperty(choices=['Recorded', 'Cancelled'], default='Recorded')
     cancellation_id     = ndb.StringProperty()
 

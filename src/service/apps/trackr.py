@@ -187,7 +187,7 @@ def set_supervisor(agent, supervisor, update):
         logging.info('Supervisor already set for agent.')
 
 
-def create_or_update_sales_order(order_num, order_date, amount, advance, customer, incharge, update, order_type=None):
+def create_or_update_sales_order(order_num, order_date, amount, advance, customer, incharge, category, update, order_type=None):
     logging.info('Create / Update Sales Order')
 
     order = SalesOrder.get_by_id(order_num)
@@ -269,7 +269,7 @@ def create_or_update_sales_order(order_num, order_date, amount, advance, custome
 
         advance_id = ''
         order = SalesOrder(id=order_num, on=order_date, amount=amount, advance_amount=advance,
-                           customer=customer.key, incharge=incharge.key)
+                           customer=customer.key, incharge=incharge.key, category=category)
 
         if order_type:
             order.status = order_type
@@ -414,7 +414,8 @@ def create_invoice(invoice_num, invoice_date, order, update):
         raise ValueError('Another invoice with this ID exists')
 
     invoice = Invoice(id=invoice_num, on=invoice_date, order=order.key, customer=order.customer,
-                      amount=order.amount, paid=order.advance_amount, payments=[order.advance] if order.advance else [])
+                      category=order.category, amount=order.amount, paid=order.advance_amount,
+                      payments=[order.advance] if order.advance else [])
     invoice.put()
 
     tst = ts()
@@ -524,7 +525,7 @@ def create_payment(invoice, amount, sales, update):
 
     payment = Payment(id=get_next_prn(), by=invoice.customer, to=sales.key, amount=amount,
                       invoice=invoice.key if invoice_id else None, order=None if invoice_id else invoice.key,
-                      is_advance=False if invoice_id else True)
+                      is_advance=False if invoice_id else True, category=invoice.category)
     payment.put()
 
     tst = ts()
@@ -555,7 +556,7 @@ def create_payment(invoice, amount, sales, update):
 
     update['Sheet']['Payments'][payment_id] = [payment_id, payment.amount, invoice.key.id(), sales.phone,
                                                sales.name, customer.phone, customer.name,
-                                               'Paid' if invoice_id else 'Advance', '']
+                                               'Paid' if invoice_id else 'Advance', '', payment.category]
 
     if invoice_id:
         set_payment_on_invoice(invoice, payment, update)
@@ -641,7 +642,7 @@ def cancel_payment(payment, sales, update):
 
     update['Sheet']['Payments'][payment_id] = [payment_id, payment.amount, invoice_id or order_id, sales.phone,
                                                sales.name, customer.phone, customer.name, 'Cancelled',
-                                               payment.cancellation_id]
+                                               payment.cancellation_id, payment.category]
 
     if invoice_id:
         remove_payment_on_invoice(invoice, payment, update)
