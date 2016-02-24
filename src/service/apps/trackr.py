@@ -84,7 +84,8 @@ def get_or_create_agent(name, phone, update):
                 tst = ts()
                 update['Sheet']['Sales Executives'][phone] = [phone, name, None]
                 update['FBase']['PATCH'][agents_path(phone)] = {'name': name, 'phone': phone,
-                                                                'supervisor': agent.supervisor, '.priority': -1 * tst}
+                                                                'supervisor': agent.supervisors[0].id() if agent.supervisors and len(agent.supervisors) > 0 else '',
+                                                                '.priority': -1 * tst}
 
         else:
             logging.info('Creating new agent')
@@ -105,7 +106,11 @@ def get_or_create_agent(name, phone, update):
 
         return agent
 
+    except TypeError, e:
+        raise ValueError('Sales Executive: ' + str(e))
+
     except:
+        logging.info('Error creating sales executive.', exc_info=True)
         raise ValueError('Error creating sales executive')
 
 
@@ -206,8 +211,8 @@ def create_or_update_sales_order(order_num, order_date, amount, advance, custome
             order.on = order_date
             date_updated = True
 
-        if order.advance_amount != advance or order.customer != customer.key or order.incharge != incharge.key:
-            if order.advance and order.advance_amount != advance:
+        if (advance and order.advance_amount != advance) or order.customer != customer.key or order.incharge != incharge.key:
+            if advance and order.advance and order.advance_amount != advance:
                 order_updated['advance'] = order.advance.id()
                 cancel_payment(order.advance.get(), order.incharge.get(), update)
                 order.advance = None

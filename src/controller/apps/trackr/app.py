@@ -129,7 +129,7 @@ class AppController(SignedInController):
         customer = get_or_create_customer(data.business, data.customer_name, data.customer_phone, update)
         incharge = get_or_create_agent(data.sales_name, data.sales_phone, update)
 
-        order = create_or_update_sales_order(data.order_num, data.order_date, data.amount, data.advance,
+        order = create_or_update_sales_order(data.order_num, data.order_date, data.amount, None,
                                              customer, incharge, update)
 
         push_updates(self.org, self.org_app, self.livemode, update)

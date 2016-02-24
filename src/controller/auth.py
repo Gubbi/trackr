@@ -45,10 +45,13 @@ class AuthController(PublicController):
 
     @methods('POST')
     def refresh_auth(self):
-        web_auth.set_cookie_for_user(self.user.email, response)
-        response.set_cookie("org_id", self.user.org[0].id(), max_age=7200)
+        if self.user:
+            web_auth.set_cookie_for_user(self.user.email, response)
+            response.set_cookie("org_id", self.user.org[0].id(), max_age=7200)
 
-        return 'Session refreshed'
+            return 'Session refreshed'
+
+        return error('User not logged in.')
 
     def get_auth(self):
         if self.user:
@@ -64,10 +67,7 @@ class AuthController(PublicController):
                 'isTemporaryPassword': self.user.is_temporary_password
             }
 
-        return {
-            'status': 'error',
-            'message': 'User not logged in.'
-        }
+        return error('User not logged in.')
 
     @methods('POST')
     def reset(self):

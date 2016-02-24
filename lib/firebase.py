@@ -3,7 +3,7 @@ import urllib
 import json
 import httplib2
 
-http = httplib2.Http()
+http = httplib2.Http(timeout=60)
 
 class Firebase(object):
 
