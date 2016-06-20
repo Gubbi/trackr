@@ -36,16 +36,16 @@ handlers:
   secure: optional
 
 - url: /
-  static_files: www/dist/index.html
-  upload: www/dist/index.html
+  static_files: www/app/index.html
+  upload: www/app/index.html
 
 - url: /sys.html
-  static_files: www/dist/sys.html
-  upload: www/dist/sys.html
+  static_files: www/app/sys.html
+  upload: www/app/sys.html
   login: admin
 
 - url: /
-  static_dir: www/dist/
+  static_dir: www/app/
 
 skip_files:
 - ^(.*/)?app\.yaml
