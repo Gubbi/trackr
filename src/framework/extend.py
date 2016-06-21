@@ -3,7 +3,7 @@ from google.appengine.api import namespace_manager
 from boondi.formats import mime_json
 from framework.default_auth import DefaultModuleAuth
 from framework.default_controller import DefaultController
-from model.apps.trackr import Trackr, TrackrRoles, get_org_by_short_code
+from model.apps.trackr import Trackr, TrackrRoles
 
 
 class TrackrModuleAuth(DefaultModuleAuth):
@@ -12,7 +12,7 @@ class TrackrModuleAuth(DefaultModuleAuth):
         id_type, user_id = user_data
 
         if id_type == 'ShortCode':
-            return get_org_by_short_code(user_id)
+            return user_id #get_org_by_short_code(user_id)
         else:
             return None
 

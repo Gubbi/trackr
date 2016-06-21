@@ -4,11 +4,12 @@ from boondi.routes import ControllerPrefixRoute as Controller, ActionRoute as Ac
 routes = [
     Controller("apps.trackr.app",   '/bkend', [
         Action('settings',              '/settings'),
-        Action('create_payment',        '/payment/create'),
+        Action('payment_request',        '/payment/create'),
         Action('cancel_payment',        '/payment/cancel'),
         Action('entry',                 '/entry'),
         Action('new_invoice',           '/new_invoice'),
         Action('update_agent',          '/update_agent'),
+        Action('verify_jobs',           '/verify_jobs'),
     ]),
 
     Controller("apps.trackr.google",    '/bkend/google', [
