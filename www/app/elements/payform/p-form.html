@@ -1,0 +1,74 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+
+<dom-module id="p-form">
+  <style>
+    :host paper-card {
+      width:500px;
+      border-top: 2px solid #2196F3;
+      margin: 30px auto;
+      padding: 0 12px;
+    }
+    paper-button {
+      background: #1976D2 !important;
+      color: white;
+    }
+  </style>
+  <template>
+
+    <div class="card-actions horizontal layout center flex">
+
+      <paper-card>
+        <paper-input label="Mobile Number" value="{{payer.phone}}" required ></paper-input>
+        <paper-input label="Provider Name" value="{{payer.name}}" required ></paper-input>
+        <paper-input label="Provider Pincode" value="{{payer.pincode}}" required ></paper-input>
+        <paper-textarea label="Address"  value="{{payer.address}}"></paper-textarea>
+        <div class="card-actions horizontal layout center flex">
+          <paper-button raised on-tap="go">
+            Go!!
+          </paper-button>
+        </div>
+      </paper-card>
+    </div>
+
+    <paper-toast class="error" id="errorMsg" text="Error" duration="200" ></paper-toast>
+    <paper-toast class="success" id="successMsg" text="Success" duration="0"></paper-toast>
+
+  </template>
+  <script>
+    (function () {
+      Polymer({
+        is: 'p-form',
+        properties: {
+          payer: {
+            type: Object,
+            value: {}
+          }
+        },
+        ready : function () {
+
+        },
+        go:function () {
+
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

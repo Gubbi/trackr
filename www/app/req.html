@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="Polymer Starter Kit" />
+  <title>Add Payer</title>
+
+  <!-- build:css styles/main.css -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild-->
+
+  <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
+  <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <!-- endbuild -->
+
+  <!-- will be replaced with elements/elements.vulcanized.html -->
+  <link rel="import" href="elements/payform/req.html">
+  <!-- endreplace-->
+</head>
+<body unresolved class="fullbleed layout vertical">
+<span id="browser-sync-binding"></span>
+<template is="dom-bind" id="app">
+  <paper-scroll-header-panel id="mainDrawerPanel" class="main-drawer-panel" main fixed>
+    <!-- Main Toolbar -->
+    <paper-toolbar id="mainToolbar" class="SysPanel">
+      <!-- Application name -->
+      <div class="middle middle-container center horizontal layout">
+        <div class="app-name">
+          Add Payer
+        </div>
+      </div>
+    </paper-toolbar>
+
+    <div class="content">
+      <p-form></p-form>
+    </div>
+  </paper-scroll-header-panel>
+</template>
+</body>
+</html>
