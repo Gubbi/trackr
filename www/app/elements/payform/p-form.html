@@ -35,10 +35,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="card-actions horizontal layout center flex">
 
       <paper-card>
-        <paper-input label="Mobile Number" value="{{payer.phone}}" required ></paper-input>
-        <paper-input label="Provider Name" value="{{payer.name}}" required ></paper-input>
-        <paper-input label="Provider Pincode" value="{{payer.pincode}}" required ></paper-input>
-        <paper-textarea label="Address"  value="{{payer.address}}"></paper-textarea>
+        <paper-input label="Mobile Number" value="{{phone}}" required ></paper-input>
+        <paper-input label="Provider Name" value="{{name}}" required ></paper-input>
+        <paper-input label="Provider Pincode" value="{{pincode}}" required ></paper-input>
+        <paper-textarea label="Address"  value="{{address}}"></paper-textarea>
         <div class="card-actions horizontal layout center flex">
           <paper-button raised on-tap="go">
             Go!!
@@ -56,7 +56,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'p-form',
         properties: {
-          payer: {
+          payer: {        //payer is the object which contains the info of the imputed payer
             type: Object,
             value: {}
           }
@@ -64,7 +64,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ready : function () {
 
         },
-        go:function () {
+        go:function () {    //called on clicking on the 'GO' button
+          var _this = this;
+
+
+          superagent.post('bkend/new').send({
+            provider_phone: this.phone,
+            provider_name: this.name,
+            provider_pincode: this.pincode,
+            address: this.address,
+          }).end(function(err, res) {
+            if (res.ok) {
+              //_this.show_success('Logged In!');
+              console.log("loggedin");
+            } else {
+              //_this.show_error(res.body.message);
+              console.log("err ",err,res);
+            }
+          });
 
         }
 

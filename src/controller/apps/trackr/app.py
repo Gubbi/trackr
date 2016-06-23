@@ -71,6 +71,26 @@ class AppController(SignedInController):
         }
 
     @methods('POST')
+    def add_service_provider(self):                      #creeated fresh by saurabh
+        data.validate(required_fields=['provider_phone', 'provider_name',
+                                       'provider_pincode', 'address'],
+                      optional_fields=['provider_contact'],
+                      error_message='Valid Provider Info and Job details is required')
+
+        #update = updates_holder()
+
+        #service_provider = get_or_create_service_provider(data.provider_phone, data.provider_name,
+                                                       #   data.provider_pincode, data.provider_contact, update)
+
+
+
+        #push_updates(self.org, self.org_app, self.livemode, update)
+
+        return {
+            "message": "KyashCode Created",
+        }
+
+    @methods('POST')
     def handle_payment(self):
         api_id = self.org_app.kyash_public_api_id
 
