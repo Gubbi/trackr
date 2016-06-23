@@ -10,6 +10,7 @@ routes = [
         Action('new_invoice',           '/new_invoice'),
         Action('update_agent',          '/update_agent'),
         Action('verify_jobs',           '/verify_jobs'),
+        Action('search_provider',                '/search_provider'),
     ]),
 
     Controller("apps.trackr.google",    '/bkend/google', [

@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from boondi.controllers import methods
@@ -5,18 +6,54 @@ from boondi.ext import error
 from boondi.data import Optional
 from boondi.globals import data, request
 from framework.extend import SignedInController, PublicController
-from model.apps.trackr import get_jobs, get_jobs_by_kyash_code
+from model.apps.trackr import get_jobs, get_jobs_by_kyash_code, ServiceProvider
 from pykyash import KyashService
 from service.apps.push_updates import updates_holder, push_updates
 from service.apps.trackr import create_payment, get_or_create_service_provider, mark_jobs_as_paid
 
 __author__ = 'vinuth'
 
-job_regex = re.compile(r'[ ]*["]?([\w\#\@\-\*\$\.]+)["]?[:, \t]+["]?([\d\.]+)["]?[ \t]*')
+job_regex = re.compile(r'[ ]*["]?([\w\#\@\-\*\$\.]+)["]?[:, \t]+["]?([\d\.]+)["]?[ \t\s]*')
 jobs_regex = re.compile(r'\A\s*?(?:^' + job_regex.pattern + '$\s*?)+\Z', re.MULTILINE)
 
 
 class AppController(SignedInController):
+    def search_provider(self):
+        try:
+            if data.payload:
+                data.validate(required_fields=['phone', 'name', 'pincode'],
+                              optional_fields=['contact'],
+                              error_message='Valid Provider info are required')
+                update = updates_holder()
+                sp = get_or_create_service_provider(data.phone, data.name, int(data.pincode), data.contact, update)
+
+            else:
+                phone = request.params.get('phone')
+                if not phone:
+                    return error('Valid Provider Phone is required')
+
+                sp = ServiceProvider.get_by_id(phone)
+
+            if not sp:
+                logging.info('Could not find any service provider')
+                return {
+                    'message': 'Not found. You can create a new one.'
+                }
+
+            return {
+                'message': 'Done',
+                'provider': {
+                    'name': sp.name,
+                    'contact': sp.contact,
+                    'pincode': sp.pincode,
+                    'phone': sp.phone
+                }
+            }
+
+        except Exception, e:
+            logging.warn(str(e), exc_info=True)
+            return error('Error')
+
     @methods('POST')
     def verify_jobs(self):
         data.validate(required_fields=['job_data'],

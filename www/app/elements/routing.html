@@ -98,6 +98,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.titlePage = 'App Settings';
     });
 
+    page('/housejoy', function (data) {
+      app.route = 'housejoy';
+      app.titlePage = 'Home - Housejoy';
+    });
+
     page('/logout', function () {
       app.route = 'logging-out';
       superagent.get('/auth/logout').end(function(err, res) {

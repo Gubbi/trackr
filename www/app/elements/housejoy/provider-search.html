@@ -1,0 +1,191 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+
+<dom-module id="provider-search">
+  <style>
+    :host paper-card {
+      width: 400px;
+      /*max-width: 90vw;*/
+      margin: 30px auto;
+      border-top: 2px solid #2196F3;
+      background-color: ghostwhite;
+    }
+
+    paper-input[readonly]  {
+      /* line color when the input is unfocused */
+      --paper-input-container-underline: {
+        display:none;
+      }
+      --paper-input-container-underline-focus: {
+        display:none;
+      }
+      --paper-input-container-underline-disabled: {
+        display:none;
+      }
+    }
+
+    .card-actions, .card-actions a {
+      color: rgba(0,0,0,.15);
+    }
+
+    .card-actions:hover, .card-actions:hover a {
+      color: rgba(0,0,0,.6);
+    }
+
+    paper-toast {
+        width: 100%;
+        min-width: 0;
+        border-radius: 0;
+        margin: 0;
+        text-align: center;
+        font-size: 1.05em;
+    }
+    paper-toast.error {
+        background-color: #D50000;
+        color: rgba(255, 255, 255, 0.87);
+    }
+    paper-toast.success {
+        background-color: #33691E;
+        color: rgba(255, 255, 255, 0.87);
+    }
+  </style>
+  <template>
+    <div class="card-actions horizontal layout center flex">
+          <span class="flex"></span>
+          <iron-pages attr-for-selected="sub-route" selected="{{show}}">
+              <paper-card sub-route="search" heading="Find Service Provider">
+                  <div>
+                      <div class="card-content">
+                        <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" char-counter maxlength="10" required always-float-label>
+                        </paper-input>
+                      </div>
+                      <div class="card-actions horizontal layout center flex">
+                        <paper-button class="actions" alt="Search" title="Search Service Provider" on-tap="search">Search</paper-button>
+                        <paper-spinner alt="Searching..." active="[[isSearching]]"></paper-spinner>
+                      </div>
+                  </div>
+              </paper-card>
+
+              <paper-card sub-route="contact" heading="Account Details">
+                  <div>
+                      <div class="card-content">
+                          <paper-input name="name" id="provider_name" label="Name *" value="{{provider.name}}" required></paper-input>
+                          <paper-textarea name="contact" id="provider_contact" label="Address" value="{{provider.contact}}"></paper-textarea>
+                          <paper-input name="pincode" id="provider_pincode" label="Pin code *" value="{{provider.pincode}}" maxlength="6" required></paper-input>
+                          <paper-input name="phone" id="provider_phone2" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
+                      </div>
+                      <div class="card-actions horizontal layout center">
+                          <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Save</paper-button>
+                          <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
+                      </div>
+                  </div>
+              </paper-card>
+            </iron-pages>
+          <span class="flex"></span>
+      </div>
+
+
+    <!--paper-card>
+      <div>
+        <div class="card-content">
+          <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" required></paper-input>
+        </div>
+        <div class="card-actions horizontal layout center flex">
+          <span class="flex"></span>
+          <paper-icon-button icon="done" title="Save" on-tap="search"></paper-icon-button>
+          <!--<paper-spinner alt="Search Service Provider" active="[[isSaving]]"></paper-spinner>>
+        </div>
+      </div>
+    </paper-card-->
+
+    <paper-toast class="error" id="errorMsg" text="{{errorMessage}}" duration="0"></paper-toast>
+    <paper-toast class="success" id="successMsg" text="[[successMessage]]"></paper-toast>
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        is: 'provider-search',
+        properties: {
+          show: {
+            type: String,
+            value: 'search'
+          },
+          provider: {
+            type: Object,
+            value: {}
+          }
+        },
+        ready: function() {
+        },
+        search: function() {
+          var _this = this;
+          if (!this.provider.phone) {
+            this.show_error('Phone number is required.');
+            return;
+          }
+          this.isSearching = true;
+          superagent.get('/bkend/search_provider?phone=' + this.provider.phone)
+            .end(function(err, res) {
+              _this.isSearching = false;
+              if (res.ok) {
+                var result = JSON.parse(res.text);
+                if(result.provider) {
+                  _this.provider = result.provider;
+                }
+                _this.show_success(res.body.message);
+                _this.show = 'contact';
+              } else {
+                _this.show_error(res.body.message);
+              }
+            });
+        },
+
+        save: function() {
+          var _this = this;
+          if (!_this.provider.name || !_this.provider.phone || !_this.provider.pincode) {
+            this.show_error('Name, Phone and Pin code are required.');
+            return;
+          }
+          this.isSaving = true;
+          superagent.post('/bkend/search_provider')
+            .send(this.provider)
+            .end(function(err, res) {
+              _this.isSaving = false;
+              if (res.ok) {
+                var result = JSON.parse(res.text);
+                _this.provider = result.provider;
+                _this.show = 'contact';
+                _this.show_success(res.body.message);
+              } else {
+                _this.show_error(res.body.message);
+              }
+            });
+        },
+
+
+        show_success: function(message) {
+            this.successMessage = message;
+            this.$.successMsg.show();
+        },
+        show_error: function(message) {
+            this.errorMessage = message;
+            this.$.errorMsg.open();
+        }
+      });
+    })();
+  </script>
+</dom-module>

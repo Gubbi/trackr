@@ -40,11 +40,10 @@ class AccountsController(PublicController):
         org.put()
 
         if not Trackr.get_by_id(org.key.id()):
-            Trackr(id=org.key.id(), org=org.key, users=[user.key],
-                   short_code=data.short_code, brand_name=data.brand_name, support_number=data.support_number,
-                   secure_pricing=data.pricing, secure_min_pricing=data.min_pricing).put()
+            Trackr(id=org.key.id(), org=org.key, users=[user.key], brand_name=data.brand_name,
+                   support_number=data.support_number).put()
 
-        TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Staff'])
+        TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Ops'])
 
         mail_body = render('/emails/welcome.mako', new_password=new_password, user=user)
         send_email(data.admin_email, mail_body, 'Welcome to Trackr')
@@ -71,7 +70,7 @@ class AccountsController(PublicController):
         user.password = web_auth.signed_password(new_password)
         user.put()
 
-        TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Staff'])
+        TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Ops'])
 
         mail_body = render('/emails/welcome.mako', new_password=new_password, user=user)
         send_email(data.user_email, mail_body, 'Welcome to Trackr')
