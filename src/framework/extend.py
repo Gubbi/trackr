@@ -12,7 +12,8 @@ class TrackrModuleAuth(DefaultModuleAuth):
         id_type, user_id = user_data
 
         if id_type == 'ShortCode':
-            return '' #get_org_by_short_code(user_id)
+            return user_id #get_org_by_short_code(user_id)
+
         else:
             return None
 
