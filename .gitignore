@@ -9,6 +9,7 @@ man/
 .idea/
 .data*/
 lib/python2.6/distutils/
+lib/boondi
 *.pyc
 *.tmp*
 !*.tmpl
