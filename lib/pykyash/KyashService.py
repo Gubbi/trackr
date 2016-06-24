@@ -1,6 +1,7 @@
 import base64
 import hmac
 import json
+import logging
 import random
 import time
 
@@ -32,6 +33,16 @@ class KyashService(object):
     hmac_secret = 'enter HMAC secret if you are using HTTP for requests and callback handlers.'
     callback_secret = 'enter Callback secret if you are using HTTPS for callback handlers.'
 
+        # # base_url = "https://api.kyash.in/v1"
+        # # public_id = '388c4f0f-69e9-4757-b8e3-75584c5e2a96'
+        # # api_secret = 'PukV4JB8nJcbiw0ZBOVo+1eRJrovh0jm85KPw8DMCDI='
+        # # hmac_secret = 'FaH8we7HxjC8Wa79dU7Pq5PHMTzhwTE3fnj5OE+y1IM=' #''enter HMAC secret if you are using HTTP for requests and callback handlers.'
+        # # callback_secret = 'D9j/MSwgK4eP6FtU+2gxLWINlojRjsxSa8xW0Td0Q2k=' #''enter Callback secret if you are using HTTPS for callback handlers.'
+        # base_url = "http://localhost:8082/v1"
+        # public_id = '79b50c37-6e1c-419f-ba5d-e2db0c20dbd6'
+        # api_secret = 'pJ4NFdj47njSWJNeU4Ba8vrNdUWzLD2eYUVT54y6YKI='
+        # hmac_secret = 'spy5fBBGXCdEhdgIQH2AQSMl28siKkU0eadC6Fj4jUc='  # ''enter HMAC secret if you are using HTTP for requests and callback handlers.'
+        # callback_secret = 'vkds8mwma1++0Xyo+GiH1/82nzZxhr5Ap+AgTkZIGys='  # ''enter Callback secret if you are using HTTPS for callback handlers.'
     @classmethod
     def call(cls, resource_path, data=None, credentials=None):
         if data:

@@ -21,7 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       /*max-width: 90vw;*/
       margin: 30px auto;
       border-top: 2px solid #2196F3;
-      background-color: ghostwhite;
+      background-color: #FFFFFF;
     }
 
     paper-input[readonly]  {
@@ -37,12 +37,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     }
 
-    .card-actions, .card-actions a {
-      color: rgba(0,0,0,.15);
+    paper-material {
+      padding: 20px;
+      margin: 10px 0;
     }
 
-    .card-actions:hover, .card-actions:hover a {
-      color: rgba(0,0,0,.6);
+    .float-right{
+      float: right;
     }
 
     paper-toast {
@@ -72,8 +73,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" char-counter maxlength="10" required always-float-label>
                         </paper-input>
                       </div>
-                      <div class="card-actions horizontal layout center flex">
-                        <paper-button class="actions" alt="Search" title="Search Service Provider" on-tap="search">Search</paper-button>
+                      <div class="card-actions">
+                        <paper-button title="Search Service Provider" on-tap="search">Search</paper-button>
                         <paper-spinner alt="Searching..." active="[[isSearching]]"></paper-spinner>
                       </div>
                   </div>
@@ -88,28 +89,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           <paper-input name="phone" id="provider_phone2" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
                       </div>
                       <div class="card-actions horizontal layout center">
-                          <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Save</paper-button>
+                          <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Add Jobs</paper-button>
                           <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
+                      </div>
+                  </div>
+              </paper-card>
+
+              <paper-card sub-route="jobs" heading="{{provider.name}} - Create KyashCode">
+                  <div>
+                      <div class="card-content">
+                          <paper-textarea name="job_data" rows="10" id="provider_job_data" label="Paste Job ids and amount here" value="{{provider.job_data}}" required></paper-textarea>
+                        <div id="provider_job_details" style="display: none;">
+                            <paper-material elevation="2">Amount <span class="float-right">Rs {{total}}</span></paper-material>
+                            <paper-material elevation="2">Jobs <span class="float-right">{{jobs.count}}</span></paper-material>
+                        </div>
+                        <div id="provider_kyash_code" style="display: none;">
+                            <paper-material elevation="2">KyashCode <span class="float-right">{{kyash_code}}</span></paper-material>
+                        </div>
+                      </div>
+                      <div class="card-actions horizontal layout center">
+                          <paper-button class="actions" title="Verify Job ids" on-tap="verify">Verify</paper-button>
+                          <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]" raised>Get KyashCode</paper-button>
+                          <paper-spinner active="[[isRequesting]]"></paper-spinner>
                       </div>
                   </div>
               </paper-card>
             </iron-pages>
           <span class="flex"></span>
       </div>
-
-
-    <!--paper-card>
-      <div>
-        <div class="card-content">
-          <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" required></paper-input>
-        </div>
-        <div class="card-actions horizontal layout center flex">
-          <span class="flex"></span>
-          <paper-icon-button icon="done" title="Save" on-tap="search"></paper-icon-button>
-          <!--<paper-spinner alt="Search Service Provider" active="[[isSaving]]"></paper-spinner>>
-        </div>
-      </div>
-    </paper-card-->
 
     <paper-toast class="error" id="errorMsg" text="{{errorMessage}}" duration="0"></paper-toast>
     <paper-toast class="success" id="successMsg" text="[[successMessage]]"></paper-toast>
@@ -127,9 +134,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           provider: {
             type: Object,
             value: {}
+          },
+          jobs: {
+            type: Object,
+            value: {}
+          },
+          kyash_code: String,
+          total: String,
+          isEnabled: {
+            type: Boolean,
+            value: false
           }
-        },
+         },
         ready: function() {
+//          this.isEnabled = true;
         },
         search: function() {
           var _this = this;
@@ -168,7 +186,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               if (res.ok) {
                 var result = JSON.parse(res.text);
                 _this.provider = result.provider;
-                _this.show = 'contact';
+                _this.show = 'jobs';
                 _this.show_success(res.body.message);
               } else {
                 _this.show_error(res.body.message);
@@ -176,6 +194,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
         },
 
+        verify: function() {
+          var _this = this;
+          if (!_this.provider.job_data) {
+            this.show_error('Job ids and amount are required.');
+            return;
+          }
+          this.isRequesting = true;
+          superagent.post('/bkend/verify_jobs')
+            .send(this.provider)
+            .end(function(err, res) {
+              _this.isRequesting = false;
+              if (res.ok) {
+                var result = JSON.parse(res.text);
+                if(result.job_details) {
+                  _this.jobs = result.job_details;
+                  _this.total = result.total;
+                  document.getElementById('provider_job_details').style.display = 'block';
+                }
+                _this.show = 'jobs';
+                _this.show_success(res.body.message);
+              } else {
+                _this.show_error(res.body.message);
+              }
+            });
+        },
+
+        kyashcode: function() {
+          var _this = this;
+          if (!_this.provider.job_data) {
+            this.show_error('Job ids and amount are required.');
+            return;
+          }
+          this.isRequesting = true;
+          superagent.post('/bkend/payment/create')
+            .send(this.provider)
+            .end(function(err, res) {
+              _this.isRequesting = false;
+              if (res.ok) {
+                var result = JSON.parse(res.text);
+                if(result.kyash_code){
+                  _this.kyash_code = result.kyash_code;
+                  document.getElementById('provider_kyash_code').style.display = 'block';
+                }
+                _this.show = 'jobs';
+                _this.show_success(res.body.message);
+              } else {
+                _this.show_error(res.body.message);
+              }
+            });
+        },
 
         show_success: function(message) {
             this.successMessage = message;

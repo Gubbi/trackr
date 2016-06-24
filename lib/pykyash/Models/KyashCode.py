@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from pykyash.KyashService import KyashService
 from pykyash.Models.Cancel import Cancel
@@ -28,6 +29,7 @@ class KyashCode(KyashObject):
     def create(self, credentials=None):
         saved_kyash_code = KyashService.call('/kyashcodes/', self.to_dict(), credentials=credentials)
         self.set_values(**saved_kyash_code)
+        logging.info(saved_kyash_code)
 
     @staticmethod
     def get(kyash_code_id):

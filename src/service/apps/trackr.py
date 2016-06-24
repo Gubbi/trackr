@@ -78,7 +78,7 @@ def create_kyash_code(total_amount, service_provider, org_app, livemode):
     })
 
     code = KyashCode({
-        'order_id': unix_time(datetime.datetime.utcnow()) + str(random.randrange(1, 100)),
+        'order_id': str(unix_time(datetime.datetime.utcnow())) + str(random.randrange(1, 100)),
         'amount': total_amount,
         'billing_contact': contact,
         'shipping_contact': contact
@@ -89,7 +89,7 @@ def create_kyash_code(total_amount, service_provider, org_app, livemode):
         'api_secret': secret
     })
 
-    return code.id
+    return code.__getattribute__('id')
 
 
 def create_payment(service_provider, jobs, total_amount, livemode, org_app, update):
@@ -101,7 +101,7 @@ def create_payment(service_provider, jobs, total_amount, livemode, org_app, upda
         job = Job.get_by_id(job_id)
 
         if not job:
-            job = Job(id=job_id, amount=amount, by=service_provider.key, kyash_code=[kyash_code])
+            job = Job(id=job_id, amount=int(amount), by=service_provider.key, kyash_code=[kyash_code])
         else:
             job.kyash_code.append(kyash_code)
 
@@ -120,6 +120,7 @@ def create_payment(service_provider, jobs, total_amount, livemode, org_app, upda
             '.priority': tst,
         }
 
+    return kyash_code
 
 def mark_jobs_as_paid(jobs, update):
     for job in jobs:
