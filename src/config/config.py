@@ -14,8 +14,7 @@ SESSION_SALT = "kykdgkglag;a4308#$^DFSNN$#aslh;<{:wq3932$#@$)*&dsaj"
 OAUTH_TOKEN_SECRET = 'YCMD@#ABLS OQ@#$JH48QWH$@#598#@!932 TOR$@OB&*(1N1SSR#$^&RTC640CFOCN'
 OAUTH_CIPHER_SECRET = sha256("lsyhwoud63jx@*JS wj82kalw2$dEks92a$8hkslR ,2Ls*Qn%k").digest()
 
-FIREBASE_URL = 'https://trackrapp.firebaseio.com/'
-FIREBASE_SECRET = 'PXagmBMfPfNlJ8IufPrIeHApt7qewFdAbsCLVV9b'
+FIREBASE_URL = 'https://trackrdb.firebaseio.com/'
 
 # Sendgrid
 SENDGRID = sendgrid.SendGridClient('kya.sh', 'Kyash4mBilent')

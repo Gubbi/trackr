@@ -26,9 +26,11 @@ class AppController(SignedInController):
                               error_message='Valid Provider info are required')
                 update = updates_holder()
                 sp = get_or_create_service_provider(data.phone, data.name, int(data.pincode), data.contact, update)
+                push_updates(self.org, self.org_app, self.livemode, update)
 
             else:
                 phone = request.params.get('phone')
+
                 if not phone:
                     return error('Valid Provider Phone is required')
 
@@ -37,7 +39,7 @@ class AppController(SignedInController):
             if not sp:
                 logging.info('Could not find any service provider')
                 return {
-                    'message': 'Not found. You can create a new one.'
+                    'message': 'Create a new Service Provider'
                 }
 
             return {
@@ -52,7 +54,8 @@ class AppController(SignedInController):
 
         except Exception, e:
             logging.warn(str(e), exc_info=True)
-            return error('Error')
+            return error('Error fetching Service Provider details.')
+
 
     @methods('POST')
     def verify_jobs(self):
@@ -102,7 +105,7 @@ class AppController(SignedInController):
 
         kyash_code = create_payment(service_provider, jobs, total_amount, self.livemode, self.org_app, update)
 
-        # push_updates(self.org, self.org_app, self.livemode, update)
+        push_updates(self.org, self.org_app, self.livemode, update)
         logging.info(kyash_code)
         return {
             "message": "KyashCode Created",

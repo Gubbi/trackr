@@ -19,6 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             min-width: 300px;
             border-top: 2px solid #2196F3;
             margin: 30px auto;
+            background-color: white;
         }
     </style>
     <template>
@@ -29,14 +30,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <div class="card-content">
                         <paper-input name="business_name" label="Business Name" value="{{org.name}}" required></paper-input>
                         <paper-input name="brand_name" label="Brand Name" value="{{org.brand_name}}" required></paper-input>
-                        <paper-input name="short_code" label="SMS Short Code" value="{{org.short_code}}" required></paper-input>
                         <paper-input name="business_id" label="Business ID" value="{{org.id}}" required></paper-input>
                         <paper-input name="support_number" label="Support helpline" value="{{org.support_number}}" required></paper-input>
-                        <paper-input name="pricing" label="Charge per Payment ID" value="{{org.pricing}}" required></paper-input>
-                        <paper-input name="min_pricing" label="Minimum Monthly Charge" value="{{org.min_pricing}}" required></paper-input>
                         <paper-input name="name" label="Admin Name" value="{{org.admin_name}}" required></paper-input>
                         <paper-input name="email" label="Admin Email" value="{{org.admin_email}}" required></paper-input>
                         <paper-input name="phone" label="Phone" value="{{org.admin_phone}}"></paper-input>
+                        <hr/>
+                        <paper-input name="kyash_public_api_id" label="Public API ID" value="{{org.kyash_public_api_id}}"></paper-input>
+                        <paper-input name="secure_api_secret_development" label="API Secret (dev)" value="{{org.secure_api_secret_development}}"></paper-input>
+                        <paper-input name="secure_hmac_secret_development" label="HMAC Secret (dev)" value="{{org.secure_hmac_secret_development}}"></paper-input>
+                        <paper-input name="secure_api_secret_production" label="API Secret (prod)" value="{{org.secure_api_secret_production}}"></paper-input>
+                        <paper-input name="secure_hmac_secret_production" label="HMAC Secret (prod)" value="{{org.secure_hmac_secret_production}}"></paper-input>
                     </div>
                     <div class="card-actions horizontal layout center flex">
                         <span class="flex"></span>
