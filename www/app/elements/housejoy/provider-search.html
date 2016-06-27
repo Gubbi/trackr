@@ -47,76 +47,92 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     paper-toast {
-        width: 100%;
-        min-width: 0;
-        border-radius: 0;
-        margin: 0;
-        text-align: center;
-        font-size: 1.05em;
+      width: 100%;
+      min-width: 0;
+      border-radius: 0;
+      margin: 0;
+      text-align: center;
+      font-size: 1.05em;
     }
     paper-toast.error {
-        background-color: #D50000;
-        color: rgba(255, 255, 255, 0.87);
+      background-color: #D50000;
+      color: rgba(255, 255, 255, 0.87);
     }
     paper-toast.success {
-        background-color: #33691E;
-        color: rgba(255, 255, 255, 0.87);
+      background-color: #33691E;
+      color: rgba(255, 255, 255, 0.87);
     }
   </style>
   <template>
     <div class="card-actions horizontal layout center flex">
-          <span class="flex"></span>
-          <iron-pages attr-for-selected="sub-route" selected="{{show}}">
-              <paper-card sub-route="search" heading="Find Service Provider">
-                  <div>
-                      <div class="card-content">
-                        <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" char-counter maxlength="10" required always-float-label>
-                        </paper-input>
-                      </div>
-                      <div class="card-actions">
-                        <paper-button title="Search Service Provider" on-tap="search">Search</paper-button>
-                        <paper-spinner alt="Searching..." active="[[isSearching]]"></paper-spinner>
-                      </div>
-                  </div>
-              </paper-card>
+      <span class="flex"></span>
+      <iron-pages attr-for-selected="sub-route" selected="{{show}}">
+        <paper-card sub-route="search" heading="Find Service Provider">
+          <div>
+            <div class="card-content">
+              <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" char-counter maxlength="10" required always-float-label>
+              </paper-input>
+            </div>
+            <div class="card-actions">
+              <paper-button title="Search Service Provider" on-tap="search">Search</paper-button>
+              <paper-spinner alt="Searching..." active="[[isSearching]]"></paper-spinner>
+            </div>
+          </div>
+        </paper-card>
 
-              <paper-card sub-route="contact" heading="Account Details">
-                  <div>
-                      <div class="card-content">
-                          <paper-input name="name" id="provider_name" label="Name *" value="{{provider.name}}" required></paper-input>
-                          <paper-textarea name="contact" id="provider_contact" label="Address" value="{{provider.contact}}"></paper-textarea>
-                          <paper-input name="pincode" id="provider_pincode" label="Pin code *" value="{{provider.pincode}}" maxlength="6" required></paper-input>
-                          <paper-input name="phone" id="provider_phone2" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
-                      </div>
-                      <div class="card-actions horizontal layout center">
-                          <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Add Jobs</paper-button>
-                          <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
-                      </div>
-                  </div>
-              </paper-card>
+        <paper-card sub-route="contact" heading="Account Details">
+          <div>
+            <div class="card-content">
+              <paper-input name="name" id="provider_name" label="Name *" value="{{provider.name}}" required></paper-input>
+              <paper-textarea name="contact" id="provider_contact" label="Address" value="{{provider.contact}}"></paper-textarea>
+              <paper-input name="pincode" id="provider_pincode" label="Pin code *" value="{{provider.pincode}}" maxlength="6" required></paper-input>
+              <paper-input name="phone" id="provider_phone2" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
+            </div>
+            <div class="card-actions horizontal layout center">
+              <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Add Jobs</paper-button>
+              <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
+            </div>
+          </div>
+        </paper-card>
 
-              <paper-card sub-route="jobs" heading="{{provider.name}} - Create KyashCode">
-                  <div>
-                      <div class="card-content">
-                          <paper-textarea name="job_data" rows="10" id="provider_job_data" label="Paste Job ids and amount here" value="{{provider.job_data}}" required></paper-textarea>
-                        <div id="provider_job_details" style="display: none;">
-                            <paper-material elevation="2">Amount <span class="float-right">Rs {{total}}</span></paper-material>
-                            <paper-material elevation="2">Jobs <span class="float-right">{{jobs.count}}</span></paper-material>
-                        </div>
-                        <div id="provider_kyash_code" style="display: none;">
-                            <paper-material elevation="2">KyashCode <span class="float-right">{{kyash_code}}</span></paper-material>
-                        </div>
-                      </div>
-                      <div class="card-actions horizontal layout center">
-                          <paper-button class="actions" title="Verify Job ids" on-tap="verify">Verify</paper-button>
-                          <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]" raised>Get KyashCode</paper-button>
-                          <paper-spinner active="[[isRequesting]]"></paper-spinner>
-                      </div>
-                  </div>
-              </paper-card>
-            </iron-pages>
-          <span class="flex"></span>
-      </div>
+        <paper-card sub-route="jobs" heading="{{provider.name}}'s Account">
+          <div>
+            <div class="card-content">
+              <paper-textarea name="job_data" rows="10" id="provider_job_data" label="Paste Job ids and amount here" value="{{provider.job_data}}" required></paper-textarea>
+            </div>
+            <div class="card-actions horizontal layout center">
+              <paper-button class="actions" title="Verify Job ids" on-tap="verify">Verify</paper-button>
+              <paper-spinner active="[[isRequesting]]"></paper-spinner>
+            </div>
+          </div>
+        </paper-card>
+        <paper-card sub-route="jobs_verified" heading="Job details">
+          <div>
+            <div class="card-content">
+              <paper-material elevation="2">Amount <span class="float-right">Rs {{total}}</span></paper-material>
+              <paper-material elevation="2">Jobs <span class="float-right">{{jobs.count}}</span></paper-material>
+              <paper-material elevation="2">Repeat Jobs <span class="float-right">{{jobs.repeat_jobs}}</span></paper-material>
+            </div>
+            <div class="card-actions horizontal layout center">
+              <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]" raised>Get KyashCode</paper-button>
+              <paper-spinner active="[[isRequesting]]"></paper-spinner>
+            </div>
+          </div>
+        </paper-card>
+        <paper-card sub-route="result" heading="">
+          <div>
+            <div class="card-content">
+              <paper-material elevation="2">KyashCode <span class="float-right">{{kyash_code}}</span></paper-material>
+            </div>
+            <div class="card-actions horizontal layout center">
+              <paper-button class="actions" title="Home" on-tap="home" active="[[isEnabled]]" raised>Back</paper-button>
+              <paper-spinner active="[[isRequesting]]"></paper-spinner>
+            </div>
+          </div>
+        </paper-card>
+      </iron-pages>
+      <span class="flex"></span>
+    </div>
 
     <paper-toast class="error" id="errorMsg" text="{{errorMessage}}" duration="0"></paper-toast>
     <paper-toast class="success" id="successMsg" text="[[successMessage]]"></paper-toast>
@@ -145,10 +161,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             value: false
           }
-         },
-        ready: function() {
-//          this.isEnabled = true;
         },
+        ready: function() {
+        },
+
+        home: function () {
+          this.show = 'search';
+        },
+
         search: function() {
           var _this = this;
           if (!this.provider.phone) {
@@ -210,9 +230,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 if(result.job_details) {
                   _this.jobs = result.job_details;
                   _this.total = result.total;
-                  document.getElementById('provider_job_details').style.display = 'block';
                 }
-                _this.show = 'jobs';
+                _this.show = 'jobs_verified';
                 _this.show_success(res.body.message);
               } else {
                 _this.show_error(res.body.message);
@@ -235,9 +254,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 var result = JSON.parse(res.text);
                 if(result.kyash_code){
                   _this.kyash_code = result.kyash_code;
-                  document.getElementById('provider_kyash_code').style.display = 'block';
                 }
-                _this.show = 'jobs';
+                _this.show = 'result';
                 _this.show_success(res.body.message);
               } else {
                 _this.show_error(res.body.message);
@@ -246,12 +264,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         show_success: function(message) {
-            this.successMessage = message;
-            this.$.successMsg.show();
+          this.successMessage = message;
+          this.$.successMsg.show();
         },
         show_error: function(message) {
-            this.errorMessage = message;
-            this.$.errorMsg.open();
+          this.errorMessage = message;
+          this.$.errorMsg.open();
         }
       });
     })();
