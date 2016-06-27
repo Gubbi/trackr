@@ -1,12 +1,11 @@
 from boondi.controllers import methods
-from config.config import FIREBASE_SECRET
 from framework.extend import PublicController
 from framework.default_auth import web_auth
 from boondi.globals import response, data, request
 from boondi.ext import render, error
 from boondi.utils import send_email, generate_random_password
+from lib.utils import create_fbase_token
 from model.users import get_user_by_email, get_verified_user_by_email
-from firebase_token_generator import create_token
 
 
 class AuthController(PublicController):
@@ -32,8 +31,7 @@ class AuthController(PublicController):
         response.set_cookie("org_id", org_id, max_age=7200)
         response.set_cookie("is_demo", 'False')
 
-        auth_payload = {'uid': user.email, 'org': org_id}
-        token = create_token(FIREBASE_SECRET, auth_payload)
+        token = create_fbase_token(user.email, org_id)
 
         return {
             'message': 'Logged In',
@@ -56,8 +54,7 @@ class AuthController(PublicController):
     def get_auth(self):
         if self.user:
             org = self.user.org[0].id()
-            auth_payload = {'uid': self.user.email, 'org': org}
-            token = create_token(FIREBASE_SECRET, auth_payload)
+            token = create_fbase_token(self.user.email, org)
 
             return {
                 'message': 'Logged In',

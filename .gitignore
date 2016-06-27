@@ -42,3 +42,6 @@ node_modules
 logs.db
 xsrf
 tests/init/data/logs.db-journal
+lib/boondi
+app.yaml
+

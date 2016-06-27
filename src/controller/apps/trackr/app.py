@@ -26,9 +26,11 @@ class AppController(SignedInController):
                               error_message='Valid Provider info are required')
                 update = updates_holder()
                 sp = get_or_create_service_provider(data.phone, data.name, int(data.pincode), data.contact, update)
+                push_updates(self.org, self.org_app, self.livemode, update)
 
             else:
                 phone = request.params.get('phone')
+
                 if not phone:
                     return error('Valid Provider Phone is required')
 
@@ -37,7 +39,7 @@ class AppController(SignedInController):
             if not sp:
                 logging.info('Could not find any service provider')
                 return {
-                    'message': 'Not found. You can create a new one.'
+                    'message': 'Create a new Service Provider'
                 }
 
             return {
@@ -52,7 +54,8 @@ class AppController(SignedInController):
 
         except Exception, e:
             logging.warn(str(e), exc_info=True)
-            return error('Error')
+            return error('Error fetching Service Provider details.')
+
 
     @methods('POST')
     def verify_jobs(self):
@@ -75,17 +78,18 @@ class AppController(SignedInController):
 
         return {
             "message": "Data Verified",
-            'jobs': jobs,
-            'count': len(jobs),
-            'repeat_jobs': repeat_jobs,
+            'job_details': {
+                'jobs': jobs,
+                'count': len(jobs),
+                'repeat_jobs': repeat_jobs,
+            },
             'total': total_amount
         }
 
     @methods('POST')
     def payment_request(self):
-        data.validate(required_fields=['provider_phone', 'provider_name',
-                                       'provider_pincode', 'job_data'],
-                      optional_fields=['provider_contact'],
+        data.validate(required_fields=['phone', 'name', 'pincode', 'job_data'],
+                      optional_fields=['contact'],
                       error_message='Valid Provider Info and Job details is required')
 
         if not jobs_regex.match(data.job_data):
@@ -96,13 +100,13 @@ class AppController(SignedInController):
 
         update = updates_holder()
 
-        service_provider = get_or_create_service_provider(data.provider_phone, data.provider_name,
-                                                          int(data.provider_pincode), data.provider_contact, update)
+        service_provider = get_or_create_service_provider(data.phone, data.name,
+                                                          int(data.pincode), data.contact, update)
 
         kyash_code = create_payment(service_provider, jobs, total_amount, self.livemode, self.org_app, update)
 
         push_updates(self.org, self.org_app, self.livemode, update)
-
+        logging.info(kyash_code)
         return {
             "message": "KyashCode Created",
             'kyash_code': kyash_code,

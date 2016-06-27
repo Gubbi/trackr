@@ -1,5 +1,4 @@
 from boondi.ext import render, error
-from boondi.data import Required
 from boondi.globals import data
 from boondi.utils import generate_random_password, send_email
 from framework.extend import PublicController
@@ -14,9 +13,11 @@ __author__ = 'vinuth'
 class AccountsController(PublicController):
     @staticmethod
     def new():
-        data.validate(pricing=Required(float), min_pricing=Required(float),
-                      required_fields=['name', 'id', 'short_code', 'brand_name', 'support_number',
-                                       'admin_name', 'admin_email', 'admin_phone'],
+        data.validate(required_fields=['name', 'id', 'brand_name', 'support_number',
+                                       'admin_name', 'admin_email', 'admin_phone',
+                                       'kyash_public_api_id', 'secure_api_secret_development',
+                                       'secure_hmac_secret_development', 'secure_api_secret_production',
+                                       'secure_hmac_secret_production'],
                       error_message='Form has errors')
 
         org = Organization.get_by_id(data.id)
@@ -27,7 +28,8 @@ class AccountsController(PublicController):
 
         user = get_user_by_email(data.admin_email)
         if not user:
-            user = User(raw_name=data.admin_name, email=data.admin_email, phone=data.admin_phone, account_verified=True)
+            user = User(raw_name=data.admin_name, email=data.admin_email,
+                        phone=data.admin_phone, account_verified=True)
             user.org = [org.key]
         else:
             user.org = list(set(user.org + [org.key]))
@@ -41,7 +43,11 @@ class AccountsController(PublicController):
 
         if not Trackr.get_by_id(org.key.id()):
             Trackr(id=org.key.id(), org=org.key, users=[user.key], brand_name=data.brand_name,
-                   support_number=data.support_number).put()
+                   support_number=data.support_number, kyash_public_api_id=data.kyash_public_api_id,
+                   secure_api_secret_development=data.secure_api_secret_development,
+                   secure_hmac_secret_development=data.secure_hmac_secret_development,
+                   secure_api_secret_production=data.secure_api_secret_production,
+                   secure_hmac_secret_production=data.secure_hmac_secret_production).put()
 
         TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Ops'])
 

@@ -5,7 +5,15 @@
 
 var fbase = {};
 fbase.orgId = '';
-fbase.root = new Firebase('https://trackrdb.firebaseio.com/');
+var config = {
+  apiKey: "AIzaSyCAPbI43nWlFYnfZFmlgMWn_ixh09HfXhM",
+  authDomain: "trackrdb.firebaseapp.com",
+  databaseURL: "https://trackrdb.firebaseio.com",
+  storageBucket: "trackrdb.appspot.com",
+};
+firebase.initializeApp(config);
+
+fbase.root = firebase.database().ref();
 
 fbase.queueDB = fbase.root.child('/queue/tasks');
 fbase.queue = function(spec, task) {
@@ -77,23 +85,24 @@ function login(authData) {
         return;
     }
 
-    fbase.root.authWithCustomToken(authData.fbaseToken, function(error, fbaseAuthData) {
-        if (error) {
-        } else {
-            localStorage.setItem('baseAuth', JSON.stringify(authData));
-            _login();
-        }
-    }, {
-        remember: 'sessionOnly'
+    firebase.auth().signInWithCustomToken(authData.fbaseToken).then(function(user) {
+      console.log(user);
+      localStorage.setItem('baseAuth', JSON.stringify(authData));
+      _login();
+    }, function (error) {
+      console.log(error);
     });
 }
 
 onAuth(function(authData) {
     if(authData) {
-        var fbaseAuthData = fbase.root.getAuth();
-        if(fbaseAuthData) {
+        firebase.auth().onAuthStateChanged(function(user) {
+          console.log(user);
+
+          if(user) {
             _login();
-        }
+          }
+        });
     }
     else {
         _logout();
@@ -103,20 +112,9 @@ onAuth(function(authData) {
 superagent.get('/auth/').end(function(err, res) {
     if(res.ok && res.body.status === 'success') {
         superagent.post('/auth/refresh').end(function() {
-            var fbaseAuthData = fbase.root.getAuth();
-            if(!fbaseAuthData) {
-                login(res.body);
-                return;
-            }
-
             var existingAuth = JSON.parse(localStorage.getItem('baseAuth'));
 
             if(existingAuth && existingAuth.user !== res.body.user) {
-                login(res.body);
-                return;
-            }
-
-            if(fbaseAuthData.uid !== existingAuth.user) {
                 login(res.body);
                 return;
             }
@@ -137,11 +135,13 @@ superagent.get('/auth/').end(function(err, res) {
             fbase.db = fbase.root.child(fbase.orgId);
             fbase.log = fbase.db.child('activities');
 
-            fbase.root.onAuth(function(authData) {
-                if (!authData) {
-                    localStorage.setItem('baseAuth', null);
-                    _logout();
-                }
+            firebase.auth().onAuthStateChanged(function(user) {
+              console.log(user);
+
+              if(!user) {
+                localStorage.setItem('baseAuth', null);
+                _logout();
+              }
             });
 
             ScriptRunner.markAuthReady(res.body);

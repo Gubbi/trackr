@@ -107,7 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.route = 'logging-out';
       superagent.get('/auth/logout').end(function(err, res) {
         if (res.ok) {
-          fbase.root.unauth();
+          firebase.auth().signOut();
         }
       });
     });
