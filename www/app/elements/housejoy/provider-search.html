@@ -70,6 +70,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-card sub-route="search" heading="Find Service Provider">
                   <div>
                       <div class="card-content">
+                        <iron-a11y-keys target="[[_provider_phone]]" keys="enter" on-keys-pressed="search"></iron-a11y-keys>
                         <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" char-counter maxlength="10" required always-float-label>
                         </paper-input>
                       </div>
@@ -86,9 +87,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           <paper-input name="name" id="provider_name" label="Name *" value="{{provider.name}}" required></paper-input>
                           <paper-textarea name="contact" id="provider_contact" label="Address" value="{{provider.contact}}"></paper-textarea>
                           <paper-input name="pincode" id="provider_pincode" label="Pin code *" value="{{provider.pincode}}" maxlength="6" required></paper-input>
-                          <paper-input name="phone" id="provider_phone2" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
+                          <paper-input name="phone" id="provider_phone_re" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
                       </div>
                       <div class="card-actions horizontal layout center">
+                          <paper-button class="actions" title="GoBAck" on-tap="goback">Go Back</paper-button>
                           <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Add Jobs</paper-button>
                           <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
                       </div>
@@ -108,8 +110,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                         </div>
                       </div>
                       <div class="card-actions horizontal layout center">
+                          <paper-button class="actions" title="GoBAck" on-tap="goback">Go Back</paper-button>
                           <paper-button class="actions" title="Verify Job ids" on-tap="verify">Verify</paper-button>
-                          <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]" raised>Get KyashCode</paper-button>
+                          <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" disabled="{{isDisabled}}" raised>Get KyashCode</paper-button>
                           <paper-spinner active="[[isRequesting]]"></paper-spinner>
                       </div>
                   </div>
@@ -141,13 +144,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           kyash_code: String,
           total: String,
-          isEnabled: {
+          isDisabled: {
             type: Boolean,
-            value: false
+            value: true
           }
          },
         ready: function() {
-//          this.isEnabled = true;
+          this._provider_phone = this.$.provider_phone;
+          //this.isDisabled = false;
         },
         search: function() {
           var _this = this;
@@ -172,7 +176,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             });
         },
-
+        goback : function () {
+          this.show= 'search';
+        },
         save: function() {
           var _this = this;
           if (!_this.provider.name || !_this.provider.phone || !_this.provider.pincode) {
@@ -215,6 +221,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 _this.show = 'jobs';
                 _this.show_success(res.body.message);
+                _this.isDisabled=false;
               } else {
                 _this.show_error(res.body.message);
               }
@@ -251,7 +258,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.$.successMsg.show();
         },
         show_error: function(message) {
-          console.log("in");
           this.errorMessage = message;
             this.$.errorMsg.open();
         }
