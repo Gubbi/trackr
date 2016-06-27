@@ -106,6 +106,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
           </div>
         </paper-card>
+
         <paper-card sub-route="jobs_verified" heading="Job details">
           <div>
             <div class="card-content">
@@ -119,6 +120,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
           </div>
         </paper-card>
+
         <paper-card sub-route="result" heading="">
           <div>
             <div class="card-content">
@@ -157,9 +159,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           kyash_code: String,
           total: String,
-          isEnabled: {
+          isDisabled: {
             type: Boolean,
-            value: false
+            value: true
           }
         },
         ready: function() {
@@ -187,11 +189,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 _this.show_success(res.body.message);
                 _this.show = 'contact';
               } else {
+                console.log(res);
                 _this.show_error(res.body.message);
               }
             });
         },
-
+        goback : function () {
+          this.show= 'search';
+        },
         save: function() {
           var _this = this;
           if (!_this.provider.name || !_this.provider.phone || !_this.provider.pincode) {
@@ -233,6 +238,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 _this.show = 'jobs_verified';
                 _this.show_success(res.body.message);
+                _this.isDisabled=false;
               } else {
                 _this.show_error(res.body.message);
               }
