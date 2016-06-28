@@ -62,6 +62,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       background-color: #33691E;
       color: rgba(255, 255, 255, 0.87);
     }
+    paper-button {
+      background-color: #2196F3;
+      color: white;
+    }
+    paper-button.back{
+      background-color: #db3236;
+    }
+    paper-spinner {
+      padding-left: 10px;
+    }
   </style>
   <template>
     <div class="card-actions horizontal layout center flex">
@@ -70,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-card sub-route="search" heading="Find Service Provider">
           <div>
             <div class="card-content">
-              <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" char-counter maxlength="10" required always-float-label>
+              <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" allowed-pattern="[0-9]" char-counter maxlength="10" required always-float-label>
               </paper-input>
             </div>
             <div class="card-actions">
@@ -89,7 +99,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-input name="phone" id="provider_phone2" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
             </div>
             <div class="card-actions horizontal layout center">
-              <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Add Jobs</paper-button>
+              <paper-button title="Go Back" on-tap="goback" class="back"><iron-icon icon="undo"></iron-icon>Go Back</paper-button>
+              <paper-button class="actions" alt="Save" title="Save Details" on-tap="save"><iron-icon icon="check"></iron-icon>Add Jobs</paper-button>
               <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
             </div>
           </div>
@@ -101,7 +112,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-textarea name="job_data" rows="10" id="provider_job_data" label="Paste Job ids and amount here" value="{{provider.job_data}}" required></paper-textarea>
             </div>
             <div class="card-actions horizontal layout center">
-              <paper-button class="actions" title="Verify Job ids" on-tap="verify">Verify</paper-button>
+              <paper-button title="Go Back" on-tap="goback" class="back"><iron-icon icon="undo"></iron-icon>Go Back</paper-button>
+              <paper-button class="actions" title="Verify Job ids" on-tap="verify"><iron-icon icon="check"></iron-icon>Verify</paper-button>
               <paper-spinner active="[[isRequesting]]"></paper-spinner>
             </div>
           </div>
