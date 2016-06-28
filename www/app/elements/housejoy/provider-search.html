@@ -72,6 +72,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     paper-spinner {
       padding-left: 10px;
     }
+    #kylogo{
+      width:25px;
+      height:30px;
+      padding-right:8px;
+    }
   </style>
   <template>
     <div class="card-actions horizontal layout center flex">
@@ -84,7 +89,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </paper-input>
             </div>
             <div class="card-actions">
-              <paper-button title="Search Service Provider" on-tap="search">Search</paper-button>
+              <paper-button title="Search Service Provider" on-tap="search"><iron-icon icon="search"></iron-icon>Search</paper-button>
               <paper-spinner alt="Searching..." active="[[isSearching]]"></paper-spinner>
             </div>
           </div>
@@ -99,7 +104,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-input name="phone" id="provider_phone2" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
             </div>
             <div class="card-actions horizontal layout center">
-              <paper-button title="Go Back" on-tap="goback" class="back"><iron-icon icon="undo"></iron-icon>Go Back</paper-button>
+              <paper-button title="Back" on-tap="home" class="back"><iron-icon icon="undo"></iron-icon>Back</paper-button>
               <paper-button class="actions" alt="Save" title="Save Details" on-tap="save"><iron-icon icon="check"></iron-icon>Add Jobs</paper-button>
               <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
             </div>
@@ -112,7 +117,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-textarea name="job_data" rows="10" id="provider_job_data" label="Paste Job ids and amount here" value="{{provider.job_data}}" required></paper-textarea>
             </div>
             <div class="card-actions horizontal layout center">
-              <paper-button title="Go Back" on-tap="goback" class="back"><iron-icon icon="undo"></iron-icon>Go Back</paper-button>
+              <paper-button title="Back" on-tap="home" class="back"><iron-icon icon="undo"></iron-icon>Back</paper-button>
               <paper-button class="actions" title="Verify Job ids" on-tap="verify"><iron-icon icon="check"></iron-icon>Verify</paper-button>
               <paper-spinner active="[[isRequesting]]"></paper-spinner>
             </div>
@@ -127,7 +132,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-material elevation="2">Repeat Jobs <span class="float-right">{{jobs.repeat_jobs}}</span></paper-material>
             </div>
             <div class="card-actions horizontal layout center">
-              <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]" raised>Get KyashCode</paper-button>
+              <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]"><img id="kylogo" src="../../images/kyashlogo.png">Get KyashCode</paper-button>
+
               <paper-spinner active="[[isRequesting]]"></paper-spinner>
             </div>
           </div>
@@ -139,7 +145,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-material elevation="2">KyashCode <span class="float-right">{{kyash_code}}</span></paper-material>
             </div>
             <div class="card-actions horizontal layout center">
-              <paper-button class="actions" title="Home" on-tap="home" active="[[isEnabled]]" raised>Back</paper-button>
+              <paper-button class="actions" title="Home" on-tap="home" active="[[isEnabled]]"><iron-icon icon="arrow-back"></iron-icon>Back</paper-button>
               <paper-spinner active="[[isRequesting]]"></paper-spinner>
             </div>
           </div>
@@ -205,9 +211,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 _this.show_error(res.body.message);
               }
             });
-        },
-        goback : function () {
-          this.show= 'search';
         },
         save: function() {
           var _this = this;
