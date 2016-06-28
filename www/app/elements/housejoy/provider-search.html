@@ -72,11 +72,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     paper-spinner {
       padding-left: 10px;
     }
-    #kylogo{
-      width:25px;
-      height:30px;
-      padding-right:8px;
-    }
   </style>
   <template>
     <div class="card-actions horizontal layout center flex">
@@ -85,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-card sub-route="search" heading="Find Service Provider">
           <div>
             <div class="card-content">
-              <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" allowed-pattern="[0-9]" char-counter maxlength="10" required always-float-label>
+              <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" allowed-pattern="[0-9]" char-counter maxlength="10" required>
               </paper-input>
             </div>
             <div class="card-actions">
@@ -132,7 +127,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-material elevation="2">Repeat Jobs <span class="float-right">{{jobs.repeat_jobs}}</span></paper-material>
             </div>
             <div class="card-actions horizontal layout center">
-              <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]"><img id="kylogo" src="../../images/kyashlogo.png">Get KyashCode</paper-button>
+              <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]"><iron-icon icon="check"></iron-icon>Get KyashCode</paper-button>
 
               <paper-spinner active="[[isRequesting]]"></paper-spinner>
             </div>
