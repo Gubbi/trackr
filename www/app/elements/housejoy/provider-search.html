@@ -46,6 +46,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       float: right;
     }
 
+    .float-left{
+      float: left;
+    }
+
+    .align-right {
+      text-align: right;
+    }
+
     paper-toast {
       width: 100%;
       min-width: 0;
@@ -73,9 +81,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-input name="phone" id="provider_phone" label="Mobile No" value="{{provider.phone}}" char-counter maxlength="10" required always-float-label>
               </paper-input>
             </div>
-            <div class="card-actions">
-              <paper-button title="Search Service Provider" on-tap="search">Search</paper-button>
+            <div class="card-actions align-right">
               <paper-spinner alt="Searching..." active="[[isSearching]]"></paper-spinner>
+              <paper-button title="Search Service Provider" on-tap="search">Search</paper-button>
             </div>
           </div>
         </paper-card>
@@ -88,9 +96,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-input name="pincode" id="provider_pincode" label="Pin code *" value="{{provider.pincode}}" maxlength="6" required></paper-input>
               <paper-input name="phone" id="provider_phone2" label="Mobile No *" value="{{provider.phone}}" required></paper-input>
             </div>
-            <div class="card-actions horizontal layout center">
-              <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Add Jobs</paper-button>
+            <div class="card-actions align-right">
+              <paper-button class="float-left">
+                <iron-icon icon="arrow-back" on-tap="goto" data-goto="search"></iron-icon>
+              </paper-button>
               <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
+              <paper-button class="actions" alt="Save" title="Save Details" on-tap="save">Add Jobs</paper-button>
             </div>
           </div>
         </paper-card>
@@ -100,9 +111,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="card-content">
               <paper-textarea name="job_data" rows="10" id="provider_job_data" label="Paste Job ids and amount here" value="{{provider.job_data}}" required></paper-textarea>
             </div>
-            <div class="card-actions horizontal layout center">
-              <paper-button class="actions" title="Verify Job ids" on-tap="verify">Verify</paper-button>
+            <div class="card-actions align-right">
+              <paper-button class="float-left">
+                <iron-icon icon="arrow-back" on-tap="goto" data-goto="contact"></iron-icon>
+              </paper-button>
               <paper-spinner active="[[isRequesting]]"></paper-spinner>
+              <paper-button class="actions" title="Verify Job ids" on-tap="verify">Verify</paper-button>
             </div>
           </div>
         </paper-card>
@@ -114,9 +128,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-material elevation="2">Jobs <span class="float-right">{{jobs.count}}</span></paper-material>
               <paper-material elevation="2">Repeat Jobs <span class="float-right">{{jobs.repeat_jobs}}</span></paper-material>
             </div>
-            <div class="card-actions horizontal layout center">
-              <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]" raised>Get KyashCode</paper-button>
+            <div class="card-actions align-right">
+              <paper-button class="actions float-left" title="Edit Jobs" on-tap="goto" data-goto="jobs" raised>Edit</paper-button>
               <paper-spinner active="[[isRequesting]]"></paper-spinner>
+              <paper-button class="actions" title="Generates KyashCode" on-tap="kyashcode" active="[[isEnabled]]" raised>Get KyashCode</paper-button>
             </div>
           </div>
         </paper-card>
@@ -126,8 +141,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="card-content">
               <paper-material elevation="2">KyashCode <span class="float-right">{{kyash_code}}</span></paper-material>
             </div>
-            <div class="card-actions horizontal layout center">
-              <paper-button class="actions" title="Home" on-tap="home" active="[[isEnabled]]" raised>Back</paper-button>
+            <div class="card-actions align-right">
+              <paper-button class="actions" title="Home" on-tap="goto" data-goto="search" raised>Back</paper-button>
               <paper-spinner active="[[isRequesting]]"></paper-spinner>
             </div>
           </div>
@@ -167,8 +182,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ready: function() {
         },
 
-        home: function () {
-          this.show = 'search';
+        goto: function(e) {
+          this.show = e.target.getAttribute('data-goto');
         },
 
         search: function() {
@@ -194,9 +209,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             });
         },
-        goback : function () {
-          this.show= 'search';
-        },
+
         save: function() {
           var _this = this;
           if (!_this.provider.name || !_this.provider.phone || !_this.provider.pincode) {

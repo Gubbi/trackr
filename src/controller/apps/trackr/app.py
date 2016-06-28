@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 from boondi.controllers import methods
@@ -55,7 +54,6 @@ class AppController(SignedInController):
         except Exception, e:
             logging.warn(str(e), exc_info=True)
             return error('Error fetching Service Provider details.')
-
 
     @methods('POST')
     def verify_jobs(self):

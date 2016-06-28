@@ -13,6 +13,10 @@ routes = [
         Action('search_provider',       '/search_provider'),
     ]),
 
+    Controller("apps.trackr.callback", '/bkend', [
+        Action('handle_payment',        '/payment/callback'),
+    ]),
+
     Controller("apps.trackr.google",    '/bkend/google', [
         Action('auth_url',                  '/auth_url'),
         Action('authorize',                 '/authorize')
