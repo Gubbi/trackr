@@ -10,6 +10,7 @@ from model.users import Organization
 from pykyash import KyashService
 from service.apps.push_updates import updates_holder, push_updates
 from service.apps.trackr import mark_jobs_as_paid
+from google.appengine.api import namespace_manager
 
 
 @set_auth(no_auth)
@@ -41,6 +42,11 @@ class CallbackController(PublicController):
         })
 
         update = updates_holder()
+
+        namespace = 'Trackr_' + org.key.id() + '_' + str(livemode)
+        logging.info(['Switching to namespace ', namespace])
+
+        namespace_manager.set_namespace(namespace)
 
         if data.status != 'paid':
             return "Ignoring the status update."
