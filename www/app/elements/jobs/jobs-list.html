@@ -1,0 +1,163 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="job-card.html">
+
+<dom-module id="jobs-list">
+  <style>
+    :host {
+      display: block;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      text-align: center;
+      margin-top: 0;
+    }
+
+    li {
+      display: block;
+      margin: 0 32px;
+      text-align: left;
+    }
+
+    .card-content {
+      padding: 6px 16px;
+      margin: 16px 32px 8px;
+      font-size: 0.7em;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .jobid {
+      width: 150px;
+    }
+    .amount {
+      width: 60px;
+    }
+    .status {
+      width: 60px;
+    }
+    .provider {
+      width: 90px;
+    }
+    .kyash_code {
+      width: 72px;
+    }
+    .icon-placeholder {
+      width: 40px;
+    }
+  </style>
+  <template>
+    <div class="card-content horizontal layout center flex">
+      <div class="jobid">Job ID</div><span class="flex"></span>
+      <div class="amount">Amount</div><span class="flex"></span>
+      <div class="status">Status</div><span class="flex"></span>
+      <div class="provider">Provider Num</div><span class="flex"></span>
+      <div class="kyash_code">KyashCode</div><span class="flex"></span>
+      <div class="icon-placeholder"></div>
+    </div>
+
+    <ul hidden="{{isFiltered}}">
+      <template is="dom-repeat" items="{{items}}">
+        <li><job-card job="{{item.data}}" key="{{item.key}}"></job-card></li>
+      </template>
+    </ul>
+    <ul hidden="{{!isFiltered}}">
+      <template is="dom-repeat" items="{{filtered}}">
+        <li><job-card job="{{item.data}}" key="{{item.key}}"></job-card></li>
+      </template>
+    </ul>
+  </template>
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'jobs-list',
+
+        properties: {
+          items: {
+            type: Array,
+            notify: true
+          },
+          filtered: {
+            type: Array,
+            notify: true
+          }
+        },
+
+        listeners: {
+          'search': 'search',
+          'inview': 'inview'
+        },
+
+        ready: function() {
+          var _this = this;
+
+          onAuthReady(function() {
+            _this.db = fbase.db.child('jobs');
+            _this.items = [];
+            _this.filtered = [];
+            _this.isFiltered = false;
+
+            _this.db.orderByPriority().limitToFirst(50).on('child_added', function(snap) {
+              var job = {data: snap.val(), key: snap.key};
+              console.log(job);
+              _this.push('items', job);
+            });
+          });
+        },
+
+        search: function(query) {
+          var jobID = query.detail;
+          var _this = this;
+
+          this.splice('filtered', 0, this.filtered.length);
+
+          if(jobID === '' || !jobID) {
+            this.isFiltered = false;
+            return;
+          }
+
+          if(jobID.length == 10) {
+            // Search by phone number.
+            console.log('Provider search');
+            this.db.orderByChild("by").equalTo(jobID).on("child_added", function(snap) {
+              var job =  {data: snap.val(), key: snap.key};
+              _this.push('filtered', job);
+            });
+          }
+          else if(jobID.length >=8) {
+            // Search by Kyash Code.
+            console.log('Kyashcode search');
+            this.db.orderByChild("kyash_code").equalTo(jobID).on("child_added", function(snap) {
+              var job =  {data: snap.val(), key: snap.key};
+              _this.push('filtered', job);
+            });
+          }
+
+          this.isFiltered = true;
+
+          this.db.child(jobID).once('value', function(snap) {
+            var job =  {data: snap.val(), key: snap.key};
+            if(job.data) {
+              _this.push('filtered', job);
+            }
+          });
+        },
+
+        inview: function() {
+          app.enableSearch();
+          app.searchon('Job ID, KyashCode or Provider Phone');
+        }
+      });
+    })();
+  </script>
+</dom-module>

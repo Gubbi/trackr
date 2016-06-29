@@ -1,0 +1,132 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="job-card">
+  <style>
+    paper-card {
+      width: 100%;
+      border-top: 2px solid #fefefe;
+      background-color: white;
+    }
+    .card-content {
+      padding: 0 16px;
+      font-size: 0.8em;
+    }
+    .jobid {
+      width: 150px;
+    }
+    .amount {
+      width: 60px;
+    }
+    .status {
+      width: 60px;
+    }
+    .provider {
+      width: 90px;
+    }
+    .kyash_code {
+      width: 72px;
+    }
+  </style>
+  <template>
+    <paper-card>
+      <div>
+        <div class="card-content horizontal layout center flex">
+          <div class="jobid">{{key}}</div><span class="flex"></span>
+          <div class="amount">₹{{job.amount}}</div><span class="flex"></span>
+          <div class="status">{{job.status}}</div><span class="flex"></span>
+          <div class="provider">{{job.by}}</div><span class="flex"></span>
+          <div class="kyash_code">{{job.kyash_code}}</div><span class="flex"></span>
+          <paper-icon-button class="actions" title="Activity" alt="Logs" icon="toc" on-tap="viewLogs"></paper-icon-button>
+        </div>
+      </div>
+    </paper-card>
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        is: 'job-card',
+        properties: {
+          job: Object,
+          key: {
+            type: String,
+            observer: '_ValChanged'
+          },
+        },
+
+        ready: function() {
+          var _this = this;
+          onAuthReady(function() {
+            _this.db = fbase.db.child('jobs');
+            _this._ValChanged.call(_this);
+          });
+        },
+
+        _ValChanged: function() {
+          if(!this.db || !this.key) {
+            return;
+          }
+
+          this.db.child(this.key).on('value', function(snap) {
+            console.log(snap.val());
+            this.set('job', snap.val());
+          }, this);
+        },
+
+        detached: function() {
+          if(this.logs_listener) {
+            this.logs_db.off('value', this.logs_listener);
+          }
+        },
+
+        viewLogs: function() {
+          var _this = this;
+
+          if(!this.logs_listener) {
+            this.logs_db = fbase.db.child('logs/jobs/').child(this.key);
+
+            this.logs_listener = this.logs_db.on('value', function (snap) {
+              this.logs = [];
+              var all_logs = snap.val();
+
+              Object.keys(all_logs).sort().forEach(function (key) {
+                var val = all_logs[key];
+                val.ts = key;
+                _this.logs.push(val);
+              });
+
+              if(!this.log_first) {
+                this.log_first = true;
+                var el = document.createElement('job-logs');
+                el.logs = this.logs;
+                app.subTitle = this.key;
+                app.subTitleDesc = 'Job';
+                app._displayInPanel(el);
+              }
+            }, this);
+          }
+          else {
+            var el = document.createElement('job-logs');
+            el.logs = this.logs;
+            app.subTitle = this.key;
+            app.subTitleDesc = 'Job';
+            app._displayInPanel(el);
+          }
+        }
+      });
+    })();
+  </script>
+</dom-module>

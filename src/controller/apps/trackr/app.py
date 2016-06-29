@@ -22,7 +22,7 @@ class AppController(SignedInController):
             if data.payload:
                 data.validate(required_fields=['phone', 'name', 'pincode'],
                               optional_fields=['contact'],
-                              error_message='Valid Provider info are required')
+                              error_message='Valid Provider info is required')
                 update = updates_holder()
                 sp = get_or_create_service_provider(data.phone, data.name, int(data.pincode), data.contact, update)
                 push_updates(self.org, self.org_app, self.livemode, update)
@@ -42,7 +42,7 @@ class AppController(SignedInController):
                 }
 
             return {
-                'message': 'Done',
+                'message': 'Fetched Provider Details',
                 'provider': {
                     'name': sp.name,
                     'contact': sp.contact,
