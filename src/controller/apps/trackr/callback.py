@@ -16,16 +16,15 @@ from service.apps.trackr import mark_jobs_as_paid
 class CallbackController(PublicController):
 
     @methods('POST')
-    def handle_payment(self):
+    def handle_payment(self, org_id):
+        org = Organization.get_by_id(org_id)
+        if not org:
+            return "No Organization found for " + str(org_id)
 
-        data.validate(amount=Optional(int),
-                      required_fields=['id', 'order_id', 'kyash_code', 'status'])
-
-        org = Organization.get_by_id(data.id)
         trackr = Trackr.get_by_id(org.key.id())
         api_id = trackr.kyash_public_api_id
 
-        if self.livemode:
+        if trackr.active:
             secret = trackr.secure_hmac_secret_production
         else:
             secret = trackr.secure_hmac_secret_development
@@ -37,6 +36,8 @@ class CallbackController(PublicController):
             'callback_secret': ""
         })
 
+        data.validate(amount=Optional(int),
+                      required_fields=['order_id', 'kyash_code', 'status'])
         update = updates_holder()
 
         if data.status != 'paid':
@@ -53,6 +54,6 @@ class CallbackController(PublicController):
             return error("Paid amount doesn't match requested amount.")
 
         mark_jobs_as_paid(jobs, update)
-        push_updates(self.org, self.org_app, self.livemode, update)
+        push_updates(org, trackr, trackr.active, update)
 
         return "Thanks for payment :-)"

@@ -14,7 +14,7 @@ routes = [
     ]),
 
     Controller("apps.trackr.callback", '/bkend', [
-        Action('handle_payment',        '/payment/callback'),
+        Action('handle_payment',        '/payment/callback/<org_id>'),
     ]),
 
     Controller("apps.trackr.google",    '/bkend/google', [
