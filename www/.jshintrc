@@ -21,6 +21,7 @@
     "page": true,
     "app": true,
     "fbase": true,
+    "firebase": false,
     "Firebase": false,
     "Cookies": false,
     "moment": false,

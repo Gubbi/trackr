@@ -126,18 +126,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return;
           }
 
-          if(jobID.length == 10) {
+          if(jobID.length === 10) {
             // Search by phone number.
             console.log('Provider search');
-            this.db.orderByChild("by").equalTo(jobID).on("child_added", function(snap) {
+            this.db.orderByChild('by').equalTo(jobID).on('child_added', function(snap) {
               var job =  {data: snap.val(), key: snap.key};
               _this.push('filtered', job);
             });
           }
-          else if(jobID.length >=8) {
+          else if(jobID.length >= 8) {
             // Search by Kyash Code.
             console.log('Kyashcode search');
-            this.db.orderByChild("kyash_code").equalTo(jobID).on("child_added", function(snap) {
+            this.db.orderByChild('kyash_code').equalTo(jobID).on('child_added', function(snap) {
               var job =  {data: snap.val(), key: snap.key};
               _this.push('filtered', job);
             });

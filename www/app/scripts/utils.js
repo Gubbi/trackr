@@ -6,10 +6,10 @@
 var fbase = {};
 fbase.orgId = '';
 var config = {
-  apiKey: "AIzaSyCAPbI43nWlFYnfZFmlgMWn_ixh09HfXhM",
-  authDomain: "trackrdb.firebaseapp.com",
-  databaseURL: "https://trackrdb.firebaseio.com",
-  storageBucket: "trackrdb.appspot.com",
+  apiKey: 'AIzaSyCAPbI43nWlFYnfZFmlgMWn_ixh09HfXhM',
+  authDomain: 'trackrdb.firebaseapp.com',
+  databaseURL: 'https://trackrdb.firebaseio.com',
+  storageBucket: 'trackrdb.appspot.com',
 };
 firebase.initializeApp(config);
 
