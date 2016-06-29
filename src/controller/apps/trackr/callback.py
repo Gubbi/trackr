@@ -24,7 +24,11 @@ class CallbackController(PublicController):
         trackr = Trackr.get_by_id(org.key.id())
         api_id = trackr.kyash_public_api_id
 
-        if trackr.active:
+        data.validate(amount=Optional(int),
+                      required_fields=['order_id', 'kyash_code', 'status'])
+
+        livemode = False if data.kyash_code.startswith('T') else True
+        if livemode:
             secret = trackr.secure_hmac_secret_production
         else:
             secret = trackr.secure_hmac_secret_development
@@ -36,8 +40,6 @@ class CallbackController(PublicController):
             'callback_secret': ""
         })
 
-        data.validate(amount=Optional(int),
-                      required_fields=['order_id', 'kyash_code', 'status'])
         update = updates_holder()
 
         if data.status != 'paid':
@@ -54,6 +56,6 @@ class CallbackController(PublicController):
             return error("Paid amount doesn't match requested amount.")
 
         mark_jobs_as_paid(jobs, update)
-        push_updates(org, trackr, trackr.active, update)
+        push_updates(org, trackr, livemode, update)
 
         return "Thanks for payment :-)"
