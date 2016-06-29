@@ -1,3 +1,5 @@
+import logging
+
 from boondi.ext import render, error
 from boondi.globals import data
 from boondi.utils import generate_random_password, send_email
@@ -41,13 +43,13 @@ class AccountsController(PublicController):
         org.admin = user.key
         org.put()
 
-        if not Trackr.get_by_id(org.key.id()):
-            Trackr(id=org.key.id(), org=org.key, users=[user.key], brand_name=data.brand_name,
-                   support_number=data.support_number, kyash_public_api_id=data.kyash_public_api_id,
-                   secure_api_secret_development=data.secure_api_secret_development,
-                   secure_hmac_secret_development=data.secure_hmac_secret_development,
-                   secure_api_secret_production=data.secure_api_secret_production,
-                   secure_hmac_secret_production=data.secure_hmac_secret_production).put()
+        logging.info('Creating Trackr')
+        Trackr(id=org.key.id(), org=org.key, users=[user.key], brand_name=data.brand_name,
+               support_number=data.support_number, kyash_public_api_id=data.kyash_public_api_id,
+               secure_api_secret_development=data.secure_api_secret_development,
+               secure_hmac_secret_development=data.secure_hmac_secret_development,
+               secure_api_secret_production=data.secure_api_secret_production,
+               secure_hmac_secret_production=data.secure_hmac_secret_production).put()
 
         TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Ops'])
 
