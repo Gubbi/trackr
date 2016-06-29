@@ -32,7 +32,12 @@ class PublicController(TrackrController):
     """
     Extended by controllers providing publicly accessible information and actions.
     """
-    pass
+
+    def switch_namespace(self, org, livemode):
+        namespace = 'Trackr_' + org.key.id() + '_' + str(livemode)
+        logging.info(['Switching to namespace ', namespace])
+
+        namespace_manager.set_namespace(namespace)
 
 
 class SignedInController(TrackrController):
