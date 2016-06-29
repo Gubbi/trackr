@@ -24,7 +24,7 @@
             -ms-flex: 0 0 auto;
             -o-flex: 0 0 auto;
             flex: 0 0 auto;
-            width: 40px;
+            width: 0px;
             -moz-box-sizing: border-box;
             -webkit-box-sizing: border-box;
             box-sizing: border-box;
@@ -37,7 +37,6 @@
         }
 
         #search[show] input {
-            padding: 10px;
             visibility: visible
         }
 
@@ -58,6 +57,15 @@
             -webkit-appearance: none
         }
 
+        input {
+          width: 0;
+        }
+
+        input[show] {
+          width: 200px;
+          padding: 10px;
+        }
+
         input::-webkit-input-placeholder {
           color: rgba(255,255,255,.5);
         }
@@ -71,9 +79,9 @@
           color: rgba(255,255,255,.5);
         }
         </style>
-        <div id="search" show$="{{show}}" on-click="toggleSearch">
-            <paper-icon-button icon="search"></paper-icon-button>
-            <input is="iron-input" placeholder$="{{placeholder}}" bind-value="{{searchInput}}" type="text" id="input" on-keyup="onKeyPress" on-blur="hideSearch" autocomplete="off">
+        <div id="search" show$="{{enabled}}">
+            <paper-icon-button icon="search" on-click="toggleSearch"></paper-icon-button>
+            <input show$="{{show}}" is="iron-input" placeholder$="{{placeholder}}" bind-value="{{searchInput}}" type="text" id="input" on-keyup="onKeyPress" on-blur="hideSearch" autocomplete="off">
         </div>
     </template>
     <script>
@@ -81,6 +89,10 @@
         is: 'search-bar',
 
         properties: {
+            enabled: {
+                type: Boolean,
+                value: true
+            },
             show: {
                 type: Boolean,
                 value: false

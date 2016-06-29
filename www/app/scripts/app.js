@@ -172,4 +172,16 @@ onAuthReady(function(authData) {
       document.querySelector('#search').placeholder = searchon;
     }
   };
+
+  app.disableSearch = function() {
+    if(document.querySelector('#search')) {
+      document.querySelector('#search').enabled = false;
+    }
+  };
+
+  app.enableSearch = function() {
+    if(document.querySelector('#search')) {
+      document.querySelector('#search').enabled = true;
+    }
+  };
 })(document);

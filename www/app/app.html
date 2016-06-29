@@ -71,52 +71,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
        <!-- Drawer Content -->
        <paper-menu class="list" attr-for-selected="data-route" selected="{{route}}" on-iron-select="onMenuSelect">
-         <a data-route="home" href="/app.html">
+         <a data-route="jobs" href="/app.html/jobs">
            <iron-icon icon="track-changes"></iron-icon>
-           <span>Activity Stream</span>
-         </a>
-
-         <a data-route="sales" href="/app.html/sales">
-           <iron-icon icon="shopping-basket"></iron-icon>
-           <span>Sales Orders</span>
-         </a>
-
-         <a data-route="invoices" href="/app.html/invoices">
-           <iron-icon icon="receipt"></iron-icon>
-           <span>Invoices</span>
-         </a>
-
-         <a data-route="payments" href="/app.html/payments">
-           <iron-icon icon="toll"></iron-icon>
-           <span>Payments</span>
-         </a>
-
-         <!--<a data-route="deposits" href="/app.html/deposits">-->
-           <!--<iron-icon icon="send"></iron-icon>-->
-           <!--<span>Deposits</span>-->
-         <!--</a>-->
-
-         <a data-route="customers" href="/app.html/customers">
-           <iron-icon icon="store"></iron-icon>
-           <span>Customers</span>
-         </a>
-
-         <a data-route="agents" href="/app.html/agents">
-           <iron-icon icon="face"></iron-icon>
-           <span>Agents</span>
+           <span>Jobs</span>
          </a>
 
          <a data-route="housejoy" href="/app.html/housejoy">
-           <iron-icon icon="apps"></iron-icon>
-           <span>Housejoy</span>
+           <iron-icon icon="toll"></iron-icon>
+           <span>New Payment</span>
          </a>
 
          <br/>
          <hr/>
 
          <a data-route="settings" href="/app.html/settings">
-           <iron-icon icon="settings"></iron-icon>
-           <span>Settings</span>
+           <iron-icon icon="face"></iron-icon>
+           <span>Users</span>
          </a>
 
          <a data-route="logging-out" href="/app.html/logout">
@@ -187,38 +157,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
          <!-- Main Content -->
          <div class="content">
            <iron-pages attr-for-selected="data-route" selected="{{route}}">
-             <section data-route="home">
-               <activity-list></activity-list>
+             <section data-route="jobs">
+               <jobs-list id="jobs"> </jobs-list>
              </section>
-
-             <section data-route="sales">
-               <sales-list id="sales"> </sales-list>
-             </section>
-
-             <section data-route="customers">
-               <customers-list id="customers" on-create-customer="_newCustomer"> </customers-list>
-             </section>
-
-             <section data-route="agents">
-               <agents-list id="agents" on-create-agent="_newAgent"> </agents-list>
-             </section>
-
-             <section data-route="invoices">
-               <invoices-list id="invoices"> </invoices-list>
-             </section>
-
-             <section data-route="agent-info">
-               <agent-dash id="agent-info" key={{params.key}}> </agent-dash>
-             </section>
-
-             <section data-route="payments">
-               <payments-list id="payments"> </payments-list>
-             </section>
-
-             <!--<section data-route="deposits">-->
-               <!--<deposits-list id="deposits"> </deposits-list>-->
-             <!--</section>-->
-
              <section data-route="settings">
                <app-settings id="settings"></app-settings>
              </section>

@@ -67,12 +67,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.params = data.params;
     });
 
-    page('/invoices', function () {
-      app.route = 'invoices';
+    page('/jobs', function () {
+      app.route = 'jobs';
     });
 
-    page('/invoices/:id', function (data) {
-      app.route = 'invoice-info';
+    page('/jobs/:id', function (data) {
+      app.route = 'job-info';
       app.params = data.params;
     });
 
@@ -95,12 +95,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     page('/settings', function (data) {
       app.route = 'settings';
-      app.titlePage = 'App Settings';
+      app.titlePage = 'Users';
     });
 
     page('/housejoy', function (data) {
       app.route = 'housejoy';
-      app.titlePage = 'Home - Housejoy';
+      app.titlePage = 'New Payment Request';
     });
 
     page('/logout', function () {

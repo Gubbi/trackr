@@ -23,6 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             max-width: 90%;
             border-top: 2px solid #2196F3;
             margin: 30px auto;
+            background-color: white;
         }
 
         paper-input[readonly], paper-textarea[readonly] {
@@ -71,56 +72,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div class="horizontal layout center flex">
             <span class="flex"></span>
             <paper-card>
-                <div>
-                    <div class="card-content">
-                        <paper-input label="Brand Name" value="{{app.brand_name}}" required readonly$={{!editing}}></paper-input>
-                        <paper-input label="SMS Short Code" value="{{app.short_code}}" required readonly$={{!editing}}></paper-input>
-                        <paper-input label="Support Helpline" value="{{app.support_number}}" required readonly$={{!editing}}></paper-input>
-                        <paper-input label="Notification Email" value="{{app.notification_email}}" readonly$={{!editing}}></paper-input>
-                        <paper-input label="Spreadsheet ID" value="{{app.spreadsheet_id}}" required readonly$={{!editing}} hidden="{{!is_script_enabled}}"></paper-input>
-                    </div>
-                    <div class="card-actions horizontal layout center flex">
-                        <span class="flex"></span>
-                        <paper-icon-button icon="close" title="Reset" alt="Reset" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>
-                        <paper-icon-button icon="done" title="Save" on-tap="updateSettings" hidden="{{!canSave(editing)}}"></paper-icon-button>
-                        <paper-spinner alt="Saving Changes" active="[[isSaving]]"></paper-spinner>
-                        <paper-icon-button class="actions" alt="Edit" title="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>
-                    </div>
+                <div class="card-content">
+                  Coming Soon...
                 </div>
             </paper-card>
             <span class="flex"></span>
         </div>
-        <div class="horizontal layout center flex" >
-            <span class="flex"></span>
-            <paper-card>
-                <div>
-                    <div class="click-action card-content horizontal layout center flex" hidden="{{is_script_enabled}}">
-                        <span>Enable Spreadsheet Updates</span> <span class="flex"></span>
-                        <paper-toggle-button checked="[[is_script_enabled]]" toggles on-change="enableScript"></paper-toggle-button>
-                    </div>
-                    <div class="click-action card-content horizontal layout center flex" hidden="{{!is_script_enabled}}">
-                        <paper-button raised on-tap="enableScript">
-                          <iron-icon icon="cached"></iron-icon>
-                          ReAuthenticate With Google
-                        </paper-button>
-                    </div>
-                </div>
-            </paper-card>
-            <span class="flex"></span>
-        </div>
-        <div class="horizontal layout center flex">
-            <span class="flex"></span>
-            <paper-card>
-                <div>
-                    <div class="card-content">
-                        <paper-textarea label="API ID" value="{{auth.api_id}}" readonly></paper-textarea>
-                        <paper-textarea label="API Secret" value="{{auth.api_secret}}" readonly></paper-textarea>
-                    </div>
-                </div>
-            </paper-card>
-            <span class="flex"></span>
-        </div>
-
         <paper-toast class="error" id="errorMsg" text="{{errorMessage}}" duration="0"></paper-toast>
         <paper-toast class="success" id="successMsg" text="[[successMessage]]"></paper-toast>
     </template>
