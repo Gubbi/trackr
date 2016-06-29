@@ -86,19 +86,16 @@ function login(authData) {
     }
 
     firebase.auth().signInWithCustomToken(authData.fbaseToken).then(function(user) {
-      console.log(user);
       localStorage.setItem('baseAuth', JSON.stringify(authData));
       _login();
     }, function (error) {
-      console.log(error);
+
     });
 }
 
 onAuth(function(authData) {
     if(authData) {
         firebase.auth().onAuthStateChanged(function(user) {
-          console.log(user);
-
           if(user) {
             _login();
           }
@@ -136,8 +133,6 @@ superagent.get('/auth/').end(function(err, res) {
             fbase.log = fbase.db.child('activities');
 
             firebase.auth().onAuthStateChanged(function(user) {
-              console.log(user);
-
               if(!user) {
                 localStorage.setItem('baseAuth', null);
                 _logout();

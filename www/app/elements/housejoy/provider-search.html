@@ -249,7 +249,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 _this.show_success(res.body.message);
                 _this.show = 'contact';
               } else {
-                console.log(res);
                 _this.show_error(res.body.message);
               }
             });
@@ -298,7 +297,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 _this.show_success(res.body.message);
                 _this.isDisabled=false;
                 _this.hasNoJobsRepeated = !Boolean(_this.jobs.repeat_jobs.length);
-                console.log(_this.hasNoJobsRepeated);
               } else {
                 _this.show_error(res.body.message);
               }

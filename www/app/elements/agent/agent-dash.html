@@ -207,7 +207,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           this.paymentSock = this.paymentsDB.orderByChild('to').equalTo(this.key).limitToFirst(50).on(
                   'child_added', function(snap) {
-                    console.log(snap.val());
                     this.push('payments', {data: snap.val(), key: snap.key()});
                   }, this);
         },

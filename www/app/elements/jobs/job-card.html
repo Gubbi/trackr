@@ -81,7 +81,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
           this.db.child(this.key).on('value', function(snap) {
-            console.log(snap.val());
             this.set('job', snap.val());
           }, this);
         },
