@@ -219,7 +219,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         goto: function(e) {
-          this.show = e.target.getAttribute('data-goto');
+          this.show = Polymer.dom(e).path[2].getAttribute('data-goto');
         },
 
         home: function () {
