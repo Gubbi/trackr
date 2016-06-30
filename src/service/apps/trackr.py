@@ -8,8 +8,8 @@ from pykyash import KyashCode, Contact
 
 __author__ = 'vinuth'
 
-
-stream_path = lambda: 'activities/' + (datetime.datetime.utcnow() + datetime.timedelta(hours=5.5)).strftime('%Y-%m-%d')
+batch = (datetime.datetime.utcnow() + datetime.timedelta(hours=5.5)).strftime('%Y-%m-%d')
+stream_path = lambda: 'activities/' + batch
 sp_path = lambda phone: 'sp/' + str(phone)
 job_path = lambda job_id: 'jobs/' + str(job_id)
 job_status_path = lambda job_id: 'jobs/' + str(job_id) + '/status'
@@ -135,4 +135,15 @@ def mark_jobs_as_paid(jobs, update):
             'ts': {'.sv': 'timestamp'},
             'subtype': 'Payment Made',
             '.priority': tst,
+        }
+
+        sp = job.by.get()
+        update['FBase']['PATCH']['mis/' + str(batch) + '/' + str(job.key.id())] = {
+            'type': 'inline',
+            'ts': {'.sv': 'timestamp'},
+            'job_id': str(job.key.id()),
+            'service_provider': str(sp.name),
+            'service_provider_phone': str(sp.phone),
+            'kyash_code': str(job.kyash_code[0]),
+            'amount': str(job.amount)
         }

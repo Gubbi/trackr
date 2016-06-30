@@ -79,6 +79,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            <span>New Payment</span>
          </a>
 
+         <a data-route="activity" href="/app.html/activity">
+           <iron-icon icon="track-changes"></iron-icon>
+           <span>Activity Stream</span>
+         </a>
+
          <br/>
          <hr/>
 
@@ -164,6 +169,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
              <section data-route="housejoy">
                <provider-search id="housejoy"></provider-search>
              </section>
+             <section data-route="activity">
+               <activity-list id="activity"></activity-list>
+             </section>
            </iron-pages>
          </div>
        </paper-scroll-header-panel>
@@ -187,9 +195,5 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </platinum-sw-register>
     -->
   </template>
-
-  <!-- build:js scripts/app.js -->
-
-  <!-- endbuild-->
 </body>
 </html>

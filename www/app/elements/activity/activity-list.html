@@ -59,42 +59,96 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       padding: 0 16px;
       color: white;
     }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      text-align: center;
+      margin-top: 0;
+    }
+
+    li {
+      display: block;
+      margin: 0 32px;
+      text-align: left;
+    }
+
+    .card-content {
+      padding: 6px 16px;
+      margin: 16px 32px 8px;
+      font-size: 0.7em;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .jobid {
+      width: 150px;
+    }
+    .amount {
+      width: 60px;
+    }
+    .status {
+      width: 60px;
+    }
+    .provider {
+      width: 90px;
+    }
+    .kyash_code {
+      width: 72px;
+    }
+    .icon-placeholder {
+      width: 40px;
+    }
   </style>
   <template>
     <paper-scroll-header-panel id="container" fixed header-height='32px'>
       <div class="paper-header layout horizontal center flex">
+        <paper-icon-button icon="chevron-right" on-tap="download"></paper-icon-button>
         <span class="flex"></span>
         <paper-icon-button id="prevIcon" class="menu-icon selected" icon="chevron-left" on-tap="showPrev"></paper-icon-button>
         <b>{{dateSelected}}</b>
         <paper-icon-button id="nextIcon" class="menu-icon selected" icon="chevron-right" on-tap="showNext"></paper-icon-button>
       </div>
-
       <!-- Main Content -->
       <div class="content">
-        <ul>
-          <template is="dom-repeat" items="{{activities}}">
-            <li><activity-card activity="{{item.data}}"></activity-card></li>
-          </template>
-          <li class="filler"></li>
-          <li class="filler"></li>
-          <li class="filler"></li>
-          <li class="filler"></li>
-          <li class="filler"></li>
-          <li class="filler"></li>
-          <li class="filler"></li>
-          <li class="filler"></li>
-          <li class="filler"></li>
-        </ul>
+        <div class="card-content horizontal layout center flex">
+      <div class="jobid">Job ID</div><span class="flex"></span>
+      <div class="amount">Amount</div><span class="flex"></span>
+      <div class="status">Status</div><span class="flex"></span>
+      <div class="provider">Provider Num</div><span class="flex"></span>
+      <div class="kyash_code">KyashCode</div><span class="flex"></span>
+      <div class="icon-placeholder"></div>
+    </div>
+
+    <ul hidden="{{isFiltered}}">
+      <template is="dom-repeat" items="{{items}}">
+        <li><job-card job="{{item.data}}" key="{{item.key}}"></job-card></li>
+      </template>
+    </ul>
+    <ul hidden="{{!isFiltered}}">
+      <template is="dom-repeat" items="{{filtered}}">
+        <li><job-card job="{{item.data}}" key="{{item.key}}"></job-card></li>
+      </template>
+    </ul>
       </div>
     </paper-scroll-header-panel>
   </template>
 
-  <script>
+  <script src="../../bower_components/file-saver/FileSaver.min.js"></script>
+<script>
     (function () {
       Polymer({
         is: 'activity-list',
 
         properties: {
+          items: {
+            type: Array,
+            notify: true
+          },
+          filtered: {
+            type: Array,
+            notify: true
+          },
           dateSelected: {
             type: String,
             observer: '_dateChanged'
@@ -102,36 +156,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         listeners: {
-          'search': 'search'
+          'search': 'search',
+          'inview': 'inview'
         },
 
         ready: function() {
           var _this = this;
+
           onAuthReady(function() {
-            _this.activityDB = fbase.db.child('activities');
+            _this.items = [];
+            _this.filtered = [];
+            _this.isFiltered = false;
             _this.today = moment().format('YYYY-MM-DD');
             _this.dateSelected = _this.today;
           });
         },
+         _dateChanged: function() {
 
-        _dateChanged: function() {
-          this.activities = [];
-
+          this.items = [];
           if(!this.dateSelected) {
             return;
           }
-
           this.toggleClass('selected', this.dateSelected !== this.today, this.$.nextIcon);
-
           var _this = this;
-          if(this.active_query) {
-            this.active_query.off();
-            this.splice('activities', 0, this.activities.length);
-          }
 
-          this.active_query = this.activityDB.child(this.dateSelected);
-          this.active_query.orderByPriority().limitToFirst(50).on('child_added', function(snap) {
-            _this.push('activities', {data: snap.val(), key: snap.key()});
+          if(this.db) {
+            this.db.off();
+            this.splice('items', 0, this.items.length);
+          }
+          this.db = fbase.db.child('mis/'+this.dateSelected);
+          this.db.orderByPriority().limitToFirst(50).on('child_added', function(snap) {
+            var job = {data: snap.val(), key: snap.key};
+            _this.push('items', job);
           });
         },
         showPrev: function() {
@@ -141,10 +197,80 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if(this.dateSelected === this.today) {
             return;
           }
-
           this.dateSelected = moment(this.dateSelected).add(1, 'day').format('YYYY-MM-DD');
         },
+        download: function() {
+          function ConvertToCSV(objArray) {
+            var obj = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+            var str = '';
+
+            for (var i = 0; i < obj.length; i++) {
+              var line = '';
+              for (var key in obj[i].data) {
+                if (Object.prototype.hasOwnProperty.call(obj[i].data, key)) {
+                  if (line != '') line += ',';
+
+                  line += obj[i].data[key];
+                  console.log(line);
+                }
+              }
+              str += line + '\r\n'
+            }
+//            for (var i = 0; i < array.length; i++) {
+//                var line = '';
+//                for (var index in array[i]) {
+//                    if (line != '') line += ',';
+//
+//                    line += array[i][index];
+//                }
+//
+//                str += line + '\r\n';
+//            }
+            console.log(str);
+            return str;
+        }
+          var file = new File([ConvertToCSV(this.items)], this.dateSelected + '.csv', {type: "text/plain;charset=utf-8"});
+            //saveAs(file);
+        },
         search: function(query) {
+          var jobID = query.detail;
+          var _this = this;
+
+          this.splice('filtered', 0, this.filtered.length);
+
+          if(jobID === '' || !jobID) {
+            this.isFiltered = false;
+            return;
+          }
+
+          if(jobID.length === 10) {
+            // Search by phone number.
+            this.db.orderByChild('by').equalTo(jobID).on('child_added', function(snap) {
+              var job =  {data: snap.val(), key: snap.key};
+              _this.push('filtered', job);
+            });
+          }
+          else if(jobID.length >= 8) {
+            // Search by Kyash Code.
+            this.db.orderByChild('kyash_code').equalTo(jobID).on('child_added', function(snap) {
+              var job =  {data: snap.val(), key: snap.key};
+              _this.push('filtered', job);
+            });
+          }
+
+          this.isFiltered = true;
+
+          this.db.child(jobID).once('value', function(snap) {
+            var job =  {data: snap.val(), key: snap.key};
+            if(job.data) {
+              _this.push('filtered', job);
+            }
+          });
+        },
+
+        inview: function() {
+          app.enableSearch();
+          app.searchon('Job ID, KyashCode or Provider Phone');
         }
       });
     })();

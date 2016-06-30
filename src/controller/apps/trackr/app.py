@@ -111,43 +111,6 @@ class AppController(SignedInController):
             'total': total_amount
         }
 
-    @methods('POST')
-    def handle_payment(self):
-        api_id = self.org_app.kyash_public_api_id
-
-        if self.livemode:
-            secret = self.org_app.secure_hmac_secret_production
-        else:
-            secret = self.org_app.secure_hmac_secret_development
-
-        KyashService.authenticate_callback(request, credentials={
-            'public_id': api_id,
-            'hmac_secret': secret
-        })
-
-        data.validate(amount=Optional(int),
-                      required_fields=['order_id', 'kyash_code', 'status'])
-
-        update = updates_holder()
-
-        if data.status != 'paid':
-            return "Ignoring the status update."
-
-        if not data.amount:
-            return error("Amount value required.")
-
-        jobs = get_jobs_by_kyash_code(data.kyash_code)
-        total_amount = reduce(lambda aggr, x: aggr+x.amount, jobs, 0)
-
-        if data.amount != total_amount:
-            # TODO: Add admin notification email to configured email id.
-            return error("Paid amount doesn't match requested amount.")
-
-        mark_jobs_as_paid(jobs, update)
-        push_updates(self.org, self.org_app, self.livemode, update)
-
-        return "Thanks for payment :-)"
-
     def settings(self):
         data.define(required_fields=['support_number'],
                     optional_fields=['notification_email'])

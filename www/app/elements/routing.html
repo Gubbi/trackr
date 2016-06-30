@@ -102,6 +102,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.titlePage = 'New Payment Request';
     });
 
+    page('/activity', function (data) {
+      app.route = 'activity';
+    });
+
     page('/logout', function () {
       app.route = 'logging-out';
       superagent.get('/auth/logout').end(function(err, res) {
