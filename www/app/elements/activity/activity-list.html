@@ -200,26 +200,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            * @return {string}
            */
           function ConvertToCSV(objArray) {
-            var obj = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+            var obj = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
             var str = 'ID,PAYER,PAYER NUM,AMOUNT,KYASHCODE,,\r\n';
 
             for (var i = 0; i < obj.length; i++) {
               var line = '';
               for (var key in obj[i].data) {
                 if (Object.prototype.hasOwnProperty.call(obj[i].data, key)) {
-                  if (line != '') line += ',';
-
+                  if (line !== '') { line += ','; }
                   line += obj[i].data[key];
                 }
               }
-              str += line + '\r\n'
+              str += line + '\r\n';
             }
             return str;
           }
 
           try {
             if(this.items) {
-              var blob = new Blob([ConvertToCSV(this.items)], {type: "text/csv;charset=utf-8"});
+              var blob = new Blob([ConvertToCSV(this.items)], {type: 'text/csv;charset=utf-8'});
               saveAs(blob, this.dateSelected + '.csv');
             }
           } catch (e) {
