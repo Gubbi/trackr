@@ -90,7 +90,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-card sub-route="search">
           <div>
             <div class="card-content">
-              <paper-input name="phone" id="provider_phone" label="Service Provider Mobile No" value="{{provider.phone}}" char-counter maxlength="10" required always-float-label>
+              <paper-input name="phone" id="provider_phone" label="Payer Mobile No" value="{{provider.phone}}" allowed-pattern="[0-9]" char-counter maxlength="10" required always-float-label>
               </paper-input>
             </div>
             <div class="card-actions horizontal layout center">
@@ -101,7 +101,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
         </paper-card>
 
-        <paper-card sub-route="contact" heading="Provider Details">
+        <paper-card sub-route="contact" heading="Payer Details">
           <div>
             <div class="card-content">
               <paper-input name="name" id="provider_name" label="Name *" value="{{provider.name}}" required></paper-input>
@@ -119,10 +119,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
         </paper-card>
 
-        <paper-card sub-route="jobs" heading="Jobs">
+        <paper-card sub-route="jobs" heading="Orders/Jobs">
           <div>
             <div class="card-content">
-              <paper-textarea name="job_data" rows="10" id="provider_job_data" label="Paste Job ID, Amount here" value="{{provider.job_data}}" required></paper-textarea>
+              <paper-textarea name="job_data" rows="10" id="provider_job_data" label="Paste Order/Job ID, Amount here" value="{{provider.job_data}}" required></paper-textarea>
             </div>
             <div class="card-actions horizontal layout center">
               <paper-icon-button icon="arrow-back" title="Provider Details" alt="Back" on-tap="goto" data-goto="contact"></paper-icon-button>
@@ -134,12 +134,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </div>
         </paper-card>
 
-        <paper-card sub-route="jobs_verified" heading="Job details">
+        <paper-card sub-route="jobs_verified" heading="Order/Job details">
           <div>
             <div class="summary card-content">
               <paper-input name="name" id="total_amount" label="Total Amount" value="{{total}}" readonly></paper-input>
-              <paper-input name="name" id="NumJobs" label="Number of Jobs" value="{{jobs.count}}" readonly></paper-input>
-              <paper-textarea name="name" id="RepeatJobs" label="Repeated Job IDs" value="{{jobs.repeat_jobs}}" readonly hidden="{{hasNoJobsRepeated}}"></paper-textarea>
+              <paper-input name="name" id="NumJobs" label="Number of Orders/Jobs" value="{{jobs.count}}" readonly></paper-input>
+              <paper-textarea name="name" id="RepeatJobs" label="Repeated IDs" value="{{jobs.repeat_jobs}}" readonly hidden="{{hasNoJobsRepeated}}"></paper-textarea>
             </div>
             <div class="card-actions horizontal layout center">
               <paper-icon-button icon="arrow-back" title="Edit Jobs" alt="Back" on-tap="goto" data-goto="jobs"></paper-icon-button>
@@ -154,7 +154,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-card sub-route="result">
           <div>
             <div class="card-content">
-              <p>Payment instructions have been sent to the provider.</p>
+              <p>Payment instructions have been sent to the payer.</p>
               <paper-input name="name" id="kyash_code" label="KyashCode" value="{{kyash_code}}" readonly></paper-input>
             </div>
             <div class="card-actions horizontal layout center">

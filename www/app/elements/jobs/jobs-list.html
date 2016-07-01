@@ -57,10 +57,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
   <template>
     <div class="card-content horizontal layout center flex">
-      <div class="jobid">Job ID</div><span class="flex"></span>
+      <div class="jobid">ID</div><span class="flex"></span>
       <div class="amount">Amount</div><span class="flex"></span>
       <div class="status">Status</div><span class="flex"></span>
-      <div class="provider">Provider Num</div><span class="flex"></span>
+      <div class="provider">Payer Num</div><span class="flex"></span>
       <div class="kyash_code">KyashCode</div><span class="flex"></span>
       <div class="icon-placeholder"></div>
     </div>
@@ -152,7 +152,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         inview: function() {
           app.enableSearch();
-          app.searchon('Job ID, KyashCode or Provider Phone');
+          app.searchon('ID, KyashCode or Payer Phone');
         }
       });
     })();

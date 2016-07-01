@@ -18,23 +18,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       display: block;
     }
 
-    ul {
-      list-style: none;
-      padding-left: 0;
-      text-align: center;
-    }
-
-    li {
-      display: inline-block;
-      margin: 8px 16px;
-      text-align: left;
-    }
-
-    li.filler {
-      width: 300px;
-      max-width: 90vw;
-    }
-
     .paper-header {
       background-color: #0277BD;
     }
@@ -84,58 +67,71 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     .jobid {
       width: 150px;
     }
+
     .amount {
       width: 60px;
     }
-    .status {
-      width: 60px;
+
+    .payer_num {
+      width: 80px;
     }
-    .provider {
+
+    .payer {
       width: 90px;
     }
+
     .kyash_code {
       width: 72px;
-    }
-    .icon-placeholder {
-      width: 40px;
     }
   </style>
   <template>
     <paper-scroll-header-panel id="container" fixed header-height='32px'>
       <div class="paper-header layout horizontal center flex">
-        <paper-icon-button icon="chevron-right" on-tap="download"></paper-icon-button>
+        <paper-icon-button icon="file-download" on-tap="download"></paper-icon-button>
         <span class="flex"></span>
-        <paper-icon-button id="prevIcon" class="menu-icon selected" icon="chevron-left" on-tap="showPrev"></paper-icon-button>
+        <paper-icon-button id="prevIcon" class="menu-icon selected" icon="chevron-left"
+                           on-tap="showPrev"></paper-icon-button>
         <b>{{dateSelected}}</b>
-        <paper-icon-button id="nextIcon" class="menu-icon selected" icon="chevron-right" on-tap="showNext"></paper-icon-button>
+        <paper-icon-button id="nextIcon" class="menu-icon selected" icon="chevron-right"
+                           on-tap="showNext"></paper-icon-button>
       </div>
       <!-- Main Content -->
       <div class="content">
         <div class="card-content horizontal layout center flex">
-      <div class="jobid">Job ID</div><span class="flex"></span>
-      <div class="amount">Amount</div><span class="flex"></span>
-      <div class="status">Status</div><span class="flex"></span>
-      <div class="provider">Provider Num</div><span class="flex"></span>
-      <div class="kyash_code">KyashCode</div><span class="flex"></span>
-      <div class="icon-placeholder"></div>
-    </div>
+          <div class="jobid">ID</div>
+          <span class="flex"></span>
+          <div class="payer">Payer</div>
+          <span class="flex"></span>
+          <div class="payer_num">Payer Num</div>
+          <span class="flex"></span>
+          <div class="amount">Amount</div>
+          <span class="flex"></span>
+          <!--<div class="status">Status</div><span class="flex"></span>-->
+          <div class="kyash_code">KyashCode</div>
+          <span class="flex"></span>
+          <!--<div class="icon-placeholder"></div>-->
+        </div>
 
-    <ul hidden="{{isFiltered}}">
-      <template is="dom-repeat" items="{{items}}">
-        <li><job-card job="{{item.data}}" key="{{item.key}}"></job-card></li>
-      </template>
-    </ul>
-    <ul hidden="{{!isFiltered}}">
-      <template is="dom-repeat" items="{{filtered}}">
-        <li><job-card job="{{item.data}}" key="{{item.key}}"></job-card></li>
-      </template>
-    </ul>
+        <ul hidden="{{isFiltered}}">
+          <template is="dom-repeat" items="{{items}}">
+            <li>
+              <activity-card job="{{item.data}}" key="{{item.key}}"></activity-card>
+            </li>
+          </template>
+        </ul>
+        <ul hidden="{{!isFiltered}}">
+          <template is="dom-repeat" items="{{filtered}}">
+            <li>
+              <activity-card job="{{item.data}}" key="{{item.key}}"></activity-card>
+            </li>
+          </template>
+        </ul>
       </div>
     </paper-scroll-header-panel>
   </template>
 
   <script src="../../bower_components/file-saver/FileSaver.min.js"></script>
-<script>
+  <script>
     (function () {
       Polymer({
         is: 'activity-list',
@@ -160,10 +156,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           'inview': 'inview'
         },
 
-        ready: function() {
+        ready: function () {
           var _this = this;
 
-          onAuthReady(function() {
+          onAuthReady(function () {
             _this.items = [];
             _this.filtered = [];
             _this.isFiltered = false;
@@ -171,38 +167,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _this.dateSelected = _this.today;
           });
         },
-         _dateChanged: function() {
+        _dateChanged: function () {
 
           this.items = [];
-          if(!this.dateSelected) {
+          if (!this.dateSelected) {
             return;
           }
           this.toggleClass('selected', this.dateSelected !== this.today, this.$.nextIcon);
           var _this = this;
 
-          if(this.db) {
+          if (this.db) {
             this.db.off();
             this.splice('items', 0, this.items.length);
           }
-          this.db = fbase.db.child('mis/'+this.dateSelected);
-          this.db.orderByPriority().limitToFirst(50).on('child_added', function(snap) {
+          this.db = fbase.db.child('mis/' + this.dateSelected);
+          this.db.orderByPriority().on('child_added', function (snap) {
             var job = {data: snap.val(), key: snap.key};
             _this.push('items', job);
           });
         },
-        showPrev: function() {
+        showPrev: function () {
           this.dateSelected = moment(this.dateSelected).subtract(1, 'day').format('YYYY-MM-DD');
         },
-        showNext: function() {
-          if(this.dateSelected === this.today) {
+        showNext: function () {
+          if (this.dateSelected === this.today) {
             return;
           }
           this.dateSelected = moment(this.dateSelected).add(1, 'day').format('YYYY-MM-DD');
         },
-        download: function() {
+        download: function () {
+          /**
+           * @return {string}
+           */
           function ConvertToCSV(objArray) {
             var obj = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
-            var str = '';
+            var str = 'ID,PAYER,PAYER NUM,AMOUNT,KYASHCODE,,\r\n';
 
             for (var i = 0; i < obj.length; i++) {
               var line = '';
@@ -211,64 +210,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   if (line != '') line += ',';
 
                   line += obj[i].data[key];
-                  console.log(line);
                 }
               }
               str += line + '\r\n'
             }
-//            for (var i = 0; i < array.length; i++) {
-//                var line = '';
-//                for (var index in array[i]) {
-//                    if (line != '') line += ',';
-//
-//                    line += array[i][index];
-//                }
-//
-//                str += line + '\r\n';
-//            }
-            console.log(str);
             return str;
-        }
-          var file = new File([ConvertToCSV(this.items)], this.dateSelected + '.csv', {type: "text/plain;charset=utf-8"});
-            //saveAs(file);
+          }
+
+          try {
+            if(this.items) {
+              var blob = new Blob([ConvertToCSV(this.items)], {type: "text/csv;charset=utf-8"});
+              saveAs(blob, this.dateSelected + '.csv');
+            }
+          } catch (e) {
+          }
         },
-        search: function(query) {
+        search: function (query) {
           var jobID = query.detail;
           var _this = this;
 
           this.splice('filtered', 0, this.filtered.length);
 
-          if(jobID === '' || !jobID) {
+          if (jobID === '' || !jobID) {
             this.isFiltered = false;
             return;
           }
 
-          if(jobID.length === 10) {
+          if (jobID.length === 10) {
             // Search by phone number.
-            this.db.orderByChild('by').equalTo(jobID).on('child_added', function(snap) {
-              var job =  {data: snap.val(), key: snap.key};
+            this.db.orderByChild('by').equalTo(jobID).on('child_added', function (snap) {
+              var job = {data: snap.val(), key: snap.key};
               _this.push('filtered', job);
             });
           }
-          else if(jobID.length >= 8) {
+          else if (jobID.length >= 8) {
             // Search by Kyash Code.
-            this.db.orderByChild('kyash_code').equalTo(jobID).on('child_added', function(snap) {
-              var job =  {data: snap.val(), key: snap.key};
+            this.db.orderByChild('kyash_code').equalTo(jobID).on('child_added', function (snap) {
+              var job = {data: snap.val(), key: snap.key};
               _this.push('filtered', job);
             });
           }
 
           this.isFiltered = true;
 
-          this.db.child(jobID).once('value', function(snap) {
-            var job =  {data: snap.val(), key: snap.key};
-            if(job.data) {
+          this.db.child(jobID).once('value', function (snap) {
+            var job = {data: snap.val(), key: snap.key};
+            if (job.data) {
               _this.push('filtered', job);
             }
           });
         },
 
-        inview: function() {
+        inview: function () {
           app.enableSearch();
           app.searchon('Job ID, KyashCode or Provider Phone');
         }

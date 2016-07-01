@@ -142,8 +142,8 @@ def mark_jobs_as_paid(jobs, update):
             'type': 'inline',
             'ts': {'.sv': 'timestamp'},
             'job_id': str(job.key.id()),
-            'service_provider': str(sp.name),
-            'service_provider_phone': str(sp.phone),
+            'payer': str(sp.name),
+            'payer_num': str(sp.phone),
             'kyash_code': str(job.kyash_code[0]),
-            'amount': str(job.amount)
+            'amount': str(job.amount),
         }

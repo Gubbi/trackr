@@ -9,79 +9,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
-<script src="../../bower_components/time-elements/time-elements.js"></script>
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 
 <dom-module id="activity-card">
   <style>
-    :host paper-card {
-      width: 300px;
-      max-width: 90vw;
+    paper-card {
+      width: 100%;
+      border-top: 2px solid #fefefe;
+      background-color: white;
     }
-
-    paper-card.customer {
-      border-top: 2px solid #2196F3;
-    }
-
-    paper-card.agent {
-      border-top: 2px solid #9C27B0;
-    }
-
-    paper-card.invoice {
-      border-top: 2px solid #009688;
-    }
-
-    paper-card.payment {
-      border-top: 2px solid #8BC34A;
-    }
-
-    paper-card.sale {
-      border-top: 2px solid #795548;
-    }
-
-    paper-input[readonly]  {
-      /* line color when the input is unfocused */
-      --paper-input-container-underline: {
-        display:none;
-      }
-      --paper-input-container-underline-focus: {
-        display:none;
-      }
-      --paper-input-container-underline-disabled: {
-        display:none;
-      }
-    }
-
-    :host paper-card a {
-      color: inherit;
-    }
-
-    :host .card-content {
-      cursor: pointer;
-    }
-
-    .secondary {
-      color: rgba(0,0,0,.4);
-      font-size: 0.9em;
-      margin-top: 6px;
-    }
-
-    :host .card-actions {
-      color: rgba(0,0,0,.5);
+    .card-content {
+      padding: 8px 16px;
       font-size: 0.8em;
     }
+    .jobid {
+      width: 150px;
+    }
+    .amount {
+      width: 60px;
+    }
+    .payer_num {
+      width: 80px;
+    }
+    .payer {
+      width: 90px;
+    }
+    .kyash_code {
+      width: 72px;
+    }
   </style>
-
   <template>
-    <paper-card class$="[[activity.type]]" on-tap="showItem">
+    <paper-card>
       <div>
-        <div class="card-content">
-          <div>{{heading}}</div>
-          <div class="secondary">{{log}}</div>
-        </div>
-        <div class="card-actions horizontal layout center flex">
-          <span>{{card_type}}</span>
-          <span class="flex"></span>
-          <time is="relative-time" datetime$="{{_timestamp(activity.ts)}}">{{_displayDate(activity.ts)}}</time>
+        <div class="card-content horizontal layout center flex">
+          <div class="jobid">{{key}}</div><span class="flex"></span>
+          <div class="payer">{{job.payer}}</div><span class="flex"></span>
+          <div class="payer_num">{{job.payer_num}}</div><span class="flex"></span>
+          <div class="amount">₹{{job.amount}}</div><span class="flex"></span>
+          <!--<div class="status">{{job.status}}</div><span class="flex"></span>-->
+
+          <div class="kyash_code">{{job.kyash_code}}</div><span class="flex"></span>
+          <!--<paper-icon-button class="actions" title="Activity" alt="Logs" icon="toc" on-tap="viewLogs"></paper-icon-button>-->
         </div>
       </div>
     </paper-card>
@@ -92,101 +62,70 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'activity-card',
         properties: {
-          activity: {
-            type: Object
-          }
+          job: Object,
+          key: {
+            type: String,
+            observer: '_ValChanged'
+          },
         },
-        showItem: function() {
-          app.subTitle = this.activity.type.charAt(0).toUpperCase() + this.activity.type.slice(1).replace('-', ' ');
-          var activity = this.activity;
-          this.db.once('value', function(snap) {
-            var el = document.createElement(activity.type + '-card');
-            el[activity.type] = snap.val();
-            el.key = snap.key();
-            if(activity.data.customer_name && activity.data.customer_name !== '') {
-              el.customer = activity.data.customer_name;
-            }
-            if(activity.data.agent_name && activity.data.agent_name !== '') {
-              el.agent = activity.data.agent_name;
-            }
-            app._displayInPanel(el);
-          });
-        },
+
         ready: function() {
           var _this = this;
-
           onAuthReady(function() {
-            _this.onReady.call(_this);
+            _this.db = fbase.db.child('jobs');
+            _this._ValChanged.call(_this);
           });
         },
-        onReady: function() {
-          if(!this.activity) {
+
+        _ValChanged: function() {
+          if(!this.db || !this.key) {
             return;
           }
 
-          this.db = fbase.db.child(this.activity.path);
-          this.title = 'click to view';
-          this.card_type = this.activity.type;
+          this.db.child(this.key).on('value', function(snap) {
+            this.set('job', snap.val());
+          }, this);
+        },
 
-          if(this.activity.type === 'customer') {
-            this.heading = this.activity.data.name;
-            this.log = 'new customer created';
+        detached: function() {
+          if(this.logs_listener) {
+            this.logs_db.off('value', this.logs_listener);
           }
-          else if(this.activity.type === 'agent') {
-            this.heading = this.activity.data.name;
-            this.log = 'new agent created';
-          }
-          else if(this.activity.type === 'invoice') {
-            this.heading = this.activity.data.customer_name;
-            if(this.activity.data.type === 'Modified') {
-              this.log = 'amount changed from ₹' +  this.activity.data.old_amount + ' to ₹' +  this.activity.data.amount;
-            }
-            else {
-              this.log = '₹' +  this.activity.data.amount + ' [Paid: ₹' + (this.activity.data.paid || 0) + ']';
-            }
-          }
-          else if(this.activity.type === 'payment') {
-            var prefix = this.activity.data.type === 'Cancelled'? '-' : '';
-            this.heading = prefix + '₹' + this.activity.data.amount;
+        },
 
-            if(this.activity.data.type === 'Cancelled') {
-              this.log = this.activity.data.agent_name + ' cancelled the payment';
-            }
-            else {
-              if(this.activity.data.is_advance) {
-                this.card_type = 'advance';
+        viewLogs: function() {
+          var _this = this;
+
+          if(!this.logs_listener) {
+            this.logs_db = fbase.db.child('logs/jobs/').child(this.key);
+
+            this.logs_listener = this.logs_db.on('value', function (snap) {
+              this.logs = [];
+              var all_logs = snap.val();
+
+              Object.keys(all_logs).sort().forEach(function (key) {
+                var val = all_logs[key];
+                val.ts = key;
+                _this.logs.push(val);
+              });
+
+              if(!this.log_first) {
+                this.log_first = true;
+                var el = document.createElement('job-logs');
+                el.logs = this.logs;
+                app.subTitle = this.key;
+                app.subTitleDesc = 'Job';
+                app._displayInPanel(el);
               }
-              this.log = this.activity.data.customer_name + ' paid to ' + this.activity.data.agent_name;
-            }
+            }, this);
           }
-          else if(this.activity.type === 'deposit') {
-            this.heading = this.activity.data.agent_name;
-            if(this.activity.data.old_amount) {
-              this.log = 'deposit changed from ₹' +  this.activity.data.old_amount + ' to ₹' +  this.activity.data.amount;
-            }
-            else {
-              this.log = 'deposited ₹' +  this.activity.data.amount;
-            }
+          else {
+            var el = document.createElement('job-logs');
+            el.logs = this.logs;
+            app.subTitle = this.key;
+            app.subTitleDesc = 'Job';
+            app._displayInPanel(el);
           }
-          else if(this.activity.type === 'sale') {
-            this.heading = this.activity.data.customer_name;
-            if(this.activity.data.type === 'Created') {
-              this.card_type = 'new sales order!';
-              this.log = '₹' + this.activity.data.amount + ' [Advance: ₹' + this.activity.data.advance + ']';
-            }
-            if(this.activity.data.type === 'Modified') {
-              this.log = 'Sales order modified';
-            }
-            if(this.activity.data.type === 'Cancelled') {
-              this.log = 'Sales order cancelled';
-            }
-          }
-        },
-        _displayDate: function(epoch) {
-          return moment(parseInt(epoch)).fromNow();
-        },
-        _timestamp: function(epoch) {
-          return moment(parseInt(epoch)).format();
         }
       });
     })();
