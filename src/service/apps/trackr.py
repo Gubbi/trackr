@@ -140,7 +140,7 @@ def mark_jobs_as_paid(jobs, update):
         sp = job.by.get()
         update['FBase']['PATCH']['mis/' + str(batch) + '/' + str(job.key.id())] = {
             'type': 'inline',
-            'ts': {'.sv': 'timestamp'},
+            'ts': str(tst),
             'job_id': str(job.key.id()),
             'payer': str(sp.name),
             'payer_num': str(sp.phone),

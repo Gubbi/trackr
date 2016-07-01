@@ -201,14 +201,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            */
           function ConvertToCSV(objArray) {
             var obj = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
-            var str = 'ID,PAYER,PAYER NUM,AMOUNT,KYASHCODE,,\r\n';
+            var str = 'DATE,KYASHCODE,ID,PAYER,PAYER NUM,AMOUNT\r\n';
+            var fields = ['ts', 'kyash_code', 'job_id', 'payer', 'payer_num', 'amount'];
 
             for (var i = 0; i < obj.length; i++) {
               var line = '';
-              for (var key in obj[i].data) {
-                if (Object.prototype.hasOwnProperty.call(obj[i].data, key)) {
-                  if (line !== '') { line += ','; }
-                  line += obj[i].data[key];
+              console.log(obj[i].data);
+              console.log(typeof  obj[i].data);
+              for (var j=0; j < fields.length; j++) {
+                if (line !== '') { line += ','; }
+                if (Object.prototype.hasOwnProperty.call(obj[i].data, fields[j])) {
+                  if(fields[j] === 'ts') {
+                    line += moment.unix(obj[i].data[fields[j]]).format('MM/DD/YYYY hh:mm a');
+                  }
+                  else {
+                    line += obj[i].data[fields[j]];
+                  }
+                }
+                else {
+                  line += '';
                 }
               }
               str += line + '\r\n';
