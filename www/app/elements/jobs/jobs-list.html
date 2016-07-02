@@ -107,7 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _this.filtered = [];
             _this.isFiltered = false;
 
-            _this.db.orderByPriority().limitToFirst(50).on('child_added', function(snap) {
+            _this.db.orderByPriority().limitToFirst(200).on('child_added', function(snap) {
               var job = {data: snap.val(), key: snap.key};
               _this.push('items', job);
             });

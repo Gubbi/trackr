@@ -31,7 +31,7 @@ class DefaultController(BaseController):
         super(DefaultController, self).__init__(request, response)
 
         # Controller variables that will be set when available
-        self.org = self.admin = self.org_app = self.default_namespace = self.livemode = None
+        self.org = self.admin = self.org_app = self.default_namespace = self.livemode = self.roles = None
         self.realm = self.token_response = self.client = None
         self.api_user = None
         self.set_env(config=config, h=helpers)

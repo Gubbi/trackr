@@ -51,7 +51,9 @@ class AccountsController(PublicController):
                secure_api_secret_production=data.secure_api_secret_production,
                secure_hmac_secret_production=data.secure_hmac_secret_production).put()
 
-        TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Ops'])
+        role = TrackrRoles.get_or_insert(org.key.id(), parent=user.key)
+        role.kind = ['Admin', 'Ops']
+        role.put()
 
         mail_body = render('/emails/welcome.mako', new_password=new_password, user=user)
         send_email(data.admin_email, mail_body, 'Welcome to Trackr')
@@ -71,16 +73,19 @@ class AccountsController(PublicController):
         if not user:
             user = User(raw_name=data.user_name, email=data.user_email, phone=data.user_phone, account_verified=True)
             user.org = [org.key]
+
+            new_password = generate_random_password()
+            user.password = web_auth.signed_password(new_password)
+
+            mail_body = render('/emails/welcome.mako', new_password=new_password, user=user)
+            send_email(data.user_email, mail_body, 'Welcome to Trackr')
         else:
             user.org = list(set(user.org + [org.key]))
 
-        new_password = generate_random_password()
-        user.password = web_auth.signed_password(new_password)
         user.put()
 
-        TrackrRoles.get_or_insert('roles', parent=user.key, kind=['Admin', 'Ops'])
-
-        mail_body = render('/emails/welcome.mako', new_password=new_password, user=user)
-        send_email(data.user_email, mail_body, 'Welcome to Trackr')
+        role = TrackrRoles.get_or_insert(org.key.id(), parent=user.key)
+        role.kind = ['Admin', 'Ops']
+        role.put()
 
         return 'Account Created'

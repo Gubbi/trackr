@@ -3,23 +3,30 @@ from boondi.routes import ControllerPrefixRoute as Controller, ActionRoute as Ac
 
 routes = [
     Controller("apps.trackr.app",   '/bkend', [
-        Action('settings',              '/settings'),
-        Action('payment_request',       '/payment/create'),
-        Action('cancel_payment',        '/payment/cancel'),
-        Action('entry',                 '/entry'),
-        Action('new_invoice',           '/new_invoice'),
-        Action('update_agent',          '/update_agent'),
-        Action('verify_jobs',           '/verify_jobs'),
-        Action('search_provider',       '/search_provider'),
+        Action('settings',                '/settings'),
+        Action('payment_request',         '/payment/create'),
+        Action('cancel_payment',          '/payment/cancel'),
+        Action('entry',                   '/entry'),
+        Action('new_invoice',             '/new_invoice'),
+        Action('update_agent',            '/update_agent'),
+        Action('verify_jobs',             '/verify_jobs'),
+        Action('search_provider',         '/search_provider'),
+        Action('get_acl',                 '/acl'),
     ]),
 
     Controller("apps.trackr.callback", '/bkend', [
-        Action('handle_payment',        '/payment/callback/<org_id>'),
+        Action('handle_payment',             '/payment/callback/<org_id>'),
     ]),
 
     Controller("apps.trackr.google",    '/bkend/google', [
-        Action('auth_url',                  '/auth_url'),
-        Action('authorize',                 '/authorize')
+        Action('auth_url',                           '/auth_url'),
+        Action('authorize',                          '/authorize')
+    ]),
+
+    Controller("apps.trackr.accounts",  '/bkend/accounts', [
+        Action('list_users',                           '/list'),
+        Action('add_user',                             '/add'),
+        Action('remove_user',                          '/remove'),
     ]),
 
     Controller("sys.accounts",  '/sys/accounts', [
@@ -32,15 +39,15 @@ routes = [
     ]),
 
     Controller('auth',          '/auth', [
-        Action('login',             '/login'),
-        Action('refresh_auth',      '/refresh'),
-        Action('get_auth',          '/'),
-        Action('reset',             '/reset'),
-        Action('change',            '/change'),
+        Action('login',              '/login'),
+        Action('refresh_auth',       '/refresh'),
+        Action('get_auth',           '/'),
+        Action('reset',              '/reset'),
+        Action('change',             '/change'),
         Action('toggle_demo',        '/toggle_demo'),
     ]),
 
     Controller('home',          '/auth', [
-        Action('logout',            '/logout'),
+        Action('logout',             '/logout'),
     ]),
 ]

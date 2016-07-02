@@ -63,7 +63,7 @@ class User(ndb.Model):
 get_user_by_email = lambda email: User.query(User.email == email).get()
 get_user_by_phone = lambda phone: User.query(User.phone == phone).get()
 get_org_by_phone = lambda phone: Organization.query(Organization.phone == phone).get()
-get_users_in_org = lambda org: User.query(User.org == org).get()
+get_users_in_org = lambda org: User.query(User.org == org).fetch()
 get_verified_user_by_email = lambda email: User.query(User.email == email, User.account_verified == True).get()
 get_user_by_verification_code = lambda code: User.query(User.verification_code == code).get()
 get_org_by_api_key = lambda api_key: Organization.query().filter(Organization.secure_api_id == api_key).get()

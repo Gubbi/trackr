@@ -69,25 +69,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
        <!-- Drawer Content -->
        <paper-menu class="list" attr-for-selected="data-route" selected="{{route}}" on-iron-select="onMenuSelect">
-         <a data-route="jobs" href="/app.html/jobs">
+         <a data-route="stream" href="/app.html/stream">
            <iron-icon icon="track-changes"></iron-icon>
            <span>Activity Stream</span>
          </a>
 
-         <a data-route="housejoy" href="/app.html/housejoy">
+         <a data-route="payment" href="/app.html/payment">
            <iron-icon icon="toll"></iron-icon>
            <span>New Payment</span>
          </a>
 
-         <a data-route="activity" href="/app.html/activity">
+         <a data-route="mis" href="/app.html/mis" hidden$="{{!isAdmin}}">
            <iron-icon icon="file-download"></iron-icon>
-           <span>MIS</span>
+           <span>Daily MIS</span>
          </a>
 
          <br/>
          <hr/>
 
-         <a data-route="settings" href="/app.html/settings">
+         <a data-route="settings" href="/app.html/settings" hidden$="{{!isAdmin}}">
            <iron-icon icon="face"></iron-icon>
            <span>Users</span>
          </a>
@@ -160,17 +160,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
          <!-- Main Content -->
          <div class="content">
            <iron-pages attr-for-selected="data-route" selected="{{route}}">
-             <section data-route="jobs">
-               <jobs-list id="jobs"> </jobs-list>
+             <section data-route="stream">
+               <jobs-list id="stream"> </jobs-list>
              </section>
              <section data-route="settings">
-               <app-settings id="settings"></app-settings>
+               <users-list id="settings"></users-list>
              </section>
-             <section data-route="housejoy">
-               <provider-search id="housejoy"></provider-search>
+             <section data-route="payment">
+               <payment-instruct id="payment"></payment-instruct>
              </section>
-             <section data-route="activity">
-               <activity-list id="activity"></activity-list>
+             <section data-route="mis">
+               <mis-list id="mis"></mis-list>
              </section>
            </iron-pages>
          </div>

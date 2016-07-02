@@ -23,6 +23,20 @@ class TrackrController(DefaultController):
     app_model = Trackr
     acl_model = TrackrRoles
 
+    @staticmethod
+    def switch_to_default_ns():
+        namespace = 'default'
+        logging.info(['Switching to namespace ', namespace])
+        namespace_manager.set_namespace(namespace)
+
+    @staticmethod
+    def switch_namespace(org, livemode):
+        namespace = 'Trackr_' + org.key.id() + '_' + str(livemode)
+        logging.info(['Switching to namespace ', namespace])
+
+        namespace_manager.set_namespace(namespace)
+
+
 TrackrController.default_auth_list.append(sc_module_auth)
 TrackrController.access_auth_map['api'].append(sc_module_auth)
 TrackrController.format_map[sc_module_auth] = mime_json
@@ -32,12 +46,14 @@ class PublicController(TrackrController):
     """
     Extended by controllers providing publicly accessible information and actions.
     """
+    pass
 
-    def switch_namespace(self, org, livemode):
-        namespace = 'Trackr_' + org.key.id() + '_' + str(livemode)
-        logging.info(['Switching to namespace ', namespace])
 
-        namespace_manager.set_namespace(namespace)
+class AdminController(TrackrController):
+    """
+    Extended by controllers providing publicly accessible information and actions.
+    """
+    acl = ["Admin"]
 
 
 class SignedInController(TrackrController):
@@ -47,7 +63,4 @@ class SignedInController(TrackrController):
     acl = ["any"]
 
     def _setup(self):
-        namespace = 'Trackr_'+self.org.key.id()+'_'+str(self.livemode)
-        logging.info(['Switching to namespace ', namespace])
-
-        namespace_manager.set_namespace(namespace)
+        self.switch_namespace(self.org, self.livemode)

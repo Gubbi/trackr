@@ -1,25 +1,18 @@
-<!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 <link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
 
-<dom-module id="customer-card">
+<dom-module id="user-edit">
   <style>
     paper-card {
       width: 300px;
       max-width: 90vw;
-      border-top: 2px solid #2196F3;
+      border-top: 2px solid #9C27B0;
+      background-color: white;
     }
 
     paper-input[readonly]  {
@@ -51,31 +44,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-align: center;
         font-size: 1.05em;
     }
+
     paper-toast.error {
         background-color: #D50000;
         color: rgba(255, 255, 255, 0.87);
     }
+
     paper-toast.success {
         background-color: #33691E;
         color: rgba(255, 255, 255, 0.87);
+    }
+
+    .label {
+      padding: 8px 0 4px;
+      font-size: 0.75em;
+      color: #727272;
+    }
+
+    paper-checkbox {
+      padding: 8px 0 4px;
     }
   </style>
   <template>
     <paper-card>
       <div>
         <div class="card-content">
-          <paper-input name="business_name" label="Business Name" value="{{customer.name}}" required readonly$={{!editing}}></paper-input>
-          <paper-input name="contact" label="Contact Person" value="{{customer.contact}}" required readonly$={{!editing}}></paper-input>
-          <paper-input name="phone" id="customer_phone" label="Mobile No" value="{{customer.phone}}" required readonly$={{!keyEditable}}></paper-input>
+          <paper-input name="name" label="Name" value="{{user.name}}" required></paper-input>
+          <paper-input name="email" label="Email" value="{{user.email}}" required readonly$={{!isNew}}></paper-input>
+          <paper-input name="phone" label="Mobile No" value="{{user.phone}}" required></paper-input>
+          <br/>
+          <div class="label">Permissions</div>
+          <div><paper-checkbox checked="{{isAdmin}}"> Admin</paper-checkbox></div>
+          <div><paper-checkbox checked="{{isOps}}"> Ops</paper-checkbox></div>
         </div>
         <div class="card-actions horizontal layout center flex">
-          <!--<a href$="{{getUrl(key)}}" hidden="{{hideLaunch}}" title="Expand"><paper-icon-button class="actions" alt="View More" icon="launch" hidden="{{editing}}"></paper-icon-button></a>-->
+          <paper-icon-button icon="close" title="Cancel" on-tap="cancel"></paper-icon-button>
+          <paper-icon-button icon="delete" title="Delete" on-tap="delete"></paper-icon-button>
           <span class="flex"></span>
-          <!--<paper-icon-button class="actions" alt="New Invoice" title="New Invoice" icon="assignment-turned-in" on-tap="createInvoice" hidden="{{editing}}"></paper-icon-button>-->
-          <paper-icon-button icon="close" title="Cancel" on-tap="cancel" hidden="{{!editing}}"></paper-icon-button>
-          <paper-icon-button icon="done" title="Save" on-tap="save" hidden="{{!canSave(editing)}}"></paper-icon-button>
           <paper-spinner alt="Saving Changes" active="[[isSaving]]"></paper-spinner>
-          <paper-icon-button class="actions" alt="Edit" title="Edit" icon="create" on-tap="startEdit" hidden="{{editing}}"></paper-icon-button>
+          <paper-icon-button icon="done" title="Save" on-tap="save"></paper-icon-button>
         </div>
       </div>
     </paper-card>
@@ -87,90 +94,77 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     (function() {
       Polymer({
-        is: 'customer-card',
+        is: 'user-edit',
+
         properties: {
-          customer: Object,
-          key: {
-            type: String,
+          user: {
+            type: Object,
             observer: '_ValChanged'
           },
-          editable: {
+          isAdmin: {
+            type: Boolean,
+            value: false
+          },
+          isOps: {
             type: Boolean,
             value: true
           },
-          editing: {
+          isNew: {
             type: Boolean,
-            value: false
-          },
-          hideLaunch: {
-            type: Boolean,
-            value: false
+            value: true
           }
-        },
-
-        canSave: function() {
-          return this.editing && !this.isSaving;
-        },
-
-        getUrl: function(key) {
-          return pageBasePath + '/customers/' + key;
         },
 
         ready: function() {
           var _this = this;
-
           onAuthReady(function() {
-            _this.db = fbase.db.child('customers');
             _this._ValChanged.call(_this);
           });
-
-          this.keyEditable = this.isSaving = false;
         },
 
         _ValChanged: function() {
-          if(!this.db || !this.customer) {
+          if(!this.user) {
             return;
           }
 
-          this.customer_listener = this.db.child(this.key).on('value', function(snap) {
-            this.set('customer', snap.val());
-          }, this);
-        },
-
-        detached: function() {
-          this.$.errorMsg.close();
-          this.db.child(this.key).off('value', this.customer_listener);
-        },
-
-        startEdit: function() {
-          this.editing = true;
-          if (!this.key) { this.keyEditable = true; }
-          this.updateStyles();
+          this.isAdmin = this.user.roles.indexOf('Admin') > -1;
+          this.isOps = this.user.roles.indexOf('Ops') > -1;
         },
 
         save: function() {
           var _this = this;
 
-          if (!this.customer.phone) {
+          if (!this.user.phone) {
             this.show_error('Phone number is required.');
             return;
           }
 
-          if(!this.key) {
-            this.key = this.customer.phone;
+          if (!this.user.email) {
+            this.show_error('Email ID is required.');
+            return;
           }
 
+          if (!this.user.name) {
+            this.show_error('Name is required.');
+            return;
+          }
+
+          roles = [];
+          if(this.isAdmin) {
+            roles.push('Admin');
+          }
+          if(this.isOps) {
+            roles.push('Ops');
+          }
+          this.user.roles = roles;
+
           this.isSaving = true;
-          superagent.post('/bkend/update_customer')
-                  .send(this.customer)
+          superagent.post('/bkend/accounts/add')
+                  .send(this.user)
                   .end(function(err, res) {
                     _this.isSaving = false;
-
                     if (res.ok) {
                       _this.show_success(res.body.message);
-                      _this.editing = false;
-                      _this.keyEditable = false;
-                      _this.updateStyles();
                       _this.fire('updated');
                     } else {
                       _this.show_error(res.body.message);
@@ -178,17 +172,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   });
         },
 
+        delete: function() {
+          var _this = this;
+
+          this.isSaving = true;
+          superagent.post('/bkend/accounts/remove')
+                    .send({'email': this.user.email})
+                    .end(function(err, res) {
+                      _this.isSaving = false;
+                      if (res.ok) {
+                        _this.show_success(res.body.message);
+                        _this.fire('updated');
+                      } else {
+                        _this.show_error(res.body.message);
+                      }
+                    });
+        },
+
         cancel: function() {
           this.$.errorMsg.close();
-          this.editing = false;
-          this.keyEditable = false;
-          this.updateStyles();
           this.fire('cancelled');
         },
+
         show_success: function(message) {
             this.successMessage = message;
             this.$.successMsg.show();
         },
+
         show_error: function(message) {
             this.errorMessage = message;
             this.$.errorMsg.open();

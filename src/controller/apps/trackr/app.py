@@ -126,3 +126,8 @@ class AppController(SignedInController):
         return {
             'app': app_settings
         }
+
+    def get_acl(self):
+        return {
+            'roles': self.roles.kind
+        }

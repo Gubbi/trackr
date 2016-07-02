@@ -1,0 +1,123 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="user-card.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
+
+<dom-module id="users-list">
+  <style>
+    :host {
+      display: block;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      text-align: center;
+      margin-top: 0;
+    }
+
+    li {
+      display: block;
+      margin: 0 32px;
+      text-align: left;
+    }
+
+    .card-content {
+      padding: 6px 16px;
+      margin: 16px 32px 8px;
+      font-size: 0.7em;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .email {
+      width: 180px;
+    }
+
+    .name {
+      width: 320px;
+    }
+
+    .phone {
+      width: 90px;
+    }
+
+    .roles {
+      width: 160px;
+    }
+
+    .icon-placeholder {
+      width: 40px;
+    }
+
+    paper-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 48px;
+      background-color: #7B1FA2;
+    }
+  </style>
+  <template>
+    <div class="card-content horizontal layout center flex">
+      <div class="email">User Email</div><span class="flex"></span>
+      <div class="name">Name</div><span class="flex"></span>
+      <div class="phone">Phone</div><span class="flex"></span>
+      <div class="roles">Roles</div><span class="flex"></span>
+      <div class="icon-placeholder"></div>
+    </div>
+
+    <ul>
+      <template is="dom-repeat" items="{{items}}">
+        <li><user-card user="{{item}}"></user-card></li>
+      </template>
+    </ul>
+
+    <paper-fab icon="add" on-tap="createAccount"></paper-fab>
+  </template>
+
+  <script>
+    (function () {
+      Polymer({
+        is: 'users-list',
+
+        properties: {
+          items: {
+            type: Array,
+            notify: true
+          }
+        },
+
+        listeners: {
+          'inview': 'inview',
+          'updated': 'inview'
+        },
+
+        inview: function() {
+          _this = this;
+
+          superagent.get('/bkend/accounts/list').end(function(err, res) {
+            if (res.ok) {
+              _this.items = res.body;
+            } else {
+              _this.show_error(res.body.message);
+            }
+          });
+
+          app.enableSearch();
+          app.searchon('Job ID, KyashCode or Provider Phone');
+        },
+
+        createAccount: function() {
+          this.fire('create-account');
+        },
+      });
+    })();
+  </script>
+</dom-module>

@@ -32,7 +32,7 @@ class DefaultWebAuth(WebAuth):
                     controller.set_env(org=org)
                     controller.set_env(org_app=controller.app_model.get_by_id(org_id))
 
-            acl = controller.acl_model.get_by_id('roles', parent=user.key)
+            acl = controller.acl_model.get_by_id(org_id, parent=user.key)
             controller.set_env(roles=acl)
 
             controller.set_env(livemode=request.cookies.get("is_demo", 'False') != 'True')
@@ -40,7 +40,10 @@ class DefaultWebAuth(WebAuth):
             if org and org.admin == user.key:
                 controller.set_env(admin=True)
 
-            controller.user_acl = acl.kind
+            if acl:
+                controller.user_acl = acl.kind
+            else:
+                controller.user_acl = []
         else:
             controller.set_env(user=None)
             controller.user_acl = []

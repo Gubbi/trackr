@@ -130,7 +130,6 @@ superagent.get('/auth/').end(function(err, res) {
             }
 
             fbase.db = fbase.root.child(fbase.orgId);
-            fbase.log = fbase.db.child('activities');
 
             firebase.auth().onAuthStateChanged(function(user) {
               if(!user) {
@@ -139,7 +138,12 @@ superagent.get('/auth/').end(function(err, res) {
               }
             });
 
-            ScriptRunner.markAuthReady(res.body);
+            superagent.get('/bkend/acl').end(function(err, res) {
+              if(res.ok) {
+                fbase.acl = res.body.roles;
+                ScriptRunner.markAuthReady(res.body);
+              }
+            });
         });
     }
     else {

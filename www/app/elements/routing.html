@@ -45,53 +45,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/', function () {
-      app.route = 'jobs';
-      app.titlePage = 'Orders/Jobs';
+      app.route = 'stream';
+      app.titlePage = 'Latest Activity';
     });
 
-    page('/customers', function () {
-      app.route = 'customers';
-    });
-
-    page('/customers/:key', function (data) {
-      app.route = 'customer-info';
-      app.params = data.params;
-    });
-
-    page('/agents', function () {
-      app.route = 'agents';
-    });
-
-    page('/agents/:key', function (data) {
-      app.route = 'agent-info';
-      app.params = data.params;
-    });
-
-    page('/jobs', function () {
-      app.route = 'jobs';
-      app.titlePage = 'Orders/Jobs';
-    });
-
-    page('/jobs/:id', function (data) {
-      app.route = 'job-info';
-      app.params = data.params;
-    });
-
-    page('/payments', function () {
-      app.route = 'payments';
-    });
-
-    page('/payments/:id', function (data) {
-      app.route = 'payment-info';
-      app.params = data.params;
-    });
-
-    page('/deposits', function () {
-      app.route = 'deposits';
-    });
-
-    page('/sales', function () {
-      app.route = 'sales';
+    page('/stream', function () {
+      app.route = 'stream';
+      app.titlePage = 'Latest Activity';
     });
 
     page('/settings', function (data) {
@@ -99,14 +59,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.titlePage = 'Users';
     });
 
-    page('/housejoy', function (data) {
-      app.route = 'housejoy';
+    page('/payment', function (data) {
+      app.route = 'payment';
       app.titlePage = 'New Payment Request';
     });
 
-    page('/activity', function (data) {
-      app.route = 'activity';
-      app.titlePage = 'MIS';
+    page('/mis', function (data) {
+      app.route = 'mis';
+      app.titlePage = 'Daily MIS';
     });
 
     page('/logout', function () {

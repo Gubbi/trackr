@@ -22,6 +22,9 @@ class AuthController(PublicController):
         elif password != user.password:
             return error('Invalid User / Password')
 
+        if not user.active:
+            return error('Invalid User / Password')
+
         org = user.org[0].get()
         org_id = org.key.id()
         if org.secure_signup_step == 'Deactivated':
@@ -73,6 +76,9 @@ class AuthController(PublicController):
         user = get_user_by_email(data.email)
 
         if not user:
+            return error('No user registered with this email')
+
+        if not user.active:
             return error('No user registered with this email')
 
         new_password = generate_random_password()

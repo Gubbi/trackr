@@ -10,9 +10,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../../bower_components/paper-scroll-header-panel/paper-scroll-header-panel.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
-<link rel="import" href="activity-card.html">
+<link rel="import" href="mis-entry.html">
 
-<dom-module id="activity-list">
+<dom-module id="mis-list">
   <style>
     :host {
       display: block;
@@ -106,23 +106,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <span class="flex"></span>
           <div class="amount">Amount</div>
           <span class="flex"></span>
-          <!--<div class="status">Status</div><span class="flex"></span>-->
           <div class="kyash_code">KyashCode</div>
-          <span class="flex"></span>
-          <!--<div class="icon-placeholder"></div>-->
         </div>
 
         <ul hidden="{{isFiltered}}">
           <template is="dom-repeat" items="{{items}}">
             <li>
-              <activity-card job="{{item.data}}" key="{{item.key}}"></activity-card>
+              <mis-entry job="{{item.data}}" key="{{item.key}}"></mis-entry>
             </li>
           </template>
         </ul>
         <ul hidden="{{!isFiltered}}">
           <template is="dom-repeat" items="{{filtered}}">
             <li>
-              <activity-card job="{{item.data}}" key="{{item.key}}"></activity-card>
+              <mis-entry job="{{item.data}}" key="{{item.key}}"></mis-entry>
             </li>
           </template>
         </ul>
@@ -134,7 +131,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <script>
     (function () {
       Polymer({
-        is: 'activity-list',
+        is: 'mis-list',
 
         properties: {
           items: {
@@ -167,12 +164,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             _this.dateSelected = _this.today;
           });
         },
-        _dateChanged: function () {
 
+        _dateChanged: function () {
           this.items = [];
           if (!this.dateSelected) {
             return;
           }
+
           this.toggleClass('selected', this.dateSelected !== this.today, this.$.nextIcon);
           var _this = this;
 
@@ -180,21 +178,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.db.off();
             this.splice('items', 0, this.items.length);
           }
+
           this.db = fbase.db.child('mis/' + this.dateSelected);
+
           this.db.orderByPriority().on('child_added', function (snap) {
             var job = {data: snap.val(), key: snap.key};
             _this.push('items', job);
           });
         },
+
         showPrev: function () {
           this.dateSelected = moment(this.dateSelected).subtract(1, 'day').format('YYYY-MM-DD');
         },
+
         showNext: function () {
           if (this.dateSelected === this.today) {
             return;
           }
           this.dateSelected = moment(this.dateSelected).add(1, 'day').format('YYYY-MM-DD');
         },
+
         download: function () {
           /**
            * @return {string}
@@ -206,8 +209,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             for (var i = 0; i < obj.length; i++) {
               var line = '';
-              console.log(obj[i].data);
-              console.log(typeof  obj[i].data);
               for (var j=0; j < fields.length; j++) {
                 if (line !== '') { line += ','; }
                 if (Object.prototype.hasOwnProperty.call(obj[i].data, fields[j])) {
@@ -235,6 +236,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           } catch (e) {
           }
         },
+
         search: function (query) {
           var jobID = query.detail;
           var _this = this;

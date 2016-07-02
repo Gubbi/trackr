@@ -1,0 +1,86 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+
+<dom-module id="user-card">
+  <style>
+    paper-card {
+      width: 100%;
+      border-top: 2px solid #fefefe;
+      background-color: white;
+    }
+
+    .card-content {
+      padding: 0 16px;
+      font-size: 0.8em;
+    }
+
+    .email {
+      width: 180px;
+    }
+
+    .name {
+      width: 320px;
+    }
+
+    .phone {
+      width: 90px;
+    }
+
+    .roles {
+      width: 160px;
+    }
+  </style>
+  <template>
+    <paper-card>
+      <div>
+        <div class="card-content horizontal layout center flex">
+          <div class="email">{{user.email}}</div><span class="flex"></span>
+          <div class="name">{{user.name}}</div><span class="flex"></span>
+          <div class="phone">{{user.phone}}</div><span class="flex"></span>
+          <div class="roles">{{user.roles}}</div><span class="flex"></span>
+          <paper-icon-button class="actions" title="Edit" alt="Edit" icon="create" on-tap="edit"></paper-icon-button>
+        </div>
+      </div>
+    </paper-card>
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        is: 'user-card',
+
+        properties: {
+          user: Object
+        },
+
+        roles: function() {
+          if(this.user) {
+            return this.user.roles.join(', ');
+          }
+
+          return '';
+        },
+
+        edit: function() {
+          app.subTitle = 'Edit Details';
+          var el = document.createElement('user-edit');
+          el.isNew = false;
+          el.user = this.user;
+          app._displayInPanel(el);
+        }
+      });
+    })();
+  </script>
+</dom-module>
