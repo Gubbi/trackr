@@ -100,7 +100,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         inview: function() {
-          _this = this;
+          var _this = this;
 
           superagent.get('/bkend/accounts/list').end(function(err, res) {
             if (res.ok) {
