@@ -19,7 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     .paper-header {
-      background-color: #0277BD;
+      background-color: #1565C0;
     }
 
     .menu-icon {
@@ -83,11 +83,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     .kyash_code {
       width: 72px;
     }
+
+    paper-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 48px;
+      background-color: #1976D2;
+    }
   </style>
   <template>
     <paper-scroll-header-panel id="container" fixed header-height='32px'>
       <div class="paper-header layout horizontal center flex">
-        <paper-icon-button icon="file-download" on-tap="download"></paper-icon-button>
         <span class="flex"></span>
         <paper-icon-button id="prevIcon" class="menu-icon selected" icon="chevron-left"
                            on-tap="showPrev"></paper-icon-button>
@@ -124,6 +130,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </template>
         </ul>
       </div>
+
+      <paper-fab icon="file-download" alt="Download" title="Download" on-tap="download"></paper-fab>
     </paper-scroll-header-panel>
   </template>
 
