@@ -1,6 +1,7 @@
 import datetime
 import logging
 import random
+import urllib2
 
 from boondi.utils import unix_time
 from model.apps.trackr import ServiceProvider, Job
@@ -147,3 +148,12 @@ def mark_jobs_as_paid(jobs, update):
             'kyash_code': str(job.kyash_code[0]),
             'amount': str(job.amount),
         }
+
+
+def send_outlets(phone, message):
+    try:
+        if phone and message:
+            res = urllib2.urlopen('http://secure.kyash.com/9we7twekrht4397lkths?phone=' + str(phone) + '&message=' + str(message))
+            logging.info(res)
+    except:
+        pass

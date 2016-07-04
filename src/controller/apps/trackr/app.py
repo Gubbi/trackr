@@ -1,5 +1,8 @@
 import logging
 import re
+import urllib
+import urllib2
+
 from boondi.controllers import methods
 from boondi.ext import error
 from boondi.data import Optional
@@ -8,7 +11,7 @@ from framework.extend import SignedInController, PublicController
 from model.apps.trackr import get_jobs, get_jobs_by_kyash_code, ServiceProvider
 from pykyash import KyashService
 from service.apps.push_updates import updates_holder, push_updates
-from service.apps.trackr import create_payment, get_or_create_service_provider, mark_jobs_as_paid
+from service.apps.trackr import create_payment, get_or_create_service_provider, mark_jobs_as_paid, send_outlets
 
 __author__ = 'vinuth'
 
@@ -104,6 +107,7 @@ class AppController(SignedInController):
         kyash_code = create_payment(service_provider, jobs, total_amount, self.livemode, self.org_app, update)
 
         push_updates(self.org, self.org_app, self.livemode, update)
+        send_outlets(data.phone, data.pincode)
         logging.info(kyash_code)
         return {
             "message": "KyashCode Created",
