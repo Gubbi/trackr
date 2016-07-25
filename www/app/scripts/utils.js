@@ -125,11 +125,12 @@ superagent.get('/auth/').end(function(err, res) {
             }
 
             fbase.orgId = Cookies.get('org_id');
+            fbase.env = Cookies.get('env');
             if(isDemo) {
                 fbase.orgId += '_demo';
             }
 
-            fbase.db = fbase.root.child(fbase.orgId);
+            fbase.db = fbase.root.child(fbase.env + '/' + fbase.orgId);
 
             firebase.auth().onAuthStateChanged(function(user) {
               if(!user) {

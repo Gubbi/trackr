@@ -33,6 +33,7 @@ class AuthController(PublicController):
         web_auth.set_cookie_for_user(user.email, response)
         response.set_cookie("org_id", org_id, max_age=7200)
         response.set_cookie("is_demo", 'False')
+        response.set_cookie("env", self.environment, max_age=7200)
 
         token = create_fbase_token(user.email, org_id)
 
@@ -49,6 +50,7 @@ class AuthController(PublicController):
         if self.user:
             web_auth.set_cookie_for_user(self.user.email, response)
             response.set_cookie("org_id", self.user.org[0].id(), max_age=7200)
+            response.set_cookie("env", self.environment, max_age=7200)
 
             return 'Session refreshed'
 

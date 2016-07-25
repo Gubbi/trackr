@@ -15,14 +15,15 @@ def updates_holder():
     }
 
 
-def push_updates(org, org_app, livemode, update):
+def push_updates(org, org_app, livemode, update, env):
     org_id = org.key.id()
 
     if not livemode:
         org_id += '_demo'
 
-    logging.info("Writing to: " + FIREBASE_URL + org_id + '.json')
-    fbase_url = Firebase(FIREBASE_URL + org_id + '.json')
+    url = FIREBASE_URL + env + '/' + org_id + '.json'
+    logging.info("Writing to: " + url)
+    fbase_url = Firebase(url)
     fbase_updates = update['FBase']
 
     if 'PATCH' in fbase_updates and fbase_updates['PATCH']:

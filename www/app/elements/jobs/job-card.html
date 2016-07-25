@@ -43,13 +43,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <paper-card>
       <div>
-        <div class="card-content horizontal layout center flex">
+        <div class="card-content horizontal layout center flex wrap">
           <div class="jobid">{{key}}</div><span class="flex"></span>
           <div class="amount">₹{{job.amount}}</div><span class="flex"></span>
           <div class="status">{{job.status}}</div><span class="flex"></span>
           <div class="provider">{{job.by}}</div><span class="flex"></span>
           <div class="kyash_code">{{job.kyash_code}}</div><span class="flex"></span>
           <paper-icon-button class="actions" title="Activity" alt="Logs" icon="toc" on-tap="viewLogs"></paper-icon-button>
+          <paper-icon-button class="actions" title="Payment Points" alt="Points" icon="store" on-tap="showPoints"></paper-icon-button>
         </div>
       </div>
     </paper-card>
@@ -124,6 +125,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             app.subTitleDesc = 'Job';
             app._displayInPanel(el);
           }
+        },
+
+        showPoints: function() {
+          var el = document.createElement('kyash-points');
+          el.order = this.job;
+          app.subTitle = '';
+          app.subTitleDesc = 'Payment Points';
+          app._displayInPanel(el);
         }
       });
     })();

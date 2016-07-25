@@ -1,0 +1,249 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+
+<dom-module id="kyash-points">
+  <style>
+    paper-card {
+      min-width: 300px;
+      width: 90%;
+      margin: 30px auto;
+      border-top: 2px solid #fefefe;
+      background-color: white;
+      display: block;
+    }
+
+    paper-input {
+      --paper-input-container-input: {
+        font-size: 1.1em;
+      }
+    }
+
+    paper-input[readonly], paper-textarea[readonly] {
+      /* line color when the input is unfocused */
+      --paper-input-container-underline: {
+        display:none;
+      }
+      --paper-input-container-underline-focus: {
+        display:none;
+      }
+      --paper-input-container-underline-disabled: {
+        display:none;
+      }
+    }
+
+    .card-content {
+      padding: 0 16px;
+      font-size: 0.8em;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      text-align: center;
+      margin-top: 0;
+    }
+
+    li {
+      display: block;
+      margin: 0 32px;
+      text-align: left;
+    }
+
+    paper-toast {
+        width: 100%;
+        min-width: 0;
+        border-radius: 0;
+        margin: 0;
+        text-align: center;
+        font-size: 1.05em;
+    }
+    paper-toast.error {
+        background-color: #D50000;
+        color: rgba(255, 255, 255, 0.87);
+    }
+    paper-toast.success {
+        background-color: #33691E;
+        color: rgba(255, 255, 255, 0.87);
+    }
+  </style>
+  <template>
+    <div class="card-content horizontal layout end">
+      <span class="flex"></span>
+      <paper-input name="pincode" id="pincode" label="Points in Pincode" value="{{by.pincode}}" allowed-pattern="[0-9]" maxlength="6" required></paper-input>
+      <span class="flex"></span>
+      <paper-icon-button class="actions" title="Get" alt="Reload" icon="refresh" on-tap="getPoints"></paper-icon-button>
+      <span class="flex"></span>
+    </div>
+    <br/>
+    <ul>
+      <template is="dom-repeat" items="{{points}}">
+        <li on-tap="toggleSelect">
+          <kyash-point point="{{item}}" order="{{order}}"></kyash-point>
+        </li>
+      </template>
+    </ul>
+
+    <paper-card elevation="0">
+      <div>
+        <div class="card-content">
+          <paper-input name="mobile_no" id="to" label="SMS Selected Points To" value="{{order.by}}" readonly></paper-input>
+        </div>
+        <div class="card-actions horizontal layout center">
+          <span class="flex"></span>
+          <paper-icon-button class="actions" title="SMS Selected Points" alt="Send SMS" icon="send" on-tap="sendSMS"></paper-icon-button>
+        </div>
+      </div>
+    </paper-card>
+
+    <paper-toast class="error" id="errorMsg" text="{{errorMessage}}"></paper-toast>
+    <paper-toast class="success horizontal layout center flex" id="successMsg" text="[[successMessage]]">
+    </paper-toast>
+  </template>
+
+  <script>
+    (function() {
+      Polymer({
+        is: 'kyash-points',
+        properties: {
+          order: {
+            type: Object,
+            observer: '_ValChanged'
+          },
+          by: Object,
+          points: {
+            type: Array,
+            notify: true
+          },
+          selectedPoints: {
+            type: Object,
+            value: {}
+          }
+        },
+
+        ready: function() {
+          var _this = this;
+          onAuthReady(function() {
+            _this.points = [];
+
+            if(!fbase.api_id) {
+              superagent.get('/bkend/api_id')
+              .end(function(err, res) {
+                  if (res.ok) {
+                    fbase.api_id = res.body.api_id;
+                    _this.db = fbase.db.child('sp');
+                    _this._ValChanged.call(_this);
+                  } else {
+                      _this.show_error(res.body.message);
+                  }
+              });
+            }
+            else {
+              _this.db = fbase.db.child('sp');
+              _this._ValChanged.call(_this);
+            }
+          });
+        },
+
+        _ValChanged: function() {
+          if(!this.db || !this.order) {
+            return;
+          }
+
+          this.db.child(this.order.by).once('value', function(snap) {
+            this.set('by', snap.val());
+            this.getPoints.call(this);
+          }, this);
+        },
+
+        getPoints: function() {
+          var _this = this;
+          var pincode = this.by.pincode;
+          this.splice('points', 0, this.points.length);
+
+          superagent.get('https://api.kyash.in/v1/outlets/'+pincode)
+          .auth(fbase.api_id, '')
+          .query({
+              user_phone: this.order.by
+          })
+          .end(function(err, res) {
+              if(res.ok) {
+                var points = res.body;
+                for (var i=0; i<points.length; i++) {
+                  _this.push('points', points[i]);
+                }
+              } else {
+                  _this.show_error(res.body.message);
+              }
+          });
+        },
+
+        toggleSelect: function(e) {
+          var id = e.model.item.id;
+          var point = Polymer.dom(e).localTarget;
+
+          if (this.selectedPoints[id]) {
+            delete this.selectedPoints[id];
+            point.toggleSelect();
+          }
+          else {
+            if (Object.keys(this.selectedPoints).length >= 4) {
+              this.show_error('You can select a maximum of 4 payment points.');
+            }
+            else {
+              this.selectedPoints[id] = true;
+              point.toggleSelect();
+            }
+          }
+        },
+
+        sendSMS: function() {
+          var _this = this;
+          var pincode = this.by.pincode;
+
+          if (Object.keys(this.selectedPoints).length === 0) {
+            this.show_error('Select up to 4 points to be sent via SMS.');
+            return;
+          }
+
+          superagent.post('https://api.kyash.in/v1/outlets/sms/'+pincode)
+          .auth(fbase.api_id, '')
+          .type('form')
+          .send({
+              user_phone: this.order.by,
+              kyash_code: this.order.kyash_code,
+              outlets: Object.keys(this.selectedPoints)
+          })
+          .end(function(err, res) {
+              if(res.ok) {
+                  _this.show_success('SMS Sent');
+              } else {
+                  _this.show_error(res.body.message);
+              }
+          });
+        },
+
+        show_success: function(message) {
+          this.successMessage = message;
+          this.$.successMsg.show();
+        },
+
+        show_error: function(message) {
+          this.errorMessage = message;
+          this.$.errorMsg.show();
+        }
+      });
+    })();
+  </script>
+</dom-module>

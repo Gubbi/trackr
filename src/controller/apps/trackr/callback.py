@@ -58,6 +58,6 @@ class CallbackController(PublicController):
             return error("Paid amount doesn't match requested amount.")
 
         mark_jobs_as_paid(jobs, update)
-        push_updates(org, trackr, livemode, update)
+        push_updates(org, trackr, livemode, update, self.environment)
 
         return "Thanks for payment :-)"

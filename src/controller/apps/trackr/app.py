@@ -25,7 +25,7 @@ class AppController(SignedInController):
                               error_message='Valid Provider info is required')
                 update = updates_holder()
                 sp = get_or_create_service_provider(data.phone, data.name, int(data.pincode), data.contact, update)
-                push_updates(self.org, self.org_app, self.livemode, update)
+                push_updates(self.org, self.org_app, self.livemode, update, self.environment)
 
             else:
                 phone = request.params.get('phone')
@@ -103,7 +103,7 @@ class AppController(SignedInController):
 
         kyash_code = create_payment(service_provider, jobs, total_amount, self.livemode, self.org_app, update)
 
-        push_updates(self.org, self.org_app, self.livemode, update)
+        push_updates(self.org, self.org_app, self.livemode, update, self.environment)
         logging.info(kyash_code)
         return {
             "message": "KyashCode Created",
@@ -130,4 +130,9 @@ class AppController(SignedInController):
     def get_acl(self):
         return {
             'roles': self.roles.kind
+        }
+
+    def get_api_id(self):
+        return {
+            'api_id': self.org_app.kyash_public_api_id
         }

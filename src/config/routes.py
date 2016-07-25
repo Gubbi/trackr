@@ -12,6 +12,7 @@ routes = [
         Action('verify_jobs',             '/verify_jobs'),
         Action('search_provider',         '/search_provider'),
         Action('get_acl',                 '/acl'),
+        Action('get_api_id',              '/api_id'),
     ]),
 
     Controller("apps.trackr.callback", '/bkend', [
