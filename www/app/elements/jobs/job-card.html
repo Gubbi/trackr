@@ -130,6 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         showPoints: function() {
           var el = document.createElement('kyash-points');
           el.order = this.job;
+          console.log(this.job);
           app.subTitle = '';
           app.subTitleDesc = 'Payment Points';
           app._displayInPanel(el);

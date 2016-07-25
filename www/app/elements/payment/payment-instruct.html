@@ -160,6 +160,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <div class="card-actions horizontal layout center">
               <span class="flex"></span>
               <paper-button class="actions" title="Home" on-tap="home" active="[[isEnabled]]">OK</paper-button>
+              <paper-icon-button class="actions" title="Payment Points" alt="Points" icon="store" on-tap="showPoints"></paper-icon-button>
             </div>
           </div>
         </paper-card>
@@ -325,6 +326,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 _this.show_error(res.body.message);
               }
             });
+        },
+
+        showPoints: function() {
+          var el = document.createElement('kyash-points');
+          console.log(el);
+          el.order = { 'by': this.provider.phone, 'pincode': this.provider.pincode, 'kyash_code': this.kyash_code};
+          app.subTitle = '';
+          app.subTitleDesc = 'Payment Points';
+          app._displayInPanel(el);
         },
 
         show_success: function(message) {
