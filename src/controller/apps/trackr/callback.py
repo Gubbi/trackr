@@ -24,8 +24,7 @@ class CallbackController(PublicController):
         trackr = Trackr.get_by_id(org.key.id())
         api_id = trackr.kyash_public_api_id
 
-        data.validate(amount=Optional(int),
-                      required_fields=['order_id', 'kyash_code', 'status'])
+        data.validate(required_fields=['order_id', 'kyash_code', 'status'])
 
         livemode = False if data.kyash_code.startswith('T') else True
         if livemode:
@@ -44,18 +43,12 @@ class CallbackController(PublicController):
 
         self.switch_namespace(org, livemode)
 
-        if data.status != 'paid':
-            return "Ignoring the status update."
-
-        if not data.amount:
-            return error("Amount value required.")
+        if data.status in ['paid', 'expired']:
+            return "Ignoring the update for status " + data.status
 
         jobs = get_jobs_by_kyash_code(data.kyash_code)
         total_amount = reduce(lambda aggr, x: aggr + x.amount, jobs, 0)
         logging.info([jobs, total_amount])
-        if data.amount != total_amount:
-            # TODO: Add admin notification email to configured email id.
-            return error("Paid amount doesn't match requested amount.")
 
         mark_jobs_as_paid(jobs, update)
         push_updates(org, trackr, livemode, update, self.environment)

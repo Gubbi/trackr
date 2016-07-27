@@ -2,13 +2,11 @@ import logging
 import re
 from boondi.controllers import methods
 from boondi.ext import error
-from boondi.data import Optional
 from boondi.globals import data, request
-from framework.extend import SignedInController, PublicController
-from model.apps.trackr import get_jobs, get_jobs_by_kyash_code, ServiceProvider
-from pykyash import KyashService
+from framework.extend import SignedInController
+from model.apps.trackr import get_jobs, ServiceProvider
 from service.apps.push_updates import updates_holder, push_updates
-from service.apps.trackr import create_payment, get_or_create_service_provider, mark_jobs_as_paid
+from service.apps.trackr import create_payment, get_or_create_service_provider
 
 __author__ = 'vinuth'
 
