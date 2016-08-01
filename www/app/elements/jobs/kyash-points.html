@@ -136,6 +136,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _this = this;
           onAuthReady(function() {
             _this.points = [];
+            _this.selectedPoints = {};
 
             if(!fbase.api_id) {
               superagent.get('/bkend/api_id')
