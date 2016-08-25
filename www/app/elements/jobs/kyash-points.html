@@ -243,7 +243,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             var p_count = 4;
             var address = this.order.address.split(' ');
             for (var i = 0; i < points.length; i++) {
-              var point_address = points[i]['address'].split(' ');
+              var point_address = points[i].address.split(' ');
               for (var j = 0; j < point_address.length; j++) {
                 if (point_address.indexOf(address[j]) >= 0 && p_count >= 0) {
                   points[i].match = true;
