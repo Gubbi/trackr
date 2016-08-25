@@ -172,6 +172,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _this = this;
           var pincode = this.by.pincode;
           this.splice('points', 0, this.points.length);
+          this.selectedPoints = {};
 
           superagent.get('https://api.kyash.in/v1/outlets/'+pincode)
           .auth(fbase.api_id, '')
@@ -184,6 +185,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 for (var i=0; i<points.length; i++) {
                   _this.push('points', points[i]);
                 }
+                _this.mark_match(points);
               } else {
                   _this.show_error(res.body.message);
               }
@@ -233,6 +235,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   _this.show_error(res.body.message);
               }
           });
+        },
+
+        mark_match : function(points) {
+          console.log(points);
+          if (this.order.address) {
+            var p_count = 4;
+            var address = this.order.address.split(' ');
+            for (var i = 0; i < points.length; i++) {
+              var point_address = points[i]['address'].split(' ');
+              for (var j = 0; j < point_address.length; j++) {
+                if (point_address.indexOf(address[j]) >= 0 && p_count >= 0) {
+                  points[i].match = true;
+                  p_count--;
+                }
+              }
+            }
+          }
         },
 
         show_success: function(message) {

@@ -98,6 +98,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         },
 
+        attached: function () {
+          if(this.point.match) {
+            this.fire('tap');
+          }
+        },
+
         toggleSelect: function() {
           this.ele = this.ele === 0? 3: 0;
         },

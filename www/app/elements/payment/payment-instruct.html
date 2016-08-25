@@ -114,6 +114,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <paper-icon-button icon="close" title="Cancel" alt="Cancel" on-tap="home"></paper-icon-button>
               <span class="flex"></span>
               <paper-spinner alt="Saving Details" active="[[isSaving]]"></paper-spinner>
+              <paper-icon-button class="actions" title="Payment Points" alt="Points" icon="store" on-tap="showPoints"></paper-icon-button>
               <paper-icon-button icon="done" title="Next" on-tap="save"></paper-icon-button>
             </div>
           </div>
@@ -330,7 +331,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         showPoints: function() {
           var el = document.createElement('kyash-points');
-          el.order = { 'by': this.provider.phone, 'pincode': this.provider.pincode, 'kyash_code': this.kyash_code};
+          el.order = { 'by': this.provider.phone, 'pincode': this.provider.pincode, 'kyash_code': this.kyash_code, 'address': this.provider.contact};
           app.subTitle = '';
           app.subTitleDesc = 'Payment Points';
           app._displayInPanel(el);
