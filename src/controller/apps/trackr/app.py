@@ -1,5 +1,6 @@
 import logging
 import re
+import cloudstorage as gcs
 from boondi.controllers import methods
 from boondi.ext import error
 from boondi.globals import data, request
@@ -108,6 +109,33 @@ class AppController(SignedInController):
             'kyash_code': kyash_code,
             'total': total_amount
         }
+
+    # @methods('POST')
+    def bulk_kyashcode(self):
+        s = None
+        try:
+            bucket = '/trackr/'
+            file_name = 'dummy_icici.csv'
+
+            # gcs_file = gcs.open(filename,
+            #                     'w',
+            #                     content_type='text/plain',
+            #                     options={'x-goog-meta-foo': 'foo',
+            #                              'x-goog-meta-bar': 'bar'},
+            #                     retry_params=write_retry_params)
+            # gcs_file.write('abcde\n')
+            # gcs_file.write('f' * 1024 * 4 + '\n')
+            # gcs_file.close()
+
+
+            # with gcs.open(bucket+file_name, 'r') as f:
+            #     s = f.readline()
+            #     logging.info(s)
+
+        except Exception as e:
+            logging.critical(str(e))
+
+        return s
 
     def settings(self):
         data.define(required_fields=['support_number'],

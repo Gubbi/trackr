@@ -43,8 +43,8 @@ class CallbackController(PublicController):
 
         self.switch_namespace(org, livemode)
 
-        if data.status in ['paid', 'expired']:
-            return "Ignoring the update for status " + data.status
+        # if data.status in ['expired']:
+        #     return "Ignoring the update for status " + data.status
 
         jobs = get_jobs_by_kyash_code(data.kyash_code)
         total_amount = reduce(lambda aggr, x: aggr + x.amount, jobs, 0)

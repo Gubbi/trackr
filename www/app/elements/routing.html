@@ -64,6 +64,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.titlePage = 'New Payment Request';
     });
 
+    page('/upload', function (data) {
+      app.route = 'upload';
+      app.titlePage = 'Upload Pending Payments';
+    });
+
     page('/mis', function (data) {
       app.route = 'mis';
       app.titlePage = 'Daily MIS';

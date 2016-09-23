@@ -15,6 +15,10 @@ firebase.initializeApp(config);
 
 fbase.root = firebase.database().ref();
 
+// fbase.storage = firebase.storage();
+// console.log(fbase.cs.child('/images/weqw').put());
+fbase.auth = firebase.auth();
+
 fbase.queueDB = fbase.root.child('/queue/tasks');
 fbase.queue = function(spec, task) {
     task.org = 'default_org';

@@ -34,6 +34,8 @@ MODULE_SECRETS = {
     'adojsl!@$EDASDDIQ04324': True
 }
 
+gs_bucket_name = "trackr"
+
 try:
     from config_prod import *
 except:

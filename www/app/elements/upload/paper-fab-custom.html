@@ -1,0 +1,278 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/paper-behaviors/paper-button-behavior.html">
+<link rel="import" href="../../bower_components/paper-material/paper-material-shared-styles.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-styles/default-theme.html">
+
+<!--
+Material design: [Floating Action Button](https://www.google.com/design/spec/components/buttons-floating-action-button.html)
+
+`paper-fab-custom` is a floating action button. It contains an image placed in the center and
+comes in two sizes: regular size and a smaller size by applying the attribute `mini`. When
+the user touches the button, a ripple effect emanates from the center of the button.
+
+You may import `iron-icons` to use with this element, or provide a URL to a custom icon.
+See `iron-iconset` for more information about how to use a custom icon set.
+
+Example:
+
+    <link href="path/to/iron-icons/iron-icons.html" rel="import">
+
+    <paper-fab-custom icon="add"></paper-fab-custom>
+    <paper-fab-custom mini icon="favorite"></paper-fab-custom>
+    <paper-fab-custom src="star.png"></paper-fab-custom>
+
+
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-fab-custom-background` | The background color of the button | `--accent-color`
+`--paper-fab-custom-keyboard-focus-background` | The background color of the button when focused | `--paper-pink-900`
+`--paper-fab-custom-disabled-background` | The background color of the button when it's disabled | `--paper-grey-300`
+`--paper-fab-custom-disabled-text` | The text color of the button when it's disabled | `--paper-grey-500`
+`--paper-fab-custom` | Mixin applied to the button | `{}`
+`--paper-fab-custom-mini` | Mixin applied to a mini button | `{}`
+`--paper-fab-custom-disabled` | Mixin applied to a disabled button | `{}`
+`--paper-fab-custom-iron-icon` | Mixin applied to the iron-icon within the button | `{}`
+
+@group Paper Elements
+@demo demo/index.html
+-->
+
+<dom-module id="paper-fab-custom">
+  <template strip-whitespace>
+    <style include="paper-material-shared-styles">
+      :host {
+        @apply(--layout-vertical);
+        @apply(--layout-center-center);
+
+        background: var(--paper-fab-custom-background, --accent-color);
+        border-radius: 50%;
+        box-sizing: border-box;
+        color: var(--text-primary-color);
+        cursor: pointer;
+        height: 56px;
+        min-width: 0;
+        outline: none;
+        padding: 16px;
+        position: relative;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        width: 56px;
+        z-index: 0;
+
+        /* NOTE: Both values are needed, since some phones require the value `transparent`. */
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-tap-highlight-color: transparent;
+
+        @apply(--paper-fab-custom);
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      :host([mini]) {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+
+        @apply(--paper-fab-custom-mini);
+      }
+
+      :host([disabled]) {
+        color: var(--paper-fab-custom-disabled-text, --paper-grey-500);
+        background: var(--paper-fab-custom-disabled-background, --paper-grey-300);
+
+        @apply(--paper-fab-custom-disabled);
+      }
+
+      iron-icon {
+        @apply(--paper-fab-custom-iron-icon);
+      }
+
+      span {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+      }
+      #fileupload {
+        position: absolute;
+        opacity: 0;
+        -ms-filter: 'alpha(opacity=0)';
+        top: 0;
+        right: 0;
+        margin: 0;
+        cursor: pointer;
+        direction: ltr;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+      }
+
+      /* Fixes for IE < 8 */
+      @media screen\9 {
+        #fileupload {
+          filter: alpha(opacity=0);
+          font-size: 100%;
+          height: 100%;
+        }
+      }
+      :host(.keyboard-focus) {
+        background: var(--paper-fab-custom-keyboard-focus-background, --paper-pink-900);
+      }
+    </style>
+
+    <iron-icon id="icon" hidden$="{{!_computeIsIconFab(icon, src)}}" src="[[src]]" icon="[[icon]]"></iron-icon>
+    <input id="fileupload" type="file" name="file[]"/>
+    <span hidden$="{{_computeIsIconFab(icon, src)}}">{{label}}</span>
+  </template>
+  <script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+  <script src="../../scripts/fileupload.js"></script>
+
+  <script>
+    Polymer({
+      is: 'paper-fab-custom',
+
+      behaviors: [
+        Polymer.PaperButtonBehavior
+      ],
+
+      properties: {
+        /**
+         * The URL of an image for the icon. If the src property is specified,
+         * the icon property should not be.
+         */
+        src: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Specifies the icon name or index in the set of icons available in
+         * the icon's icon set. If the icon property is specified,
+         * the src property should not be.
+         */
+        icon: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * Set this to true to style this is a "mini" FAB.
+         */
+        mini: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        },
+
+        /**
+         * The label displayed in the badge. The label is centered, and ideally
+         * should have very few characters.
+         */
+        label: {
+          type: String,
+          observer: '_labelChanged'
+        }
+      },
+      ready: function() {
+
+        var _this = this;
+    var auth = fbase.auth;
+    var storageRef = firebase.storage().ref();
+//        console.log(storageRef);
+
+    function handleFileSelect(evt) {
+      evt.stopPropagation();
+      evt.preventDefault();
+      var file = evt.target.files[0];
+      console.log(file);
+
+      var metadata = {
+        'contentType': file.type
+      };
+
+      // Push to child path.
+      // [START oncomplete]
+      console.log(file.name);
+      storageRef.child('images/' + file.name).put(file, metadata).on('state_changed', function(snapshot) {
+        console.log('Uploaded', snapshot.totalBytes, 'bytes.');
+        console.log(snapshot.metadata);
+        var url = snapshot.metadata.downloadURLs[0];
+        console.log('File available at', url);
+        // [START_EXCLUDE]
+//        document.getElementById('linkbox').innerHTML = '<a href="' +  url + '">Click For File</a>';
+        // [END_EXCLUDE]
+      }).catch(function(error) {
+        // [START onfailure]
+        console.error('Upload failed:', error);
+        // [END onfailure]
+      });
+      // [END oncomplete]
+    }
+    this.$.fileupload.addEventListener('change', handleFileSelect, false);
+    this.$.fileupload.disabled = true;
+
+      auth.onAuthStateChanged(function(user) {
+        console.log(user);
+        if (user) {
+          console.log('Anonymous user signed-in.', user);
+          _this.$.fileupload.disabled = false;
+        } else {
+          console.log('There was no anonymous session. Creating a new anonymous user.');
+          // Sign the user in anonymously since accessing Storage requires the user to be authorized.
+          auth.signInAnonymously();
+        }
+      });
+      },
+      upload: function() {
+        console.log('Start Upload');
+        console.log(this);
+        //var file_upload = Polymer.dom(this.root).querySelector('#fileupload');
+        $('#fileupload').fileupload({
+          submit: function (e, data) {
+            alert('Submit');
+          },
+          done: function (e, data) {
+            alert('Done');
+          },
+          progressall: function (e, data) {
+              var progress = parseInt(data.loaded / data.total * 100, 10);
+              if (progress == 100) {
+                  $('#progress').text(progress + '%');
+              }
+          }
+        })
+      },
+
+      _labelChanged: function() {
+        this.setAttribute('aria-label', this.label);
+      },
+
+      _computeIsIconFab: function(icon, src) {
+        return (icon.length > 0) || (src.length > 0);
+      }
+    });
+  </script>
+</dom-module>

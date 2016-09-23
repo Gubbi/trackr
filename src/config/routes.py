@@ -13,6 +13,11 @@ routes = [
         Action('search_provider',         '/search_provider'),
         Action('get_acl',                 '/acl'),
         Action('get_api_id',              '/api_id'),
+        Action('bulk_kyashcode',          '/upload'),
+    ]),
+
+    Controller('apps.trackr.storage', '/storage', [
+        Action('get', '/test'),
     ]),
 
     Controller("apps.trackr.callback", '/bkend', [
@@ -51,4 +56,5 @@ routes = [
     Controller('home',          '/auth', [
         Action('logout',             '/logout'),
     ]),
+
 ]

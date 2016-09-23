@@ -33,6 +33,10 @@ handlers:
   script: main.app
   secure: optional
 
+- url: /storage/.*
+  script: main.app
+  secure: optional
+
 - url: /auth/.*
   script: main.app
   secure: optional

@@ -79,6 +79,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            <span>New Payment</span>
          </a>
 
+         <a data-route="upload" href="/app.html/upload">
+           <iron-icon icon="file-upload"></iron-icon>
+           <span>Upload</span>
+         </a>
+
          <a data-route="mis" href="/app.html/mis" hidden$="{{!isAdmin}}">
            <iron-icon icon="file-download"></iron-icon>
            <span>Daily MIS</span>
@@ -168,6 +173,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
              </section>
              <section data-route="payment">
                <payment-instruct id="payment"></payment-instruct>
+             </section>
+             <section data-route="upload">
+               <payment-upload id="upload"></payment-upload>
              </section>
              <section data-route="mis">
                <mis-list id="mis"></mis-list>
