@@ -1,3 +1,4 @@
+import csv
 import logging
 import re
 import cloudstorage as gcs
@@ -110,8 +111,9 @@ class AppController(SignedInController):
             'total': total_amount
         }
 
-    # @methods('POST')
-    def bulk_kyashcode(self):
+    @methods('POST')
+    def file_upload(self):
+        data.validate(required_fields=['file', 'url'])
         s = None
         try:
             bucket = '/trackr/'
@@ -131,6 +133,18 @@ class AppController(SignedInController):
             # with gcs.open(bucket+file_name, 'r') as f:
             #     s = f.readline()
             #     logging.info(s)
+
+            csv_file_path = "/trackrdb.appspot.com/images/" + data.file
+            logging.info(['File: ', csv_file_path])
+            # with gcs.open(csv_file_path, 'r') as csv_file:
+            #     jobs = csv.DictReader(csv_file)
+            #     result = list(jobs)
+            #
+            #     logging.info(len(result))
+
+            #TODO need to access trackrdb project cloudstorage
+
+
 
         except Exception as e:
             logging.critical(str(e))

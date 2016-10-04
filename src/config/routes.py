@@ -13,7 +13,7 @@ routes = [
         Action('search_provider',         '/search_provider'),
         Action('get_acl',                 '/acl'),
         Action('get_api_id',              '/api_id'),
-        Action('bulk_kyashcode',          '/upload'),
+        Action('file_upload',             '/upload'),
     ]),
 
     Controller('apps.trackr.storage', '/storage', [
@@ -38,6 +38,10 @@ routes = [
     Controller("sys.accounts",  '/sys/accounts', [
         Action('new',               '/new'),
         Action('add_user',          '/add_user')
+    ]),
+
+    Controller("sys.bigquery",  '/sys/bigquery', [
+        Action('check_job_status',          '/status')
     ]),
 
     Controller("sys.prod",      '/sys/prod', [

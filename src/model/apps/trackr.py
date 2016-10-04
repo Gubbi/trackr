@@ -50,6 +50,17 @@ class Job(ndb.Model):
     modifiedAt          = ndb.DateTimeProperty(auto_now=True)
 
 
+class JobsUploaded(ndb.Model):
+    rows                = ndb.IntegerProperty(default=0)
+    cols                = ndb.IntegerProperty(default=0)
+    size                = ndb.IntegerProperty(default=0)
+    codes               = ndb.IntegerProperty(default=0)
+    amt                 = ndb.IntegerProperty(default=0)
+
+    createdAt           = ndb.DateTimeProperty(auto_now_add=True)
+    modifiedAt          = ndb.DateTimeProperty(auto_now=True)
+
+
 def get_jobs(job_ids):
     jobs = ndb.get_multi([Key('Job', job_id) for job_id in job_ids])
     return [job for job in jobs if job]

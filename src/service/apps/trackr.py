@@ -122,6 +122,7 @@ def create_payment(service_provider, jobs, total_amount, livemode, org_app, upda
 
     return kyash_code
 
+
 def mark_jobs_as_paid(jobs, update):
     for job in jobs:
         job.status = 'Paid'

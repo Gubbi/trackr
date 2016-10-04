@@ -5,6 +5,8 @@ import datetime
 import logging
 
 from google.appengine.api import memcache
+
+from config.config import BQ_JOBS_DATASET
 from oauth2client import client
 
 import httplib2
@@ -52,3 +54,4 @@ def google_api_access(scope):
 
     return token_refresh_decorator, http
 
+jobs_table = lambda x: BQ_JOBS_DATASET + '.' + x if x else None

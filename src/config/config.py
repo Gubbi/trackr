@@ -34,6 +34,11 @@ MODULE_SECRETS = {
     'adojsl!@$EDASDDIQ04324': True
 }
 
+#Google BigQuery Settings
+BQ_PROJECT_ID = 'bilent-apps'
+BQ_PROJECT_NUMBER = 849963260641
+BQ_JOBS_DATASET = 'jobs'
+
 gs_bucket_name = "trackr"
 
 try:
