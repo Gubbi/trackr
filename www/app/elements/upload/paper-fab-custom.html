@@ -200,7 +200,6 @@ Custom property | Description | Default
       ready: function() {
 
         var _this = this;
-        var auth = fbase.auth;
         var storageRef = firebase.storage().ref();
 
         function handleFileSelect(evt) {
@@ -248,20 +247,21 @@ Custom property | Description | Default
               // Upload completed successfully, now we can get the download URL
               var downloadURL = uploadTask.snapshot.downloadURL;
               console.log(uploadTask);
-              console.log(uploadTask.snapshot);
-              console.log("File uploaded successfully.");
+              console.log('File uploaded successfully.');
               superagent.post('/bkend/upload')
                 .auth(fbase.api_id, '')
                 .type('form')
                 .send({
-                    file: file.name,
-                    url: downloadURL
+                  id: 'test',
+                  file: file.name,
+                  url: downloadURL,
+                  size: file.size
                 })
                 .end(function(err, res) {
                     if(res.ok) {
-                        _this.show_success('');
+                        evt.show_success('');
                     } else {
-                        _this.show_error(res.body.message);
+                        evt.show_error(res.body.message);
                     }
                 });
             });
@@ -271,7 +271,7 @@ Custom property | Description | Default
         this.$.fileupload.addEventListener('change', handleFileSelect, false);
         this.$.fileupload.disabled = true;
 
-        auth.onAuthStateChanged(function (user) {
+        onAuthReady(function(user) {
           console.log(user);
           if (user) {
             console.log('Anonymous user signed-in.', user);
@@ -279,7 +279,7 @@ Custom property | Description | Default
           } else {
             console.log('There was no anonymous session. Creating a new anonymous user.');
             // Sign the user in anonymously since accessing Storage requires the user to be authorized.
-            auth.signInAnonymously();
+//            auth.signInAnonymously();
           }
         });
       },

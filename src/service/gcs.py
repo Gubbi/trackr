@@ -10,7 +10,7 @@ from config import config
 
 __author__ = 'vinuth'
 
-_BUCKET_NAME = config.gs_bucket_name
+_BUCKET_NAME = config.GCS_BUCKET_NAME
 _API_VERSION = 'v1'
 
 google_auth, http = google_api_access('https://www.googleapis.com/auth/devstorage.read_write')

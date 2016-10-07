@@ -13,6 +13,7 @@ stream_path = lambda: 'activities/' + batch
 sp_path = lambda phone: 'sp/' + str(phone)
 job_path = lambda job_id: 'jobs/' + str(job_id)
 job_status_path = lambda job_id: 'jobs/' + str(job_id) + '/status'
+upload_path = lambda id: 'uploads/' + str(id)
 ts = lambda: unix_time(datetime.datetime.utcnow())
 
 
@@ -25,15 +26,15 @@ def get_or_create_service_provider(phone, name, pincode, contact, update):
             logging.info('Service Provider Found')
             sp_modified = False
 
-            if sp.name != name:
+            if sp.name != name and name != '':
                 sp.name = name
                 sp_modified = True
 
-            if sp.contact != contact:
+            if sp.contact != contact and contact != '':
                 sp.contact = contact
                 sp_modified = True
 
-            if sp.pincode != pincode:
+            if sp.pincode != pincode and pincode != '':
                 sp.pincode = pincode
                 sp_modified = True
 

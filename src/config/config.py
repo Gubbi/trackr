@@ -15,6 +15,7 @@ OAUTH_TOKEN_SECRET = 'YCMD@#ABLS OQ@#$JH48QWH$@#598#@!932 TOR$@OB&*(1N1SSR#$^&RT
 OAUTH_CIPHER_SECRET = sha256("lsyhwoud63jx@*JS wj82kalw2$dEks92a$8hkslR ,2Ls*Qn%k").digest()
 
 FIREBASE_URL = 'https://trackrdb.firebaseio.com/'
+FIREBASE_STORAGE = "/trackrdb.appspot.com/images/"
 
 # Sendgrid
 SENDGRID = sendgrid.SendGridClient('kya.sh', 'Kyash4mBilent')
@@ -39,7 +40,8 @@ BQ_PROJECT_ID = 'bilent-apps'
 BQ_PROJECT_NUMBER = 849963260641
 BQ_JOBS_DATASET = 'jobs'
 
-gs_bucket_name = "trackr"
+GCS_LINK_PREFIX_DOWNLOAD = 'http://localhost:8080/_ah/gcs'
+GCS_BUCKET_NAME = "trackr"
 
 try:
     from config_prod import *

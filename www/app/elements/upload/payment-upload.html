@@ -81,15 +81,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       width: 60px;
     }
 
-    .payer_num {
+    .codes {
       width: 80px;
     }
 
-    .payer {
+    .total_rows {
       width: 90px;
     }
 
-    .kyash_code {
+    .download_url {
       width: 72px;
     }
 
@@ -117,28 +117,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Main Content -->
       <div class="content">
         <div class="card-content horizontal layout center flex">
-          <div class="jobid">ID</div>
+          <div class="upload_id">ID</div>
           <span class="flex"></span>
-          <div class="payer">Payer</div>
+          <div class="total_rows">Records</div>
           <span class="flex"></span>
-          <div class="payer_num">Payer Num</div>
+          <div class="codes">KyashCodes</div>
           <span class="flex"></span>
           <div class="amount">Amount</div>
           <span class="flex"></span>
-          <div class="kyash_code">KyashCode</div>
+          <div class="download_url">File</div>
         </div>
 
         <ul hidden="{{isFiltered}}">
           <template is="dom-repeat" items="{{items}}">
             <li>
-              <mis-entry job="{{item.data}}" key="{{item.key}}"></mis-entry>
+              <upload-entry job="{{item.data}}" key="{{item.key}}"></upload-entry>
             </li>
           </template>
         </ul>
         <ul hidden="{{!isFiltered}}">
           <template is="dom-repeat" items="{{filtered}}">
             <li>
-              <mis-entry job="{{item.data}}" key="{{item.key}}"></mis-entry>
+              <upload-entry job="{{item.data}}" key="{{item.key}}"></upload-entry>
             </li>
           </template>
         </ul>
@@ -149,8 +149,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </paper-scroll-header-panel>
   </template>
-
-  <script src="../../bower_components/file-saver/FileSaver.min.js"></script>
 
   <script>
     (function () {
@@ -180,12 +178,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ready: function () {
           var _this = this;
 
-          onAuthReady(function () {
+          onAuthReady(function() {
+            _this.db = fbase.db.child('uploads');
             _this.items = [];
             _this.filtered = [];
             _this.isFiltered = false;
-            _this.today = moment().format('YYYY-MM-DD');
-            _this.dateSelected = _this.today;
+
+            _this.db.orderByPriority().limitToFirst(200).on('child_added', function(snap) {
+              var job = {data: snap.val(), key: snap.key};
+              _this.push('items', job);
+            });
           });
         },
 
@@ -220,45 +222,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return;
           }
           this.dateSelected = moment(this.dateSelected).add(1, 'day').format('YYYY-MM-DD');
-        },
-
-        download: function () {
-          /**
-           * @return {string}
-           */
-          function ConvertToCSV(objArray) {
-            var obj = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
-            var str = 'DATE,KYASHCODE,ID,PAYER,PAYER NUM,AMOUNT\r\n';
-            var fields = ['ts', 'kyash_code', 'job_id', 'payer', 'payer_num', 'amount'];
-
-            for (var i = 0; i < obj.length; i++) {
-              var line = '';
-              for (var j=0; j < fields.length; j++) {
-                if (line !== '') { line += ','; }
-                if (Object.prototype.hasOwnProperty.call(obj[i].data, fields[j])) {
-                  if(fields[j] === 'ts') {
-                    line += moment.unix(obj[i].data[fields[j]]).format('MM/DD/YYYY hh:mm a');
-                  }
-                  else {
-                    line += obj[i].data[fields[j]];
-                  }
-                }
-                else {
-                  line += '';
-                }
-              }
-              str += line + '\r\n';
-            }
-            return str;
-          }
-
-          try {
-            if(this.items) {
-              var blob = new Blob([ConvertToCSV(this.items)], {type: 'text/csv;charset=utf-8'});
-              saveAs(blob, this.dateSelected + '.csv');
-            }
-          } catch (e) {
-          }
         },
 
         search: function (query) {

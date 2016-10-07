@@ -55,11 +55,29 @@ class JobsUploaded(ndb.Model):
     cols                = ndb.IntegerProperty(default=0)
     size                = ndb.IntegerProperty(default=0)
     codes               = ndb.IntegerProperty(default=0)
-    amt                 = ndb.IntegerProperty(default=0)
+    amount              = ndb.IntegerProperty(default=0)
+    url                 = ndb.StringProperty()
+    name                = ndb.StringProperty()
+
+    incharge            = ndb.KeyProperty(kind='User')
+    app                 = ndb.KeyProperty(kind='Trackr')
+    livemode            = ndb.BooleanProperty(default=False)
 
     createdAt           = ndb.DateTimeProperty(auto_now_add=True)
     modifiedAt          = ndb.DateTimeProperty(auto_now=True)
 
+
+CSV_FILE_COLUMNS = {
+    "fields": [
+        {"type": "STRING", "name": "mobile"},
+        {"type": "STRING", "name": "name"},
+        {"type": "STRING", "name": "pincode"},
+        {"type": "STRING", "name": "id"},
+        {"type": "INTEGER", "name": "amount"},
+        {"type": "STRING", "name": "expiry"},
+        {"type": "BOOLEAN", "name": "single"}
+    ]
+}
 
 def get_jobs(job_ids):
     jobs = ndb.get_multi([Key('Job', job_id) for job_id in job_ids])

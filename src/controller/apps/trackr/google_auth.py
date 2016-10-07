@@ -8,7 +8,7 @@ from framework.extend import SignedInController
 __author__ = 'vinuth'
 
 
-class GoogleController(SignedInController):
+class GoogleAuthController(SignedInController):
     @staticmethod
     def auth_url():
         auth = TRACKR_CREDENTIALS

@@ -14,6 +14,7 @@ routes = [
         Action('get_acl',                 '/acl'),
         Action('get_api_id',              '/api_id'),
         Action('file_upload',             '/upload'),
+        Action('generate_codes',          '/codes'),
     ]),
 
     Controller('apps.trackr.storage', '/storage', [
@@ -24,7 +25,7 @@ routes = [
         Action('handle_payment',             '/payment/callback/<org_id>'),
     ]),
 
-    Controller("apps.trackr.google",    '/bkend/google', [
+    Controller("apps.trackr.google_auth",    '/bkend/google', [
         Action('auth_url',                           '/auth_url'),
         Action('authorize',                          '/authorize')
     ]),
@@ -46,6 +47,11 @@ routes = [
 
     Controller("sys.prod",      '/sys/prod', [
         Action('show_config',       '/config')
+    ]),
+
+    Controller("sys.batch.transactions",      '/sys/batch', [
+        Action('verify_uploaded_jobs',       '/verify'),
+        Action('generate_kyash_codes',       '/codes')
     ]),
 
     Controller('auth',          '/auth', [
